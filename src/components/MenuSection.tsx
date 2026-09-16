@@ -7,17 +7,21 @@ interface MenuSectionProps {
   onSelectItem: (item: MenuItem) => void;
   selectedCategory: string;
   setSelectedCategory: (cat: string) => void;
+  externalSearchTerm?: string;
 }
 
 export const MenuSection: React.FC<MenuSectionProps> = ({
   onSelectItem,
   selectedCategory,
   setSelectedCategory,
+  externalSearchTerm = '',
 }) => {
   const { addToCart } = useCart();
   const [searchTerm, setSearchTerm] = useState('');
   const [onlyPopular, setOnlyPopular] = useState(false);
   const [quickAddedId, setQuickAddedId] = useState<string | null>(null);
+
+  const effectiveSearch = externalSearchTerm || searchTerm;
 
   const filteredItems = useMemo(() => {
     return MENU_ITEMS.filter((item) => {
@@ -30,8 +34,8 @@ export const MenuSection: React.FC<MenuSectionProps> = ({
         return false;
       }
       // Search term filter
-      if (searchTerm.trim() !== '') {
-        const term = searchTerm.toLowerCase();
+      if (effectiveSearch.trim() !== '') {
+        const term = effectiveSearch.toLowerCase();
         const matchesName = item.name.toLowerCase().includes(term);
         const matchesDesc = item.description.toLowerCase().includes(term);
         const matchesCategory = item.category.toLowerCase().includes(term);
@@ -40,7 +44,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({
       }
       return true;
     });
-  }, [selectedCategory, onlyPopular, searchTerm]);
+  }, [selectedCategory, onlyPopular, effectiveSearch]);
 
   const handleQuickAdd = (e: React.MouseEvent, item: MenuItem) => {
     e.stopPropagation();

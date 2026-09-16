@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Phone } from 'lucide-react';
 import { CartProvider } from './context/CartContext';
 import { Navbar } from './components/Navbar';
-import { Hero } from './components/Hero';
+import { HeroCarousel } from './components/HeroCarousel';
+import { BentoCategories } from './components/BentoCategories';
 import { PromotionsSection } from './components/PromotionsSection';
 import { SelvaHighlight } from './components/SelvaHighlight';
 import { MenuSection } from './components/MenuSection';
@@ -11,23 +12,36 @@ import { Footer } from './components/Footer';
 import { ProductDetailModal } from './components/ProductDetailModal';
 import { CartDrawer } from './components/CartDrawer';
 import { KitchenOrdersModal } from './components/KitchenOrdersModal';
+import { LocationModal } from './components/LocationModal';
+import { AuthModal } from './components/AuthModal';
 import { MenuItem } from './data/menuData';
 
 export function App() {
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('todos');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [isKitchenOpen, setIsKitchenOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState('menu');
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [isLocationOpen, setIsLocationOpen] = useState(false);
+  const [currentZone, setCurrentZone] = useState<string>('Entregar a Ate');
+  const [activeSection, setActiveSection] = useState('hero');
 
-  const handleExploreMenu = () => {
-    setSelectedCategory('todos');
+  const scrollToMenuWithCategory = (category: string) => {
+    setSelectedCategory(category);
     const menuEl = document.getElementById('menu');
     if (menuEl) {
       menuEl.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
-  const handleExploreSelva = () => {
+  const scrollToPromos = () => {
+    const promoEl = document.getElementById('promos');
+    if (promoEl) {
+      promoEl.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const scrollToSelva = () => {
     setSelectedCategory('selvaticos');
     const selvaEl = document.getElementById('selva');
     if (selvaEl) {
@@ -37,47 +51,58 @@ export function App() {
 
   return (
     <CartProvider>
-      <div className="min-h-screen bg-neutral-950 text-neutral-100 flex flex-col selection:bg-amber-500 selection:text-neutral-950">
-        {/* Navigation bar */}
+      <div className="min-h-screen bg-neutral-950 text-neutral-100 flex flex-col selection:bg-red-600 selection:text-white">
+        {/* Pardos-Style White Navigation Bar */}
         <Navbar
           onOpenKitchen={() => setIsKitchenOpen(true)}
+          onOpenAuth={() => setIsAuthOpen(true)}
+          onOpenLocation={() => setIsLocationOpen(true)}
+          currentZone={currentZone}
           activeSection={activeSection}
           setActiveSection={setActiveSection}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
         />
 
         {/* Main Content Sections */}
         <main className="flex-1">
-          {/* Hero Showcase */}
-          <Hero
-            onExploreMenu={handleExploreMenu}
-            onExploreSelva={handleExploreSelva}
+          {/* 1. Panoramic Hero Promo Banner Carousel (Exact Pardos format) */}
+          <div id="hero">
+            <HeroCarousel
+              onOrderNow={() => scrollToMenuWithCategory('todos')}
+              onExplorePromo={scrollToPromos}
+              onExploreSelva={scrollToSelva}
+            />
+          </div>
+
+          {/* 2. Visual Bento Grid of Categories (Screenshots 1, 2, 3) */}
+          <BentoCategories
+            onSelectCategory={(catId) => scrollToMenuWithCategory(catId)}
+            onOpenPromotions={scrollToPromos}
           />
 
-          {/* Combos & Promotions */}
+          {/* 3. Combos & Promotions */}
           <PromotionsSection />
 
-          {/* Amazonian Flavors Highlight */}
-          <SelvaHighlight
-            onSelectItem={(item) => setSelectedItem(item)}
-            onViewAllSelva={() => {
-              setSelectedCategory('selvaticos');
-              const menuEl = document.getElementById('menu');
-              if (menuEl) menuEl.scrollIntoView({ behavior: 'smooth' });
-            }}
-          />
-
-          {/* Full Digital Menu */}
+          {/* 4. Full Interactive Digital Menu (Carta Salón & Delivery) */}
           <MenuSection
             onSelectItem={(item) => setSelectedItem(item)}
             selectedCategory={selectedCategory}
             setSelectedCategory={setSelectedCategory}
+            externalSearchTerm={searchQuery}
           />
 
-          {/* Full Information: Horarios 24h, Ubicación en Ate, Yape/Plin, FAQ */}
+          {/* 5. Amazonian Flavors Highlight */}
+          <SelvaHighlight
+            onSelectItem={(item) => setSelectedItem(item)}
+            onViewAllSelva={() => scrollToMenuWithCategory('selvaticos')}
+          />
+
+          {/* 6. Full Information: Horarios 24h, Ubicación en Ate, Yape/Plin, FAQ */}
           <InfoSection />
         </main>
 
-        {/* Footer */}
+        {/* 7. Footer (Exact 5-column layout with Libro de Reclamaciones, phone & payment badges) */}
         <Footer />
 
         {/* Modals & Drawers */}
@@ -93,7 +118,20 @@ export function App() {
           onClose={() => setIsKitchenOpen(false)}
         />
 
-        {/* Floating WhatsApp Quick Contact Button for Tablet & Desktop */}
+        <LocationModal
+          isOpen={isLocationOpen}
+          onClose={() => setIsLocationOpen(false)}
+          currentZone={currentZone}
+          onSelectZone={(zone) => setCurrentZone(zone.startsWith('Entregar a') ? zone : `Entregar a ${zone}`)}
+        />
+
+        <AuthModal
+          isOpen={isAuthOpen}
+          onClose={() => setIsAuthOpen(false)}
+          onOpenKitchen={() => setIsKitchenOpen(true)}
+        />
+
+        {/* Floating WhatsApp Quick Contact Button */}
         <a
           href="https://wa.me/51943312024?text=%C2%A1Hola%20Buchisapa!%20Deseo%20hacer%20un%20pedido%20o%20consulta."
           target="_blank"

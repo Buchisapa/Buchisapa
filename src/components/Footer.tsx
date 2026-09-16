@@ -1,168 +1,284 @@
-import React from 'react';
-import { Phone, MapPin, Clock, Heart, ArrowUp, MessageCircle, ShieldCheck } from 'lucide-react';
+import React, { useState } from 'react';
+import { Phone, BookOpen, Facebook, Instagram, Music2, ShieldCheck, CreditCard } from 'lucide-react';
 import { RESTAURANT_INFO } from '../data/menuData';
+import { LibroReclamacionesModal } from './LibroReclamacionesModal';
 
 export const Footer: React.FC = () => {
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  const [isLibroOpen, setIsLibroOpen] = useState(false);
 
   return (
-    <footer className="bg-neutral-950 border-t border-neutral-800 text-neutral-400 text-xs sm:text-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-          {/* Col 1: Brand Info */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <img
-                src="/logo.svg"
-                alt="Logo Buchisapa"
-                className="w-12 h-12 rounded-full bg-neutral-900 ring-2 ring-amber-500/30"
-              />
-              <div>
-                <span className="text-xl font-black text-white font-heading">
-                  Buchi<span className="text-amber-400">Sapa</span>
-                </span>
-                <p className="text-[11px] text-amber-400 font-semibold uppercase tracking-wider">
-                  Sabor que te llena
-                </p>
-              </div>
+    <>
+      <footer className="bg-[#18191c] text-neutral-300 text-xs pt-12 pb-8 border-t border-neutral-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Main 5 Columns Grid + Libro de Reclamaciones */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 mb-12">
+            {/* Col 1: NOSOTROS */}
+            <div>
+              <h4 className="text-white font-extrabold uppercase tracking-wider text-xs mb-4">
+                NOSOTROS
+              </h4>
+              <ul className="space-y-2.5 text-neutral-400">
+                <li>
+                  <a href="#hero" className="hover:text-white transition-colors">
+                    Historia
+                  </a>
+                </li>
+                <li>
+                  <a href="#hero" className="hover:text-white transition-colors">
+                    Visión y Pasión
+                  </a>
+                </li>
+                <li>
+                  <a href="#hero" className="hover:text-white transition-colors">
+                    Valores
+                  </a>
+                </li>
+                <li>
+                  <a href="#info" className="hover:text-white transition-colors">
+                    Restaurante en Ate
+                  </a>
+                </li>
+              </ul>
             </div>
-            <p className="text-neutral-400 text-xs leading-relaxed">
-              El restaurante favorito de Ate con atención las 24 horas. Caldos reconfortantes, pollo broaster crocante, hamburguesas y auténtica comida amazónica.
-            </p>
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-950/60 border border-emerald-800/80 rounded-full text-emerald-300 text-xs font-bold">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span>Abierto 24 Horas / Todos los días</span>
+
+            {/* Col 2: SERVICIOS */}
+            <div>
+              <h4 className="text-white font-extrabold uppercase tracking-wider text-xs mb-4">
+                SERVICIOS
+              </h4>
+              <ul className="space-y-2.5 text-neutral-400">
+                <li>
+                  <a href="#info" className="hover:text-white transition-colors">
+                    Reservas &amp; Salón
+                  </a>
+                </li>
+                <li>
+                  <a href="#info" className="hover:text-white transition-colors">
+                    Catering Amazónico
+                  </a>
+                </li>
+                <li>
+                  <a href="#info" className="hover:text-white transition-colors">
+                    Fiestas &amp; Eventos
+                  </a>
+                </li>
+                <li>
+                  <a href="#menu" className="hover:text-white transition-colors">
+                    Delivery 24 Horas
+                  </a>
+                </li>
+                <li>
+                  <a href="#info" className="hover:text-white transition-colors">
+                    Vales y Promociones
+                  </a>
+                </li>
+              </ul>
             </div>
-          </div>
 
-          {/* Col 2: Carta & Categorías */}
-          <div>
-            <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4 font-heading">
-              Especialidades
-            </h4>
-            <ul className="space-y-2 text-xs">
-              <li>
-                <a href="#selva" className="hover:text-amber-400 transition-colors">
-                  Tacacho con Cecina Ahumada
-                </a>
-              </li>
-              <li>
-                <a href="#menu" className="hover:text-amber-400 transition-colors">
-                  Juanes Tradicionales de Gallina
-                </a>
-              </li>
-              <li>
-                <a href="#menu" className="hover:text-amber-400 transition-colors">
-                  Pollo Broaster Pecho &amp; Pierna
-                </a>
-              </li>
-              <li>
-                <a href="#menu" className="hover:text-amber-400 transition-colors">
-                  Hamburguesas La Suprema &amp; Royal
-                </a>
-              </li>
-              <li>
-                <a href="#menu" className="hover:text-amber-400 transition-colors">
-                  Salchipapas &amp; Salchibroasters
-                </a>
-              </li>
-              <li>
-                <a href="#menu" className="hover:text-amber-400 transition-colors">
-                  Refrescos de Cocona, Aguajina &amp; Camu Camu
-                </a>
-              </li>
-            </ul>
-          </div>
+            {/* Col 3: INFORMACIÓN ADICIONAL */}
+            <div>
+              <h4 className="text-white font-extrabold uppercase tracking-wider text-xs mb-4">
+                INFORMACIÓN ADICIONAL
+              </h4>
+              <ul className="space-y-2.5 text-neutral-400">
+                <li>
+                  <a href="#info" className="hover:text-white transition-colors">
+                    Valores nutricionales
+                  </a>
+                </li>
+                <li>
+                  <a href="#info" className="hover:text-white transition-colors">
+                    Cartilla de alérgenos
+                  </a>
+                </li>
+                <li>
+                  <a href="#info" className="hover:text-white transition-colors">
+                    Zonas de cobertura Ate
+                  </a>
+                </li>
+                <li>
+                  <a href="#info" className="hover:text-white transition-colors">
+                    Atención continua 24H
+                  </a>
+                </li>
+              </ul>
+            </div>
 
-          {/* Col 3: Contacto & Ubicación */}
-          <div>
-            <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4 font-heading">
-              Contacto &amp; Ubicación
-            </h4>
-            <ul className="space-y-3 text-xs">
-              <li className="flex items-start gap-2">
-                <MapPin className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-                <span>Distrito de Ate, Lima - Perú (Cerca a Real Plaza Puruchuco)</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Phone className="w-4 h-4 text-emerald-500 shrink-0" />
+            {/* Col 4: POLÍTICAS Y TÉRMINOS */}
+            <div>
+              <h4 className="text-white font-extrabold uppercase tracking-wider text-xs mb-4">
+                POLÍTICAS Y TÉRMINOS
+              </h4>
+              <ul className="space-y-2.5 text-neutral-400">
+                <li>
+                  <a href="#faq" className="hover:text-white transition-colors">
+                    Políticas de privacidad
+                  </a>
+                </li>
+                <li>
+                  <a href="#faq" className="hover:text-white transition-colors">
+                    Términos y condiciones
+                  </a>
+                </li>
+                <li>
+                  <a href="#faq" className="hover:text-white transition-colors">
+                    Términos promociones
+                  </a>
+                </li>
+                <li>
+                  <a href="#faq" className="hover:text-white transition-colors">
+                    Políticas de entrega
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Col 5: CONTÁCTANOS */}
+            <div>
+              <h4 className="text-white font-extrabold uppercase tracking-wider text-xs mb-4">
+                CONTÁCTANOS
+              </h4>
+              <ul className="space-y-2.5 text-neutral-400">
+                <li>
+                  <a
+                    href={`https://wa.me/${RESTAURANT_INFO.phoneRaw}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-white transition-colors"
+                  >
+                    Escríbenos al WhatsApp
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href={`https://wa.me/${RESTAURANT_INFO.phoneRaw}?text=Deseo%20trabajar%20con%20ustedes`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-white transition-colors"
+                  >
+                    Trabaja con nosotros
+                  </a>
+                </li>
+                <li>
+                  <a href="#info" className="hover:text-white transition-colors">
+                    Portal de atención
+                  </a>
+                </li>
+                <li>
+                  <span className="text-neutral-500">Ate, Lima - Perú</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Col 6: Libro de Reclamaciones & Teléfono */}
+            <div className="flex flex-col items-start lg:items-end justify-start space-y-4">
+              {/* Libro de Reclamaciones Badge */}
+              <button
+                onClick={() => setIsLibroOpen(true)}
+                className="bg-white p-3 rounded-lg border border-neutral-300 text-center w-40 hover:bg-neutral-50 transition-all cursor-pointer shadow-md group"
+                title="Abrir Libro de Reclamaciones Virtual"
+              >
+                <div className="flex items-center justify-center gap-1.5 text-sky-700 font-extrabold text-[11px] uppercase tracking-tighter mb-1">
+                  <BookOpen className="w-3.5 h-3.5 text-sky-600" />
+                  <span>Libro de Reclamaciones</span>
+                </div>
+                {/* Book graphic representation */}
+                <div className="flex items-center justify-center py-1">
+                  <div className="w-16 h-8 border-2 border-neutral-400 rounded-sm flex items-center justify-center bg-neutral-100 shadow-inner group-hover:border-sky-600 transition-colors">
+                    <span className="text-[10px] text-neutral-600 font-bold">INDECOPI</span>
+                  </div>
+                </div>
+              </button>
+
+              {/* Phone contact callout */}
+              <div className="text-left lg:text-right">
                 <a
                   href={`tel:${RESTAURANT_INFO.phoneRaw}`}
-                  className="hover:text-emerald-400 font-bold text-white transition-colors"
+                  className="flex items-center gap-2 text-white font-extrabold text-base hover:text-red-400 transition-colors"
                 >
-                  {RESTAURANT_INFO.phone}
+                  <Phone className="w-4 h-4 text-red-500 fill-red-500" />
+                  <span>{RESTAURANT_INFO.phone}</span>
                 </a>
-              </li>
-              <li className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-amber-500 shrink-0" />
-                <span>Atención las 24 horas continuas</span>
-              </li>
-            </ul>
-          </div>
-
-          {/* Col 4: Métodos de Pago y Seguridad */}
-          <div>
-            <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4 font-heading">
-              Medios de Pago
-            </h4>
-            <p className="text-xs text-neutral-400 mb-3">
-              Paga al instante de forma segura:
-            </p>
-            <div className="flex flex-wrap gap-2 mb-4">
-              <span className="px-2.5 py-1 rounded-md bg-purple-950 border border-purple-800 text-purple-300 font-bold text-xs">
-                YAPE
-              </span>
-              <span className="px-2.5 py-1 rounded-md bg-cyan-950 border border-cyan-800 text-cyan-300 font-bold text-xs">
-                PLIN
-              </span>
-              <span className="px-2.5 py-1 rounded-md bg-emerald-950 border border-emerald-800 text-emerald-300 font-bold text-xs">
-                EFECTIVO
-              </span>
-              <span className="px-2.5 py-1 rounded-md bg-neutral-900 border border-neutral-800 text-neutral-300 font-bold text-xs">
-                BCP / BBVA
-              </span>
+                <span className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold block mt-0.5">
+                  LLÁMENOS 24 HORAS
+                </span>
+              </div>
             </div>
-            <p className="text-[11px] text-neutral-500">
-              Número de Yape / Plin oficial: <strong className="text-white">943 312 024</strong>
-            </p>
+          </div>
+
+          {/* Social Icons & Payment Certification Badges */}
+          <div className="pt-8 border-t border-neutral-800 flex flex-col md:flex-row items-center justify-between gap-6">
+            {/* Social Icons */}
+            <div className="flex items-center gap-4 text-neutral-400">
+              <a
+                href="https://facebook.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center hover:text-white hover:bg-neutral-800 transition-colors"
+                aria-label="Facebook"
+              >
+                <Facebook className="w-4 h-4" />
+              </a>
+              <a
+                href="https://x.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center hover:text-white hover:bg-neutral-800 transition-colors font-bold text-xs"
+                aria-label="X / Twitter"
+              >
+                𝕏
+              </a>
+              <a
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center hover:text-white hover:bg-neutral-800 transition-colors"
+                aria-label="Instagram"
+              >
+                <Instagram className="w-4 h-4" />
+              </a>
+              <a
+                href="https://tiktok.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center hover:text-white hover:bg-neutral-800 transition-colors"
+                aria-label="TikTok"
+              >
+                <Music2 className="w-4 h-4" />
+              </a>
+            </div>
+
+            {/* Payment & Security Logos */}
+            <div className="flex flex-wrap items-center gap-3 text-xs">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-neutral-900 border border-neutral-800 text-neutral-300 font-semibold">
+                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                <span className="text-[11px]">PCI Security Certified</span>
+              </div>
+              <div className="flex items-center gap-1 px-2.5 py-1.5 rounded bg-purple-950/70 border border-purple-800/80 text-purple-300 font-bold text-[11px]">
+                <span>Yape</span>
+              </div>
+              <div className="flex items-center gap-1 px-2.5 py-1.5 rounded bg-cyan-950/70 border border-cyan-800/80 text-cyan-300 font-bold text-[11px]">
+                <span>Plin</span>
+              </div>
+              <div className="flex items-center gap-1 px-2.5 py-1.5 rounded bg-amber-950/70 border border-amber-800/80 text-amber-300 font-bold text-[11px]">
+                <span>PagoEfectivo</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Copyright Line */}
+          <div className="pt-6 mt-6 border-t border-neutral-800/50 text-neutral-500 text-[11px] text-center sm:text-left flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p>© 2026, Restaurante Buchisapa. Todos los derechos reservados.</p>
+            <p>Atención 24 Horas • Ate, Lima - Perú</p>
           </div>
         </div>
+      </footer>
 
-        {/* Bottom micro bar */}
-        <div className="pt-8 border-t border-neutral-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-neutral-500">
-          <p>© {new Date().getFullYear()} Restaurante Buchisapa. Todos los derechos reservados.</p>
-          <div className="flex items-center gap-4">
-            <span>Ate, Lima - Gastronomía Peruana y Amazónica</span>
-            <button
-              onClick={scrollToTop}
-              className="p-2 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors"
-              title="Volver arriba"
-              aria-label="Volver arriba"
-            >
-              <ArrowUp className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Floating Instant WhatsApp Button (Bottom Right) */}
-      <a
-        id="floating-whatsapp-btn"
-        href={`https://wa.me/${RESTAURANT_INFO.phoneRaw}?text=${encodeURIComponent('¡Hola Buchisapa! Deseo realizar una consulta o pedido 24h.')}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="fixed bottom-6 right-6 z-40 bg-emerald-500 hover:bg-emerald-400 text-neutral-950 p-3.5 sm:px-4 sm:py-3 rounded-full shadow-2xl flex items-center gap-2 font-black text-xs sm:text-sm hover:scale-105 active:scale-95 transition-all group"
-        aria-label="Pedir por WhatsApp"
-      >
-        <span className="relative flex h-3 w-3">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
-        </span>
-        <MessageCircle className="w-5 h-5 fill-neutral-950" />
-        <span className="hidden sm:inline">WhatsApp 24h: {RESTAURANT_INFO.phone}</span>
-      </a>
-    </footer>
+      {/* Libro de Reclamaciones Modal */}
+      <LibroReclamacionesModal
+        isOpen={isLibroOpen}
+        onClose={() => setIsLibroOpen(false)}
+      />
+    </>
   );
 };
