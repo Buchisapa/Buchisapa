@@ -17,6 +17,7 @@ import {
   MessageCircle,
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { RESTAURANT_INFO, CATEGORIES } from '../data/menuData';
 
 interface NavbarProps {
@@ -47,6 +48,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   setIsSearching,
 }) => {
   const { cartCount, setIsCartOpen } = useCart();
+  const { user, setIsProfileModalOpen, setProfileActiveTab } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [categoriesDropdownOpen, setCategoriesDropdownOpen] = useState(false);
   const [salonDropdownOpen, setSalonDropdownOpen] = useState(false);
@@ -274,14 +276,32 @@ export const Navbar: React.FC<NavbarProps> = ({
             </span>
           </button>
 
-          {/* Desktop Ingresar Button (Screenshot 1: Solid Red Pill Button - Hidden on mobile) */}
-          <button
-            onClick={onOpenAuth}
-            className="hidden md:flex items-center gap-1.5 bg-red-600 hover:bg-red-700 active:scale-95 text-white font-black text-xs uppercase tracking-wider py-2 px-5 rounded-full shadow-sm hover:shadow-red-600/20 transition-all cursor-pointer"
-          >
-            <User className="w-3.5 h-3.5 text-white" />
-            <span>INGRESAR</span>
-          </button>
+          {/* Desktop Ingresar / Profile Button */}
+          {user ? (
+            <button
+              onClick={() => {
+                setProfileActiveTab('profile');
+                setIsProfileModalOpen(true);
+              }}
+              className="hidden md:flex items-center gap-2 bg-neutral-100 hover:bg-neutral-200 border border-neutral-200 text-neutral-900 py-1.5 px-3 rounded-full transition-all cursor-pointer shadow-xs"
+            >
+              <div className="w-6 h-6 rounded-full bg-purple-600 text-white flex items-center justify-center font-bold text-xs shrink-0">
+                {(user.givenName || user.name || 'U').charAt(0).toUpperCase()}
+              </div>
+              <span className="text-xs font-bold truncate max-w-[100px]">
+                Hola, {user.givenName || user.name.split(' ')[0]}
+              </span>
+              <ChevronDown className="w-3.5 h-3.5 text-neutral-500" />
+            </button>
+          ) : (
+            <button
+              onClick={onOpenAuth}
+              className="hidden md:flex items-center gap-1.5 bg-red-600 hover:bg-red-700 active:scale-95 text-white font-black text-xs uppercase tracking-wider py-2 px-5 rounded-full shadow-sm hover:shadow-red-600/20 transition-all cursor-pointer"
+            >
+              <User className="w-3.5 h-3.5 text-white" />
+              <span>INGRESAR</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -350,6 +370,33 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <X className="w-7 h-7 stroke-[2.5]" />
                 </button>
               </div>
+
+              {/* Mobile User Profile Section Card matching Screenshot 4 */}
+              {user && (
+                <div className="px-4 pb-2">
+                  <div className="p-3.5 bg-white rounded-2xl border border-neutral-200 shadow-xs flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-purple-600 text-white flex items-center justify-center font-bold text-sm shrink-0">
+                        {(user.givenName || user.name || 'U').charAt(0).toUpperCase()}
+                      </div>
+                      <span className="text-sm font-bold text-neutral-900">
+                        Hola, {user.givenName || user.name.split(' ')[0]}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setProfileActiveTab('profile');
+                        setIsProfileModalOpen(true);
+                        setMobileMenuOpen(false);
+                      }}
+                      className="text-xs font-bold text-red-600 hover:text-red-700 hover:underline cursor-pointer"
+                    >
+                      Ver perfil
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Menu Items (Cards) */}
               <div className="p-4 space-y-3">
@@ -447,16 +494,30 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             {/* Bottom Footer Area */}
             <div className="p-4 bg-white border-t border-neutral-100 flex flex-col gap-5 pt-6 pb-8">
-              <button
-                onClick={() => {
-                  onOpenAuth();
-                  setMobileMenuOpen(false);
-                }}
-                className="w-full py-3.5 bg-[#E6192B] hover:bg-red-700 text-white rounded-lg text-[15px] font-medium flex items-center justify-center gap-2 shadow-sm transition-colors"
-              >
-                <User className="w-4 h-4" />
-                <span>INGRESAR</span>
-              </button>
+              {user ? (
+                <button
+                  onClick={() => {
+                    setProfileActiveTab('profile');
+                    setIsProfileModalOpen(true);
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full py-3.5 bg-[#E6192B] hover:bg-red-700 text-white rounded-lg text-[15px] font-bold flex items-center justify-center gap-2 shadow-sm transition-colors cursor-pointer"
+                >
+                  <User className="w-4 h-4" />
+                  <span>MI PERFIL</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    onOpenAuth();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full py-3.5 bg-[#E6192B] hover:bg-red-700 text-white rounded-lg text-[15px] font-bold flex items-center justify-center gap-2 shadow-sm transition-colors cursor-pointer"
+                >
+                  <User className="w-4 h-4" />
+                  <span>INGRESAR</span>
+                </button>
+              )}
               
               <a
                 href={`https://wa.me/${RESTAURANT_INFO.phoneRaw}?text=${encodeURIComponent('¡Hola Buchisapa! Deseo hacer un pedido.')}`}
