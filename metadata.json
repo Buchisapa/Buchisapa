@@ -1,0 +1,8 @@
+{
+  "name": "Restaurante Buchisapa",
+  "description": "Sitio web oficial y sistema de pedidos de Buchisapa. Caldos, Broaster, Hamburguesas, Salchipapas y auténtica gastronomía amazónica con atención 24 horas y pedidos online por WhatsApp.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
