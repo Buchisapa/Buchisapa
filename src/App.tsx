@@ -1,109 +1,132 @@
 import React, { useState } from 'react';
-import { Phone } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 import { CartProvider } from './context/CartContext';
 import { Navbar } from './components/Navbar';
 import { HeroCarousel } from './components/HeroCarousel';
-import { BentoCategories } from './components/BentoCategories';
-import { PromotionsSection } from './components/PromotionsSection';
-import { SelvaHighlight } from './components/SelvaHighlight';
-import { MenuSection } from './components/MenuSection';
-import { InfoSection } from './components/InfoSection';
+import { CategoryCardsView } from './components/CategoryCardsView';
+import { CategoryProductsView } from './components/CategoryProductsView';
+import { PromotionsView } from './components/PromotionsView';
 import { Footer } from './components/Footer';
 import { ProductDetailModal } from './components/ProductDetailModal';
 import { CartDrawer } from './components/CartDrawer';
 import { KitchenOrdersModal } from './components/KitchenOrdersModal';
 import { LocationModal } from './components/LocationModal';
 import { AuthModal } from './components/AuthModal';
-import { MenuItem } from './data/menuData';
+import { MenuItem, RESTAURANT_INFO } from './data/menuData';
+
+type ViewMode = 'categories' | 'category-detail' | 'promotions';
 
 export function App() {
+  const [currentView, setCurrentView] = useState<ViewMode>('categories');
+  const [selectedCategory, setSelectedCategory] = useState<string>('hamburguesas');
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<string>('todos');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [isSearching, setIsSearching] = useState<boolean>(false);
+
   const [isKitchenOpen, setIsKitchenOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isLocationOpen, setIsLocationOpen] = useState(false);
-  const [currentZone, setCurrentZone] = useState<string>('Entregar a Ate');
-  const [activeSection, setActiveSection] = useState('hero');
+  const [currentZone, setCurrentZone] = useState<string>('Entregar a Lima');
 
-  const scrollToMenuWithCategory = (category: string) => {
-    setSelectedCategory(category);
-    const menuEl = document.getElementById('menu');
-    if (menuEl) {
-      menuEl.scrollIntoView({ behavior: 'smooth' });
-    }
+  const handleSelectCategory = (categoryKey: string) => {
+    setSelectedCategory(categoryKey);
+    setCurrentView('category-detail');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const scrollToPromos = () => {
-    const promoEl = document.getElementById('promos');
-    if (promoEl) {
-      promoEl.scrollIntoView({ behavior: 'smooth' });
-    }
+  const handleOpenPromotions = () => {
+    setCurrentView('promotions');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const scrollToSelva = () => {
-    setSelectedCategory('selvaticos');
-    const selvaEl = document.getElementById('selva');
-    if (selvaEl) {
-      selvaEl.scrollIntoView({ behavior: 'smooth' });
-    }
+  const handleBackToCategories = () => {
+    setCurrentView('categories');
+    setSearchQuery('');
+    setIsSearching(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
     <CartProvider>
-      <div className="min-h-screen bg-neutral-950 text-neutral-100 flex flex-col selection:bg-red-600 selection:text-white">
-        {/* Pardos-Style White Navigation Bar */}
+      <div className="min-h-screen bg-white text-neutral-900 flex flex-col selection:bg-red-600 selection:text-white">
+        {/* Navigation Header matching Screenshot 1 */}
         <Navbar
           onOpenKitchen={() => setIsKitchenOpen(true)}
           onOpenAuth={() => setIsAuthOpen(true)}
           onOpenLocation={() => setIsLocationOpen(true)}
           currentZone={currentZone}
-          activeSection={activeSection}
-          setActiveSection={setActiveSection}
+          onGoHome={handleBackToCategories}
+          onOpenPromotions={handleOpenPromotions}
+          onSelectCategory={handleSelectCategory}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
+          isSearching={isSearching}
+          setIsSearching={setIsSearching}
         />
 
-        {/* Main Content Sections */}
+        {/* Main Content Area */}
         <main className="flex-1">
-          {/* 1. Panoramic Hero Promo Banner Carousel (Exact Pardos format) */}
-          <div id="hero">
-            <HeroCarousel
-              onOrderNow={() => scrollToMenuWithCategory('todos')}
-              onExplorePromo={scrollToPromos}
-              onExploreSelva={scrollToSelva}
+          {searchQuery.trim() !== '' ? (
+            /* Search results view */
+            <CategoryProductsView
+              categoryKey="todos"
+              searchQuery={searchQuery}
+              onBackToCategories={handleBackToCategories}
+              onSelectItem={(item) => setSelectedItem(item)}
             />
-          </div>
+          ) : currentView === 'categories' ? (
+            /* Desktop & Mobile Category Home */
+            <>
+              {/* Desktop & Tablet Hero Carousel from Screenshot 1 */}
+              <HeroCarousel
+                onPideAqui={(actionKey) => {
+                  if (actionKey === 'promociones') {
+                    handleOpenPromotions();
+                  } else {
+                    handleSelectCategory(actionKey);
+                  }
+                }}
+              />
 
-          {/* 2. Visual Bento Grid of Categories (Screenshots 1, 2, 3) */}
-          <BentoCategories
-            onSelectCategory={(catId) => scrollToMenuWithCategory(catId)}
-            onOpenPromotions={scrollToPromos}
-          />
-
-          {/* 3. Combos & Promotions */}
-          <PromotionsSection />
-
-          {/* 4. Full Interactive Digital Menu (Carta Salón & Delivery) */}
-          <MenuSection
-            onSelectItem={(item) => setSelectedItem(item)}
-            selectedCategory={selectedCategory}
-            setSelectedCategory={setSelectedCategory}
-            externalSearchTerm={searchQuery}
-          />
-
-          {/* 5. Amazonian Flavors Highlight */}
-          <SelvaHighlight
-            onSelectItem={(item) => setSelectedItem(item)}
-            onViewAllSelva={() => scrollToMenuWithCategory('selvaticos')}
-          />
-
-          {/* 6. Full Information: Horarios 24h, Ubicación en Ate, Yape/Plin, FAQ */}
-          <InfoSection />
+              {/* Exact Bento Grid from Screenshots 1 to 4 */}
+              <CategoryCardsView
+                onSelectCategory={handleSelectCategory}
+                onOpenPromotions={handleOpenPromotions}
+              />
+            </>
+          ) : currentView === 'promotions' ? (
+            /* Promotions detail view */
+            <PromotionsView
+              onBackToCategories={handleBackToCategories}
+              onSelectItem={(item) => setSelectedItem(item)}
+            />
+          ) : (
+            /* Category Products detail view */
+            <CategoryProductsView
+              categoryKey={selectedCategory}
+              onBackToCategories={handleBackToCategories}
+              onSelectItem={(item) => setSelectedItem(item)}
+            />
+          )}
         </main>
 
-        {/* 7. Footer (Exact 5-column layout with Libro de Reclamaciones, phone & payment badges) */}
+        {/* Footer matching Screenshots 3 & 4 (Desktop multi-column + Mobile accordion) */}
         <Footer />
+
+        {/* Floating WhatsApp Action Button */}
+        <aside aria-label="Contacto por WhatsApp" className="fixed bottom-6 right-6 z-40">
+          <a
+            href={`https://wa.me/${RESTAURANT_INFO.phoneRaw}?text=${encodeURIComponent('¡Hola Buchisapa! Deseo realizar un pedido.')}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center w-14 h-14 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-white shadow-2xl hover:scale-110 active:scale-95 transition-all group"
+            title="Pedir por WhatsApp 24 Horas"
+            aria-label="Abrir WhatsApp"
+          >
+            <MessageCircle className="w-7 h-7 fill-white" />
+            <span className="sr-only">Pedir por WhatsApp</span>
+          </a>
+        </aside>
 
         {/* Modals & Drawers */}
         <ProductDetailModal
@@ -122,7 +145,7 @@ export function App() {
           isOpen={isLocationOpen}
           onClose={() => setIsLocationOpen(false)}
           currentZone={currentZone}
-          onSelectZone={(zone) => setCurrentZone(zone.startsWith('Entregar a') ? zone : `Entregar a ${zone}`)}
+          onSelectZone={(zone) => setCurrentZone(zone)}
         />
 
         <AuthModal
@@ -130,23 +153,7 @@ export function App() {
           onClose={() => setIsAuthOpen(false)}
           onOpenKitchen={() => setIsKitchenOpen(true)}
         />
-
-        {/* Floating WhatsApp Quick Contact Button */}
-        <a
-          href="https://wa.me/51943312024?text=%C2%A1Hola%20Buchisapa!%20Deseo%20hacer%20un%20pedido%20o%20consulta."
-          target="_blank"
-          rel="noopener noreferrer"
-          className="fixed bottom-5 left-5 z-40 bg-emerald-500 hover:bg-emerald-400 text-neutral-950 p-3 sm:px-4 sm:py-3 rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-2 border border-emerald-300/40 group cursor-pointer"
-          title="Escribir al WhatsApp oficial 24 Horas"
-        >
-          <Phone className="w-5 h-5 text-neutral-950 fill-neutral-950 shrink-0" />
-          <span className="hidden sm:inline text-xs font-black tracking-wide">
-            WhatsApp 24h
-          </span>
-        </a>
       </div>
     </CartProvider>
   );
 }
-
-export default App;

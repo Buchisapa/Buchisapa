@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   ShoppingBag,
   MapPin,
@@ -9,21 +9,24 @@ import {
   X,
   Phone,
   ChefHat,
-  Percent,
-  Sparkles,
+  Flame,
+  Utensils,
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import { RESTAURANT_INFO } from '../data/menuData';
+import { RESTAURANT_INFO, CATEGORIES } from '../data/menuData';
 
 interface NavbarProps {
   onOpenKitchen: () => void;
   onOpenAuth: () => void;
   onOpenLocation: () => void;
   currentZone: string;
-  activeSection: string;
-  setActiveSection: (section: string) => void;
+  onGoHome: () => void;
+  onOpenPromotions: () => void;
+  onSelectCategory: (categoryKey: string) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
+  isSearching: boolean;
+  setIsSearching: (val: boolean) => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -31,318 +34,420 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenAuth,
   onOpenLocation,
   currentZone,
-  activeSection,
-  setActiveSection,
+  onGoHome,
+  onOpenPromotions,
+  onSelectCategory,
   searchQuery,
   setSearchQuery,
+  isSearching,
+  setIsSearching,
 }) => {
-  const { cartCount, cartSubtotal, setIsCartOpen } = useCart();
+  const { cartCount, setIsCartOpen } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [categoriesOpen, setCategoriesOpen] = useState(false);
-  const [cartaOpen, setCartaOpen] = useState(false);
+  const [categoriesDropdownOpen, setCategoriesDropdownOpen] = useState(false);
+  const [salonDropdownOpen, setSalonDropdownOpen] = useState(false);
 
-  const handleNavClick = (id: string) => {
-    setActiveSection(id);
-    setMobileMenuOpen(false);
-    setCategoriesOpen(false);
-    setCartaOpen(false);
-    const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
+  const categoriesRef = useRef<HTMLDivElement>(null);
+  const salonRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdowns on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (categoriesRef.current && !categoriesRef.current.contains(event.target as Node)) {
+        setCategoriesDropdownOpen(false);
+      }
+      if (salonRef.current && !salonRef.current.contains(event.target as Node)) {
+        setSalonDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleSearchClick = () => {
+    setIsSearching(!isSearching);
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const menuEl = document.getElementById('menu');
-    if (menuEl) {
-      menuEl.scrollIntoView({ behavior: 'smooth' });
-    }
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-white border-b border-neutral-200 shadow-sm">
-      {/* 24-Hour Notice Banner (Subtle Top Bar) */}
-      <div className="bg-neutral-900 text-neutral-300 text-[11px] py-1 px-4 border-b border-neutral-800">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
-            <span className="font-bold text-emerald-400">Atención 24 Horas en Ate</span>
-            <span className="text-neutral-500 hidden sm:inline">•</span>
-            <span className="text-neutral-300 hidden sm:inline">Delivery &amp; Salón continuo</span>
-          </div>
-          <a
-            href={`https://wa.me/${RESTAURANT_INFO.phoneRaw}?text=${encodeURIComponent('¡Hola Buchisapa! Deseo hacer un pedido.')}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1 text-amber-400 hover:text-amber-300 font-semibold transition-colors"
+    <header className="sticky top-0 z-40 bg-white border-b border-neutral-200/90 shadow-xs">
+      {/* Top Main Navigation Bar (Screenshot 1 Exact Layout) */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-3">
+        {/* Left Elements: Hamburger (Mobile only) + Logo + Location Selector + Links */}
+        <div className="flex items-center gap-2 sm:gap-4 lg:gap-6">
+          {/* Red Hamburger Menu Button (Mobile only) */}
+          <button
+            onClick={() => setMobileMenuOpen(true)}
+            className="md:hidden p-1.5 rounded-lg text-red-600 hover:bg-red-50 active:scale-95 transition-all cursor-pointer"
+            aria-label="Abrir menú"
           >
-            <Phone className="w-3 h-3" />
-            <span>WhatsApp 24H: {RESTAURANT_INFO.phone}</span>
-          </a>
-        </div>
-      </div>
+            <Menu className="w-6 h-6 stroke-[2.5]" />
+          </button>
 
-      {/* Main Pardos-Style White Header */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-3 lg:gap-6">
-        {/* Left: Logo + Location Selector + Primary Links */}
-        <div className="flex items-center gap-3 lg:gap-6">
-          {/* Logo */}
+          {/* Buchisapa Circular Badge Logo */}
           <div
-            onClick={() => handleNavClick('hero')}
+            onClick={onGoHome}
             className="flex items-center gap-2.5 cursor-pointer shrink-0 group"
+            title="Ir al inicio"
           >
             <img
               src="/logo.svg"
               alt="Buchisapa Logo"
-              className="h-11 w-11 sm:h-13 sm:w-13 object-contain rounded-full bg-neutral-950 ring-2 ring-neutral-900 group-hover:scale-105 transition-transform"
+              className="h-9 w-9 sm:h-10 sm:w-10 object-contain rounded-full bg-neutral-950 ring-2 ring-neutral-900 group-hover:scale-105 transition-transform"
             />
-            <div className="hidden xl:block">
-              <span className="text-xl font-black tracking-tight text-neutral-900 font-heading">
-                Buchi<span className="text-red-600">Sapa</span>
-              </span>
-            </div>
+            <span className="hidden sm:inline text-lg font-black tracking-tight text-neutral-900 font-heading">
+              Buchi<span className="text-red-600">Sapa</span>
+            </span>
           </div>
 
-          {/* Location Delivery Selector (e.g. Entregar a Ate ▾) */}
+          {/* Location Delivery Selector (Entregar a Lima ⌵) */}
           <button
             onClick={onOpenLocation}
-            className="flex items-center gap-1.5 py-1.5 px-2.5 sm:px-3 rounded-full hover:bg-neutral-100 text-neutral-800 transition-colors text-xs sm:text-sm font-semibold cursor-pointer border border-transparent hover:border-neutral-200"
+            className="flex items-center gap-1 sm:gap-1.5 py-1 px-1.5 sm:px-2.5 rounded-full hover:bg-neutral-100 text-red-600 transition-colors text-xs sm:text-sm font-bold cursor-pointer"
             title="Cambiar dirección o zona de entrega"
           >
-            <MapPin className="w-4 h-4 text-red-600 shrink-0" />
-            <span className="max-w-[110px] sm:max-w-[150px] truncate text-neutral-900">
+            <MapPin className="w-3.5 h-3.5 text-red-600 shrink-0" />
+            <span className="max-w-[110px] sm:max-w-[140px] truncate text-red-600">
               {currentZone}
             </span>
-            <ChevronDown className="w-3.5 h-3.5 text-neutral-500 shrink-0" />
+            <ChevronDown className="w-3.5 h-3.5 text-red-600 shrink-0" />
           </button>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-4 xl:gap-6 text-xs xl:text-sm font-bold tracking-wider text-neutral-800 uppercase">
+          {/* Desktop Navigation Links (Screenshot 1: PROMOCIONES, CATEGORÍAS ⌵, CARTA SALÓN ⌵) */}
+          <nav className="hidden md:flex items-center gap-5 lg:gap-7 text-xs font-bold tracking-wider text-neutral-800 uppercase">
+            {/* Promociones Link */}
             <button
-              onClick={() => handleNavClick('promos')}
+              onClick={onOpenPromotions}
               className="hover:text-red-600 transition-colors cursor-pointer py-1"
             >
               PROMOCIONES
             </button>
 
-            {/* Categorías Dropdown / Scroll */}
-            <div className="relative">
+            {/* Categorías Dropdown */}
+            <div className="relative" ref={categoriesRef}>
               <button
                 onClick={() => {
-                  setCategoriesOpen(!categoriesOpen);
-                  setCartaOpen(false);
+                  setCategoriesDropdownOpen(!categoriesDropdownOpen);
+                  setSalonDropdownOpen(false);
                 }}
                 className="flex items-center gap-1 hover:text-red-600 transition-colors cursor-pointer py-1"
               >
                 <span>CATEGORÍAS</span>
-                <ChevronDown className="w-3.5 h-3.5 text-neutral-500" />
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${categoriesDropdownOpen ? 'rotate-180 text-red-600' : ''}`} />
               </button>
 
-              {categoriesOpen && (
-                <div className="absolute top-full left-0 mt-2 w-56 bg-white border border-neutral-200 rounded-xl shadow-xl py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
-                  <button
-                    onClick={() => {
-                      handleNavClick('categorias-grid');
-                      setCategoriesOpen(false);
-                    }}
-                    className="w-full text-left px-4 py-2 text-xs font-bold text-neutral-700 hover:bg-neutral-50 hover:text-red-600"
-                  >
-                    Ver Cuadrícula de Categorías
-                  </button>
-                  <div className="h-px bg-neutral-100 my-1" />
-                  <button
-                    onClick={() => {
-                      handleNavClick('menu');
-                      setCategoriesOpen(false);
-                    }}
-                    className="w-full text-left px-4 py-2 text-xs text-neutral-600 hover:bg-neutral-50 hover:text-red-600"
-                  >
-                    Sánguches &amp; Hamburguesas
-                  </button>
-                  <button
-                    onClick={() => {
-                      handleNavClick('menu');
-                      setCategoriesOpen(false);
-                    }}
-                    className="w-full text-left px-4 py-2 text-xs text-neutral-600 hover:bg-neutral-50 hover:text-red-600"
-                  >
-                    Pollo Broaster
-                  </button>
-                  <button
-                    onClick={() => {
-                      handleNavClick('selva');
-                      setCategoriesOpen(false);
-                    }}
-                    className="w-full text-left px-4 py-2 text-xs text-neutral-600 hover:bg-neutral-50 hover:text-red-600"
-                  >
-                    Platos de la Selva
-                  </button>
-                  <button
-                    onClick={() => {
-                      handleNavClick('menu');
-                      setCategoriesOpen(false);
-                    }}
-                    className="w-full text-left px-4 py-2 text-xs text-neutral-600 hover:bg-neutral-50 hover:text-red-600"
-                  >
-                    Caldos &amp; Ensaladas
-                  </button>
-                  <button
-                    onClick={() => {
-                      handleNavClick('menu');
-                      setCategoriesOpen(false);
-                    }}
-                    className="w-full text-left px-4 py-2 text-xs text-neutral-600 hover:bg-neutral-50 hover:text-red-600"
-                  >
-                    Salchipapas &amp; Mixtos
-                  </button>
-                  <button
-                    onClick={() => {
-                      handleNavClick('menu');
-                      setCategoriesOpen(false);
-                    }}
-                    className="w-full text-left px-4 py-2 text-xs text-neutral-600 hover:bg-neutral-50 hover:text-red-600"
-                  >
-                    Bebidas Amazónicas
-                  </button>
+              {/* Categorías Dropdown Menu */}
+              {categoriesDropdownOpen && (
+                <div className="absolute left-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-neutral-200 p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="text-[10px] font-black uppercase tracking-wider text-neutral-400 px-3 py-1.5 border-b border-neutral-100">
+                    Nuestra Carta
+                  </div>
+                  <div className="max-h-80 overflow-y-auto divide-y divide-neutral-100/60 py-1">
+                    {CATEGORIES.filter((c) => c.id !== 'todos').map((cat) => (
+                      <button
+                        key={cat.id}
+                        onClick={() => {
+                          onSelectCategory(cat.id);
+                          setCategoriesDropdownOpen(false);
+                        }}
+                        className="w-full text-left px-3 py-2 text-xs font-bold text-neutral-800 hover:text-red-600 hover:bg-neutral-50 rounded-lg transition-colors flex items-center justify-between"
+                      >
+                        <span>{cat.name}</span>
+                        <span className="text-[10px] text-neutral-400 font-medium lowercase">ver</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
 
-            {/* Carta Salón / Digital */}
-            <button
-              onClick={() => handleNavClick('menu')}
-              className="hover:text-red-600 transition-colors cursor-pointer py-1"
-            >
-              CARTA SALÓN
-            </button>
+            {/* Carta Salón Dropdown */}
+            <div className="relative" ref={salonRef}>
+              <button
+                onClick={() => {
+                  setSalonDropdownOpen(!salonDropdownOpen);
+                  setCategoriesDropdownOpen(false);
+                }}
+                className="flex items-center gap-1 hover:text-red-600 transition-colors cursor-pointer py-1"
+              >
+                <span>CARTA SALÓN</span>
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${salonDropdownOpen ? 'rotate-180 text-red-600' : ''}`} />
+              </button>
+
+              {/* Carta Salón Dropdown Menu */}
+              {salonDropdownOpen && (
+                <div className="absolute left-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-neutral-200 p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                  <button
+                    onClick={() => {
+                      onGoHome();
+                      setSalonDropdownOpen(false);
+                    }}
+                    className="w-full text-left px-3 py-2 text-xs font-bold text-neutral-800 hover:text-red-600 hover:bg-neutral-50 rounded-lg transition-colors"
+                  >
+                    Salón Principal Buchisapa
+                  </button>
+                  <button
+                    onClick={() => {
+                      onOpenLocation();
+                      setSalonDropdownOpen(false);
+                    }}
+                    className="w-full text-left px-3 py-2 text-xs font-bold text-neutral-800 hover:text-red-600 hover:bg-neutral-50 rounded-lg transition-colors"
+                  >
+                    Horarios de Atención
+                  </button>
+                  <button
+                    onClick={() => {
+                      onOpenKitchen();
+                      setSalonDropdownOpen(false);
+                    }}
+                    className="w-full text-left px-3 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors flex items-center justify-between"
+                  >
+                    <span>Pantalla de Cocina KDS</span>
+                    <ChefHat className="w-3.5 h-3.5 text-emerald-600" />
+                  </button>
+                </div>
+              )}
+            </div>
           </nav>
         </div>
 
-        {/* Center/Right: Search Pill + Mi Pedido + Ingresar */}
-        <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 ml-auto">
-          {/* Search Pill Input (Exact Pardos format) */}
-          <form
-            onSubmit={handleSearchSubmit}
-            className="hidden md:flex items-center relative w-48 lg:w-64"
-          >
-            <Search className="w-4 h-4 text-red-600 absolute left-3 pointer-events-none" />
+        {/* Right Elements: Search input + MI PEDIDO + INGRESAR (Screenshot 1) */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Desktop Search Input Field with Red Magnifier */}
+          <div className="hidden md:flex items-center relative w-48 lg:w-64">
+            <Search className="w-4 h-4 text-red-600 absolute left-3.5 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="¿Qué se te antoja?"
-              className="w-full pl-9 pr-3 py-2 text-xs lg:text-sm bg-neutral-50 hover:bg-white focus:bg-white text-neutral-900 placeholder-neutral-500 rounded-full border border-neutral-300 focus:outline-none focus:border-red-600 transition-all shadow-inner"
+              className="w-full pl-9 pr-3 py-2 text-xs bg-neutral-50 hover:bg-white focus:bg-white text-neutral-900 placeholder-neutral-500 rounded-full border border-neutral-300 focus:outline-none focus:border-red-600 transition-all shadow-inner"
             />
-          </form>
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 text-neutral-400 hover:text-neutral-700 text-xs font-bold"
+              >
+                ×
+              </button>
+            )}
+          </div>
 
-          {/* MI PEDIDO Button (Shopping Cart) */}
+          {/* Mobile Search Icon Toggle */}
+          <button
+            onClick={handleSearchClick}
+            className="md:hidden p-1.5 rounded-full text-neutral-900 hover:text-red-600 transition-colors cursor-pointer"
+            aria-label="Buscar platos"
+          >
+            <Search className="w-6 h-6 stroke-[1.8]" />
+          </button>
+
+          {/* Desktop & Mobile Cart / MI PEDIDO Button */}
           <button
             onClick={() => setIsCartOpen(true)}
-            className="flex items-center gap-2 py-2 px-3 sm:px-4 rounded-full text-neutral-900 hover:bg-neutral-100 transition-colors cursor-pointer font-bold text-xs sm:text-sm border border-neutral-200 shadow-sm shrink-0"
-            aria-label="Abrir mi pedido"
+            className="flex items-center gap-1.5 py-1.5 px-2 md:px-3 rounded-full hover:bg-neutral-100 text-neutral-900 transition-colors cursor-pointer"
+            aria-label="Abrir carrito de compras"
           >
             <div className="relative">
-              <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />
+              <ShoppingBag className="w-6 h-6 md:w-4 md:h-4 text-neutral-900 md:text-red-600 stroke-[1.8]" />
               {cartCount > 0 && (
-                <span className="absolute -top-1.5 -right-2 bg-red-600 text-white text-[10px] font-black rounded-full h-4 min-w-4 px-1 flex items-center justify-center animate-pulse">
+                <span className="absolute -top-1.5 -right-1.5 bg-red-600 text-white text-[9px] font-black rounded-full h-4 min-w-4 px-1 flex items-center justify-center">
                   {cartCount}
                 </span>
               )}
             </div>
-            <span className="hidden sm:inline uppercase text-xs tracking-wider">
+            <span className="hidden md:inline text-xs font-extrabold uppercase tracking-wider text-neutral-900">
               MI PEDIDO
             </span>
-            {cartSubtotal > 0 && (
-              <span className="hidden md:inline text-xs text-neutral-500 font-semibold">
-                • S/ {cartSubtotal.toFixed(2)}
-              </span>
-            )}
           </button>
 
-          {/* INGRESAR Red Button */}
+          {/* Desktop Ingresar Button (Screenshot 1: Solid Red Pill Button - Hidden on mobile) */}
           <button
             onClick={onOpenAuth}
-            className="flex items-center gap-1.5 bg-red-600 hover:bg-red-700 active:scale-95 text-white font-black text-xs sm:text-sm uppercase tracking-wider py-2 sm:py-2.5 px-4 sm:px-6 rounded-lg shadow-sm transition-all cursor-pointer shrink-0"
+            className="hidden md:flex items-center gap-1.5 bg-red-600 hover:bg-red-700 active:scale-95 text-white font-black text-xs uppercase tracking-wider py-2 px-5 rounded-full shadow-sm hover:shadow-red-600/20 transition-all cursor-pointer"
           >
-            <User className="w-4 h-4 text-white" />
+            <User className="w-3.5 h-3.5 text-white" />
             <span>INGRESAR</span>
-          </button>
-
-          {/* Mobile hamburger menu */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-lg text-neutral-700 hover:bg-neutral-100 lg:hidden cursor-pointer"
-            aria-label="Menú móvil"
-          >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Search input (< md) */}
-      <div className="md:hidden px-4 pb-3">
-        <form onSubmit={handleSearchSubmit} className="relative">
-          <Search className="w-4 h-4 text-red-600 absolute left-3.5 top-2.5 pointer-events-none" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="¿Qué se te antoja?"
-            className="w-full pl-9 pr-4 py-2 text-xs bg-neutral-100 text-neutral-900 placeholder-neutral-500 rounded-full border border-neutral-200 focus:outline-none focus:border-red-600"
-          />
-        </form>
-      </div>
-
-      {/* Mobile Menu Dropdown */}
-      {mobileMenuOpen && (
-        <div className="lg:hidden bg-white border-t border-neutral-200 px-4 py-4 space-y-2 text-sm font-bold text-neutral-800 uppercase animate-in slide-in-from-top-2 duration-150">
-          <button
-            onClick={() => handleNavClick('promos')}
-            className="block w-full text-left px-3 py-2 rounded-lg hover:bg-neutral-100 text-red-600"
-          >
-            PROMOCIONES
-          </button>
-          <button
-            onClick={() => handleNavClick('categorias-grid')}
-            className="block w-full text-left px-3 py-2 rounded-lg hover:bg-neutral-100"
-          >
-            CATEGORÍAS
-          </button>
-          <button
-            onClick={() => handleNavClick('menu')}
-            className="block w-full text-left px-3 py-2 rounded-lg hover:bg-neutral-100"
-          >
-            CARTA SALÓN / DELIVERY
-          </button>
-          <button
-            onClick={() => handleNavClick('selva')}
-            className="block w-full text-left px-3 py-2 rounded-lg hover:bg-neutral-100"
-          >
-            ESPECIALIDADES AMAZÓNICAS
-          </button>
-          <button
-            onClick={() => handleNavClick('info')}
-            className="block w-full text-left px-3 py-2 rounded-lg hover:bg-neutral-100"
-          >
-            HORARIOS &amp; ATENCIÓN 24 HORAS
-          </button>
-
-          <div className="pt-3 border-t border-neutral-100 flex flex-col gap-2">
+      {/* Expandable Mobile Search Input */}
+      {isSearching && (
+        <div className="md:hidden px-3.5 py-2 bg-neutral-50 border-t border-neutral-200 animate-in slide-in-from-top-1 duration-150">
+          <form onSubmit={handleSearchSubmit} className="relative flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 text-red-600 absolute left-3.5 top-2.5 pointer-events-none" />
+              <input
+                type="text"
+                autoFocus
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Busca por plato (broaster, hamburguesa, cecina...)"
+                className="w-full pl-9 pr-8 py-1.5 text-xs bg-white text-neutral-900 placeholder-neutral-500 rounded-full border border-neutral-300 focus:outline-none focus:border-red-600 shadow-inner"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1.5 text-neutral-400 hover:text-neutral-700 text-sm font-bold"
+                >
+                  ×
+                </button>
+              )}
+            </div>
             <button
+              type="button"
               onClick={() => {
-                onOpenKitchen();
-                setMobileMenuOpen(false);
+                setIsSearching(false);
+                setSearchQuery('');
               }}
-              className="flex items-center gap-2 w-full px-3 py-2 text-xs font-semibold text-neutral-700 bg-neutral-100 rounded-lg"
+              className="text-xs font-bold text-neutral-600 hover:text-neutral-900 px-2 py-1"
             >
-              <ChefHat className="w-4 h-4 text-emerald-600" />
-              <span>Ver Panel de Cocina / KDS</span>
+              Cerrar
             </button>
+          </form>
+        </div>
+      )}
+
+      {/* Mobile Sidebar Navigation Drawer */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex animate-in fade-in duration-200">
+          <div className="w-4/5 max-w-sm bg-white h-full shadow-2xl flex flex-col justify-between overflow-y-auto animate-in slide-in-from-left duration-200">
+            <div>
+              {/* Drawer Header with Logo and Close */}
+              <div className="p-4 border-b border-neutral-200 flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <img
+                    src="/logo.svg"
+                    alt="Buchisapa Logo"
+                    className="h-9 w-9 rounded-full bg-neutral-950 ring-1 ring-neutral-900"
+                  />
+                  <div>
+                    <span className="text-base font-black text-neutral-900 font-heading block leading-none">
+                      Buchisapa
+                    </span>
+                    <span className="text-[10px] text-red-600 font-bold uppercase tracking-wider block mt-0.5">
+                      Atención 24 Horas
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-1 rounded-lg text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Delivery Zone Card */}
+              <div className="p-4 bg-neutral-50 border-b border-neutral-200">
+                <button
+                  onClick={() => {
+                    onOpenLocation();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center justify-between p-2.5 rounded-xl bg-white border border-neutral-200 text-xs font-semibold text-neutral-800 hover:bg-neutral-50"
+                >
+                  <div className="flex items-center gap-2 truncate">
+                    <MapPin className="w-4 h-4 text-red-600 shrink-0" />
+                    <span className="truncate">{currentZone}</span>
+                  </div>
+                  <span className="text-[10px] text-red-600 font-bold uppercase">Cambiar</span>
+                </button>
+              </div>
+
+              {/* Menu Links */}
+              <nav className="p-4 space-y-2 text-sm font-bold text-neutral-800 uppercase tracking-wide">
+                <button
+                  onClick={() => {
+                    onGoHome();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-neutral-100 text-left transition-colors"
+                >
+                  <Utensils className="w-4 h-4 text-neutral-600" />
+                  <span>Categorías de la Carta</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    onOpenPromotions();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-neutral-100 text-left text-red-600 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <Flame className="w-4 h-4 text-red-600" />
+                    <span>Promociones 24H</span>
+                  </div>
+                  <span className="text-[9px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-black">
+                    OFERTAS
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setIsCartOpen(true);
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-neutral-100 text-left transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <ShoppingBag className="w-4 h-4 text-neutral-600" />
+                    <span>Mi Pedido Actual</span>
+                  </div>
+                  {cartCount > 0 && (
+                    <span className="text-xs font-black text-white bg-red-600 rounded-full px-2 py-0.5">
+                      {cartCount}
+                    </span>
+                  )}
+                </button>
+
+                <button
+                  onClick={() => {
+                    onOpenKitchen();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-neutral-100 text-left text-emerald-700 transition-colors"
+                >
+                  <ChefHat className="w-4 h-4 text-emerald-600" />
+                  <span>Panel de Cocina KDS</span>
+                </button>
+              </nav>
+            </div>
+
+            {/* Bottom Section with Auth & WhatsApp */}
+            <div className="p-4 border-t border-neutral-200 space-y-2">
+              <button
+                onClick={() => {
+                  onOpenAuth();
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm cursor-pointer"
+              >
+                <User className="w-4 h-4" />
+                <span>Iniciar Sesión / Registro</span>
+              </button>
+
+              <a
+                href={`https://wa.me/${RESTAURANT_INFO.phoneRaw}?text=${encodeURIComponent('¡Hola Buchisapa! Deseo hacer un pedido.')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-2.5 bg-[#25D366]/15 hover:bg-[#25D366]/25 text-[#128C7E] rounded-xl text-xs font-bold flex items-center justify-center gap-2 border border-[#25D366]/30 transition-colors"
+              >
+                <Phone className="w-4 h-4" />
+                <span>WhatsApp: {RESTAURANT_INFO.phone}</span>
+              </a>
+            </div>
           </div>
+
+          {/* Backdrop Click */}
+          <div className="flex-1" onClick={() => setMobileMenuOpen(false)} />
         </div>
       )}
     </header>

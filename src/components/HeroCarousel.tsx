@@ -1,189 +1,395 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Sparkles, ArrowRight, Flame } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ShoppingBag, Sparkles, Award, Heart, Scissors } from 'lucide-react';
 
 interface HeroCarouselProps {
-  onOrderNow: () => void;
-  onExplorePromo: () => void;
-  onExploreSelva: () => void;
+  onPideAqui: (actionKey: string) => void;
 }
 
-interface Slide {
-  id: string;
-  tag?: string;
-  title: string;
-  highlightText: string;
-  subtitle: string;
-  image: string;
-  ctaText: string;
-  action: 'promo' | 'order' | 'selva';
-}
-
-const SLIDES: Slide[] = [
-  {
-    id: 'slide-1',
-    tag: 'PROMO EXCLUSIVA 24H',
-    title: 'PROMO',
-    highlightText: 'TU CHICHA & COMBOS',
-    subtitle: 'El auténtico Pollo Broaster crocante con papas amarillas, ensalada fresca y botella helada de Chicha Morada o Cocona.',
-    image: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1600&q=80',
-    ctaText: 'PIDE AQUÍ',
-    action: 'promo',
-  },
-  {
-    id: 'slide-2',
-    tag: '100% SABOR AMAZÓNICO',
-    title: 'ESPECIALIDADES',
-    highlightText: 'DE LA SELVA EN ATE',
-    subtitle: 'Tacacho con Cecina ahumada traída de Tarapoto, Chorizo selvático, Juane tradicional y Ají de Cocona con charapita.',
-    image: 'https://images.unsplash.com/photo-1594041680534-e8c8cdebd659?auto=format&fit=crop&w=1600&q=80',
-    ctaText: 'VER CARTA SELVA',
-    action: 'selva',
-  },
-  {
-    id: 'slide-3',
-    tag: 'SUPER CROCANTE & JUGOSO',
-    title: 'POLLO BROASTER',
-    highlightText: '& HAMBURGUESAS ROYAL',
-    subtitle: 'Porciones bien servidas de pecho o pierna broaster con papas crocantes, cremas ilimitadas y hamburguesas artesanales.',
-    image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1600&q=80',
-    ctaText: 'EXPLORAR CARTA',
-    action: 'order',
-  },
-  {
-    id: 'slide-4',
-    tag: 'RECONSTITUYENTES DÍA Y NOCHE',
-    title: 'CALDOS CALIENTES',
-    highlightText: 'DE GALLINA & AMAZÓNICO',
-    subtitle: 'Caldos poderosos servidos hirviendo las 24 horas continuas con presa entera, huevo duro, yuca, sachaculantro y canchita.',
-    image: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=1600&q=80',
-    ctaText: 'PEDIR CALDO',
-    action: 'order',
-  },
-];
-
-export const HeroCarousel: React.FC<HeroCarouselProps> = ({
-  onOrderNow,
-  onExplorePromo,
-  onExploreSelva,
-}) => {
+export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onPideAqui }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
+
+  // Desktop Slides matching Desktop Screenshot 1
+  const desktopSlides = [
+    {
+      id: 'promo-chicha',
+      title: 'TU CHICHA',
+      subtitle: '1 Pollo a la brasa + papas familiares + ensalada + 1L Chicha Morada',
+      badge: 'PROMO',
+      image: 'https://images.unsplash.com/photo-1598103442097-8b74394b95c6?auto=format&fit=crop&w=1920&q=80',
+      buttonText: 'PIDE AQUÍ',
+      actionKey: 'promociones',
+    },
+    {
+      id: 'buchisapa-brasa',
+      title: 'POLLOS A LA BRASA',
+      subtitle: 'El auténtico sabor a la brasa con papas crocantes y ají de la casa',
+      badge: 'ESPECIALIDAD',
+      image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=1920&q=80',
+      buttonText: 'PIDE AQUÍ',
+      actionKey: 'brasa',
+    },
+    {
+      id: 'parrillas-anticuchos',
+      title: 'FUEGO & CARBÓN',
+      subtitle: 'Anticuchos de corazón, mollejitas, bife y cortes finos',
+      badge: 'PARRILLERO',
+      image: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1920&q=80',
+      buttonText: 'PIDE AQUÍ',
+      actionKey: 'anticuchos',
+    },
+    {
+      id: 'sanguches-combos',
+      title: 'SÁNGUCHES & BROASTER',
+      subtitle: 'Hamburguesas artesanales, royals y pollo broaster crocante',
+      badge: 'FAVORITOS',
+      image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1920&q=80',
+      buttonText: 'PIDE AQUÍ',
+      actionKey: 'hamburguesas',
+    },
+  ];
+
+  // Mobile Slides (Slide 0 is the exact Jorge Salinas campaign banner from mobile screenshot)
+  const mobileSlidesCount = 4;
 
   useEffect(() => {
-    if (isPaused) return;
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % SLIDES.length);
-    }, 5500);
-    return () => clearInterval(interval);
-  }, [isPaused]);
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % mobileSlidesCount);
+    }, 6000);
+    return () => clearInterval(timer);
+  }, [mobileSlidesCount]);
 
-  const handlePrev = () => {
-    setCurrentSlide((prev) => (prev - 1 + SLIDES.length) % SLIDES.length);
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev === 0 ? mobileSlidesCount - 1 : prev - 1));
   };
 
-  const handleNext = () => {
-    setCurrentSlide((prev) => (prev + 1) % SLIDES.length);
-  };
-
-  const handleAction = (action: 'promo' | 'order' | 'selva') => {
-    if (action === 'promo') onExplorePromo();
-    else if (action === 'selva') onExploreSelva();
-    else onOrderNow();
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % mobileSlidesCount);
   };
 
   return (
-    <section
-      className="relative w-full bg-neutral-950 overflow-hidden select-none"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-    >
-      {/* Slides Container */}
-      <div className="relative min-h-[380px] sm:min-h-[440px] md:min-h-[480px] lg:min-h-[520px] flex items-center justify-center">
-        {SLIDES.map((slide, index) => {
-          const isActive = index === currentSlide;
-          return (
-            <div
-              key={slide.id}
-              className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
-                isActive ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'
-              }`}
-            >
-              {/* Background Image with Dark Vignette */}
-              <img
-                src={slide.image}
-                alt={slide.title}
-                className="w-full h-full object-cover object-center transform scale-105 transition-transform duration-7000 ease-out"
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-neutral-950 via-neutral-950/75 to-neutral-950/40" />
-              <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-transparent to-neutral-950/30" />
+    <section className="relative w-full bg-white select-none">
+      {/* =========================================================================
+          1. MOBILE CAROUSEL (< md) EXACTLY AS IN Screenshot_20260916-121646_Chrome.png
+         ========================================================================= */}
+      <div className="md:hidden">
+        {/* Banner container with relative positioning and navigation arrows */}
+        <div className="relative w-full bg-[#f4f3ef] overflow-hidden border-b border-neutral-200">
+          {/* SLIDE 0: Jorge Salinas Campaign Banner (Screenshot_20260916-121646_Chrome.png) */}
+          {currentSlide === 0 && (
+            <div className="relative w-full min-h-[510px] p-4 flex flex-col justify-between animate-in fade-in duration-300">
+              {/* Background Designer Photo positioned on right */}
+              <div className="absolute right-0 top-6 bottom-12 w-1/2 pointer-events-none overflow-hidden flex items-end justify-end">
+                <img
+                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"
+                  alt="Jorge Salinas Diseñador"
+                  className="w-full h-full object-cover object-top filter contrast-105"
+                  style={{ maskImage: 'linear-gradient(to left, black 65%, transparent 100%)' }}
+                />
+              </div>
 
-              {/* Slide Content Overlay */}
-              <div className="relative max-w-7xl mx-auto h-full px-6 sm:px-10 lg:px-16 flex flex-col justify-center text-left">
-                <div className="max-w-xl lg:max-w-2xl space-y-3 sm:space-y-4">
-                  {slide.tag && (
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-600/90 text-white text-[11px] sm:text-xs font-black uppercase tracking-wider shadow-md">
-                      <Flame className="w-3.5 h-3.5 fill-white" />
-                      <span>{slide.tag}</span>
-                    </div>
-                  )}
+              {/* Top Collaboration Header */}
+              <div className="relative z-10 flex items-center justify-center gap-2 pt-1 pb-2">
+                <span className="text-[13px] font-black tracking-[0.2em] text-neutral-900 uppercase font-heading">
+                  J. SALINAS
+                </span>
+                <span className="text-neutral-500 font-serif italic text-xs">x</span>
+                <span className="text-sm font-black italic tracking-wide text-red-600 font-heading">
+                  Buchisapa
+                </span>
+              </div>
 
-                  <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight leading-none uppercase font-heading">
-                    {slide.title} <br className="hidden sm:inline" />
-                    <span className="text-red-500 font-extrabold tracking-wide">
-                      {slide.highlightText}
-                    </span>
+              {/* Main Content (Left Column) */}
+              <div className="relative z-10 max-w-[62%] space-y-2.5 pt-1">
+                {/* Big Bold Headline */}
+                <div>
+                  <h1 className="text-2xl font-black tracking-tight text-neutral-950 uppercase leading-none font-heading">
+                    DISEÑADO POR
                   </h1>
+                  <h2 className="text-2xl font-black tracking-tight text-red-600 uppercase leading-none font-heading mt-0.5">
+                    JORGE SALINAS
+                  </h2>
+                </div>
 
-                  <p className="text-xs sm:text-sm md:text-base text-neutral-300 font-normal leading-relaxed max-w-lg line-clamp-3 sm:line-clamp-none">
-                    {slide.subtitle}
+                {/* Subtext description */}
+                <p className="text-[10px] leading-tight text-neutral-700 font-medium pr-1">
+                  Diseñador de modas peruano reconocido a nivel nacional e internacional, con más de 25 años de trayectoria y una visión que une moda, arte y propósito.
+                </p>
+
+                {/* 100% Ganancias Box */}
+                <div className="bg-white/90 backdrop-blur-xs p-2 rounded-xl border border-red-200/80 shadow-xs">
+                  <p className="text-[10px] font-black text-red-600 uppercase leading-none">
+                    EL 100% DE LAS GANANCIAS
                   </p>
+                  <p className="text-[9px] text-neutral-700 font-medium leading-tight mt-0.5">
+                    serán donadas a la fundación que ayuda a niños con cáncer.{' '}
+                    <span className="font-serif italic font-black text-indigo-700 text-[11px]">Magia</span>
+                  </p>
+                </div>
 
-                  <div className="pt-2 sm:pt-4">
-                    <button
-                      onClick={() => handleAction(slide.action)}
-                      className="px-6 sm:px-8 py-3 sm:py-3.5 bg-red-600 hover:bg-red-700 active:scale-95 text-white font-black text-xs sm:text-sm uppercase tracking-wider rounded-lg shadow-xl shadow-red-600/30 transition-all flex items-center gap-2 cursor-pointer group"
-                    >
-                      <span>{slide.ctaText}</span>
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </button>
+                {/* Red CTA Button */}
+                <button
+                  onClick={() => onPideAqui('promociones')}
+                  className="w-full bg-red-600 hover:bg-red-700 active:scale-95 text-white font-black text-[10px] uppercase tracking-wider py-2 px-2.5 rounded-md flex items-center justify-center gap-1.5 shadow-md transition-all cursor-pointer"
+                >
+                  <ShoppingBag className="w-3.5 h-3.5 text-white shrink-0" />
+                  <span className="truncate">COMPRA TU POLO Y HAZ EL BIEN</span>
+                </button>
+
+                {/* 3 Circle Badge Features */}
+                <div className="grid grid-cols-3 gap-1 pt-1 text-center">
+                  <div className="flex flex-col items-center">
+                    <div className="w-7 h-7 rounded-full border border-neutral-400 bg-white flex items-center justify-center text-neutral-800 mb-1">
+                      <Scissors className="w-3.5 h-3.5 stroke-[1.8]" />
+                    </div>
+                    <span className="text-[7.5px] font-black leading-tight text-neutral-800 uppercase tracking-tighter">
+                      DISEÑO PERUANO CON IDENTIDAD
+                    </span>
+                  </div>
+
+                  <div className="flex flex-col items-center">
+                    <div className="w-7 h-7 rounded-full border border-neutral-400 bg-white flex items-center justify-center text-neutral-800 mb-1">
+                      <Award className="w-3.5 h-3.5 stroke-[1.8]" />
+                    </div>
+                    <span className="text-[7.5px] font-black leading-tight text-neutral-800 uppercase tracking-tighter">
+                      25 AÑOS DE TRAYECTORIA
+                    </span>
+                  </div>
+
+                  <div className="flex flex-col items-center">
+                    <div className="w-7 h-7 rounded-full border border-neutral-400 bg-white flex items-center justify-center text-neutral-800 mb-1">
+                      <Heart className="w-3.5 h-3.5 stroke-[1.8]" />
+                    </div>
+                    <span className="text-[7.5px] font-black leading-tight text-neutral-800 uppercase tracking-tighter">
+                      MODA CON PROPÓSITO
+                    </span>
                   </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
 
-        {/* Carousel Prev/Next Navigation Controls */}
-        <button
-          onClick={handlePrev}
-          className="absolute left-3 sm:left-6 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-neutral-900/60 hover:bg-neutral-900 text-white flex items-center justify-center backdrop-blur-sm border border-neutral-700/50 transition-all cursor-pointer hover:scale-105 active:scale-95"
-          aria-label="Diapositiva anterior"
-        >
-          <ChevronLeft className="w-6 h-6 text-white" />
-        </button>
-        <button
-          onClick={handleNext}
-          className="absolute right-3 sm:right-6 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-neutral-900/60 hover:bg-neutral-900 text-white flex items-center justify-center backdrop-blur-sm border border-neutral-700/50 transition-all cursor-pointer hover:scale-105 active:scale-95"
-          aria-label="Diapositiva siguiente"
-        >
-          <ChevronRight className="w-6 h-6 text-white" />
-        </button>
+              {/* Bottom Strip: "Una prenda, un propósito." */}
+              <div className="relative z-10 mt-3 -mx-4 -mb-4 bg-black text-white px-4 py-2.5 flex items-center justify-between">
+                <span className="font-serif italic text-xs sm:text-sm text-neutral-200">
+                  Una prenda, un propósito.
+                </span>
+                <div className="flex items-center gap-2 bg-white/90 px-2 py-0.5 rounded text-neutral-900 text-[9px] font-bold">
+                  <span className="font-black text-[9px]">J. SALINAS</span>
+                  <span className="text-red-600 font-black">| BUCHISAPA |</span>
+                  <span className="text-indigo-800 font-serif italic font-bold">Magia</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* SLIDE 1: TU CHICHA Promo Slide */}
+          {currentSlide === 1 && (
+            <div className="relative w-full h-[460px] bg-neutral-950 overflow-hidden flex flex-col justify-end p-6 animate-in fade-in duration-300">
+              <img
+                src="https://images.unsplash.com/photo-1598103442097-8b74394b95c6?auto=format&fit=crop&w=1000&q=80"
+                alt="Promo Tu Chicha"
+                className="absolute inset-0 w-full h-full object-cover object-center brightness-75"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+              <div className="relative z-10 text-right space-y-2">
+                <span className="text-red-500 font-black tracking-widest text-xs uppercase block">
+                  PROMO
+                </span>
+                <h1 className="text-3xl font-black text-white uppercase tracking-tight font-heading leading-none">
+                  TU CHICHA
+                </h1>
+                <p className="text-neutral-300 text-xs font-medium">
+                  1 Pollo a la brasa + papas familiares + ensalada + 1L Chicha Morada
+                </p>
+                <div className="pt-2">
+                  <button
+                    onClick={() => onPideAqui('promociones')}
+                    className="bg-red-600 hover:bg-red-700 text-white font-black text-xs uppercase tracking-wider px-6 py-2.5 rounded-lg shadow-lg"
+                  >
+                    PIDE AQUÍ
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* SLIDE 2: Buchisapa Brasa Slide */}
+          {currentSlide === 2 && (
+            <div className="relative w-full h-[460px] bg-neutral-950 overflow-hidden flex flex-col justify-end p-6 animate-in fade-in duration-300">
+              <img
+                src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=1000&q=80"
+                alt="Pollo a la Brasa"
+                className="absolute inset-0 w-full h-full object-cover object-center brightness-75"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+              <div className="relative z-10 text-right space-y-2">
+                <span className="text-red-500 font-black tracking-widest text-xs uppercase block">
+                  ESPECIALIDAD
+                </span>
+                <h1 className="text-3xl font-black text-white uppercase tracking-tight font-heading leading-none">
+                  POLLO A LA BRASA
+                </h1>
+                <p className="text-neutral-300 text-xs font-medium">
+                  Piel dorada y crocante con papas nativas y las mejores salsas caseras.
+                </p>
+                <div className="pt-2">
+                  <button
+                    onClick={() => onPideAqui('brasa')}
+                    className="bg-red-600 hover:bg-red-700 text-white font-black text-xs uppercase tracking-wider px-6 py-2.5 rounded-lg shadow-lg"
+                  >
+                    PIDE AQUÍ
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* SLIDE 3: Fuego & Carbón Anticuchos */}
+          {currentSlide === 3 && (
+            <div className="relative w-full h-[460px] bg-neutral-950 overflow-hidden flex flex-col justify-end p-6 animate-in fade-in duration-300">
+              <img
+                src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1000&q=80"
+                alt="Anticuchos y Parrillas"
+                className="absolute inset-0 w-full h-full object-cover object-center brightness-75"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+              <div className="relative z-10 text-right space-y-2">
+                <span className="text-red-500 font-black tracking-widest text-xs uppercase block">
+                  PARRILLAS
+                </span>
+                <h1 className="text-3xl font-black text-white uppercase tracking-tight font-heading leading-none">
+                  FUEGO & CARBÓN
+                </h1>
+                <p className="text-neutral-300 text-xs font-medium">
+                  Anticuchos de corazón, mollejitas tiernas y cortes parrilleros jugosos.
+                </p>
+                <div className="pt-2">
+                  <button
+                    onClick={() => onPideAqui('anticuchos')}
+                    className="bg-red-600 hover:bg-red-700 text-white font-black text-xs uppercase tracking-wider px-6 py-2.5 rounded-lg shadow-lg"
+                  >
+                    PIDE AQUÍ
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Left Arrow Button (< as in mobile screenshot) */}
+          <button
+            onClick={prevSlide}
+            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/70 hover:bg-white text-neutral-800 flex items-center justify-center shadow-md transition-all z-20 cursor-pointer"
+            aria-label="Anterior diapositiva"
+          >
+            <ChevronLeft className="w-5 h-5 stroke-[2.5]" />
+          </button>
+
+          {/* Right Arrow Button (> as in mobile screenshot) */}
+          <button
+            onClick={nextSlide}
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/70 hover:bg-white text-neutral-800 flex items-center justify-center shadow-md transition-all z-20 cursor-pointer"
+            aria-label="Siguiente diapositiva"
+          >
+            <ChevronRight className="w-5 h-5 stroke-[2.5]" />
+          </button>
+        </div>
+
+        {/* Mobile Pagination Dots matching Screenshot_20260916-121646_Chrome.png */}
+        <div className="py-2.5 flex items-center justify-center gap-2 bg-white">
+          {Array.from({ length: mobileSlidesCount }).map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentSlide(idx)}
+              className={`rounded-full transition-all cursor-pointer ${
+                currentSlide === idx
+                  ? 'w-2 h-2 bg-neutral-800 scale-125'
+                  : 'w-2 h-2 bg-neutral-300 hover:bg-neutral-400'
+              }`}
+              aria-label={`Ir a slide ${idx + 1}`}
+            />
+          ))}
+        </div>
       </div>
 
-      {/* Pagination Dots */}
-      <div className="py-3 sm:py-4 bg-white flex items-center justify-center gap-2">
-        {SLIDES.map((_, idx) => (
-          <button
-            key={idx}
-            onClick={() => setCurrentSlide(idx)}
-            className={`transition-all duration-300 rounded-full cursor-pointer ${
-              idx === currentSlide
-                ? 'w-6 h-2.5 bg-neutral-900'
-                : 'w-2.5 h-2.5 bg-neutral-300 hover:bg-neutral-400'
-            }`}
-            aria-label={`Ir a la diapositiva ${idx + 1}`}
+      {/* =========================================================================
+          2. DESKTOP & TABLET CAROUSEL (>= md) EXACTLY AS IN Desktop Screenshot 1
+         ========================================================================= */}
+      <div className="hidden md:block relative w-full bg-[#111215] overflow-hidden border-b border-neutral-800">
+        <div className="relative w-full md:h-96 lg:h-[420px] max-w-[1400px] mx-auto overflow-hidden">
+          {/* Background Image with Dark Vignette */}
+          <img
+            key={desktopSlides[currentSlide]?.id || 0}
+            src={desktopSlides[currentSlide]?.image}
+            alt={desktopSlides[currentSlide]?.title}
+            className="w-full h-full object-cover object-center animate-in fade-in duration-700 brightness-90"
           />
-        ))}
+
+          {/* Gradient Overlay matching Screenshot 1 */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/40 to-black/85" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/40" />
+
+          {/* Desktop Right-aligned Content */}
+          <div className="absolute inset-0 max-w-7xl mx-auto px-8 lg:px-12 flex flex-col justify-center items-end text-right">
+            <div className="max-w-md lg:max-w-lg space-y-3 animate-in slide-in-from-right-4 duration-500">
+              <span className="text-red-500 font-black tracking-[0.25em] text-xs sm:text-sm uppercase block">
+                {desktopSlides[currentSlide]?.badge}
+              </span>
+
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white uppercase tracking-tight font-heading leading-none drop-shadow-md">
+                {desktopSlides[currentSlide]?.title}
+              </h1>
+
+              <p className="text-neutral-300 text-sm md:text-base font-medium leading-snug line-clamp-2">
+                {desktopSlides[currentSlide]?.subtitle}
+              </p>
+
+              <div className="pt-2">
+                <button
+                  onClick={() => onPideAqui(desktopSlides[currentSlide]?.actionKey || 'promociones')}
+                  className="bg-red-600 hover:bg-red-700 active:scale-95 text-white font-black text-sm uppercase tracking-wider px-8 py-3 rounded-lg shadow-lg hover:shadow-red-600/30 transition-all cursor-pointer inline-flex items-center gap-2"
+                >
+                  <span>{desktopSlides[currentSlide]?.buttonText || 'PIDE AQUÍ'}</span>
+                </button>
+              </div>
+
+              <span className="block text-[10px] text-neutral-400 italic pt-1">
+                Imagen referencial. Aplican términos y condiciones.
+              </span>
+            </div>
+          </div>
+
+          {/* Desktop Left Arrow Button */}
+          <button
+            onClick={prevSlide}
+            className="absolute left-6 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/40 hover:bg-black/70 text-white/80 hover:text-white flex items-center justify-center transition-all backdrop-blur-xs cursor-pointer"
+            aria-label="Anterior diapositiva"
+          >
+            <ChevronLeft className="w-6 h-6 stroke-[2.5]" />
+          </button>
+
+          {/* Desktop Right Arrow Button */}
+          <button
+            onClick={nextSlide}
+            className="absolute right-6 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/40 hover:bg-black/70 text-white/80 hover:text-white flex items-center justify-center transition-all backdrop-blur-xs cursor-pointer"
+            aria-label="Siguiente diapositiva"
+          >
+            <ChevronRight className="w-6 h-6 stroke-[2.5]" />
+          </button>
+
+          {/* Desktop Pagination Dots */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10">
+            {desktopSlides.map((s, idx) => (
+              <button
+                key={s.id}
+                onClick={() => setCurrentSlide(idx)}
+                className={`transition-all rounded-full cursor-pointer ${
+                  currentSlide === idx
+                    ? 'w-6 h-2 bg-white'
+                    : 'w-2 h-2 bg-white/40 hover:bg-white/70'
+                }`}
+                aria-label={`Ir a slide ${idx + 1}`}
+              />
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );
