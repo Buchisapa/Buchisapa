@@ -1,0 +1,15 @@
+--- src/components/Navbar.tsx
++++ src/components/Navbar.tsx
+@@ -9,12 +9,16 @@
+   X,
+   Phone,
+   ChefHat,
+   Flame,
+-  Utensils
++  Utensils,
++  Star,
++  LayoutList,
++  BookOpen,
++  MessageCircle
+ } from 'lucide-react';
+ import { useCart } from '../context/CartContext';

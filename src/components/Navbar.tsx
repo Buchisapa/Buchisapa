@@ -11,6 +11,10 @@ import {
   ChefHat,
   Flame,
   Utensils,
+  Star,
+  LayoutList,
+  BookOpen,
+  MessageCircle,
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { RESTAURANT_INFO, CATEGORIES } from '../data/menuData';
@@ -46,6 +50,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [categoriesDropdownOpen, setCategoriesDropdownOpen] = useState(false);
   const [salonDropdownOpen, setSalonDropdownOpen] = useState(false);
+  const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(false);
+  const [mobileSalonOpen, setMobileSalonOpen] = useState(false);
 
   const categoriesRef = useRef<HTMLDivElement>(null);
   const salonRef = useRef<HTMLDivElement>(null);
@@ -94,12 +100,12 @@ export const Navbar: React.FC<NavbarProps> = ({
             title="Ir al inicio"
           >
             <img
-              src="/logo.svg"
+              src="/buchisapa_oficial_hd.png"
               alt="Buchisapa Logo"
               width={40}
               height={40}
               style={{ width: '40px', height: '40px', maxWidth: '40px', maxHeight: '40px', objectFit: 'contain' }}
-              className="logo-img h-9 w-9 sm:h-10 sm:w-10 object-contain rounded-full bg-neutral-950 ring-2 ring-neutral-900 group-hover:scale-105 transition-transform"
+              className="logo-img h-9 w-9 sm:h-10 sm:w-10 object-contain group-hover:scale-105 transition-transform"
             />
             <span className="hidden sm:inline text-lg font-black tracking-tight text-neutral-900 font-heading">
               Buchi<span className="text-red-600">Sapa</span>
@@ -320,132 +326,152 @@ export const Navbar: React.FC<NavbarProps> = ({
       {/* Mobile Sidebar Navigation Drawer */}
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex animate-in fade-in duration-200">
-          <div className="w-4/5 max-w-sm bg-white h-full shadow-2xl flex flex-col justify-between overflow-y-auto animate-in slide-in-from-left duration-200">
+          <div className="w-[85%] max-w-sm bg-neutral-50 h-full shadow-2xl flex flex-col justify-between overflow-y-auto animate-in slide-in-from-left duration-200 relative">
+            
             <div>
               {/* Drawer Header with Logo and Close */}
-              <div className="p-4 border-b border-neutral-200 flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <img
-                    src="/logo.svg"
-                    alt="Buchisapa Logo"
-                    className="h-9 w-9 rounded-full bg-neutral-950 ring-1 ring-neutral-900"
-                  />
-                  <div>
-                    <span className="text-base font-black text-neutral-900 font-heading block leading-none">
-                      Buchisapa
-                    </span>
-                    <span className="text-[10px] text-red-600 font-bold uppercase tracking-wider block mt-0.5">
-                      Atención 24 Horas
-                    </span>
+              <div className="p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 flex items-center justify-center bg-transparent">
+                    <img
+                      src="/buchisapa_oficial_hd.png"
+                      alt="Buchisapa Burger Logo"
+                      className="h-full w-full object-contain"
+                    />
                   </div>
+                  <span className="text-[17px] font-black text-neutral-900 tracking-wide uppercase font-heading">
+                    Buchisapa Burger
+                  </span>
                 </div>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="p-1 rounded-lg text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100"
+                  className="text-red-600 hover:text-red-700"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-7 h-7 stroke-[2.5]" />
                 </button>
               </div>
 
-              {/* Delivery Zone Card */}
-              <div className="p-4 bg-neutral-50 border-b border-neutral-200">
-                <button
-                  onClick={() => {
-                    onOpenLocation();
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full flex items-center justify-between p-2.5 rounded-xl bg-white border border-neutral-200 text-xs font-semibold text-neutral-800 hover:bg-neutral-50"
-                >
-                  <div className="flex items-center gap-2 truncate">
-                    <MapPin className="w-4 h-4 text-red-600 shrink-0" />
-                    <span className="truncate">{currentZone}</span>
-                  </div>
-                  <span className="text-[10px] text-red-600 font-bold uppercase">Cambiar</span>
-                </button>
-              </div>
-
-              {/* Menu Links */}
-              <nav className="p-4 space-y-2 text-sm font-bold text-neutral-800 uppercase tracking-wide">
-                <button
-                  onClick={() => {
-                    onGoHome();
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-neutral-100 text-left transition-colors"
-                >
-                  <Utensils className="w-4 h-4 text-neutral-600" />
-                  <span>Categorías de la Carta</span>
-                </button>
-
+              {/* Menu Items (Cards) */}
+              <div className="p-4 space-y-3">
+                {/* Promociones */}
                 <button
                   onClick={() => {
                     onOpenPromotions();
                     setMobileMenuOpen(false);
                   }}
-                  className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-neutral-100 text-left text-red-600 transition-colors"
+                  className="w-full flex items-center gap-3 p-4 bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-neutral-100"
                 >
-                  <div className="flex items-center gap-3">
-                    <Flame className="w-4 h-4 text-red-600" />
-                    <span>Promociones 24H</span>
-                  </div>
-                  <span className="text-[9px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-black">
-                    OFERTAS
-                  </span>
+                  <Star className="w-5 h-5 text-red-600 shrink-0" />
+                  <span className="text-[15px] font-black uppercase text-neutral-900 tracking-wide">Promociones</span>
                 </button>
 
+                {/* Categorías Accordion */}
+                <div className="bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-neutral-100 overflow-hidden">
+                  <button
+                    onClick={() => setMobileCategoriesOpen(!mobileCategoriesOpen)}
+                    className="w-full flex items-center justify-between p-4"
+                  >
+                    <div className="flex items-center gap-3">
+                      <LayoutList className="w-5 h-5 text-red-600 shrink-0" />
+                      <span className="text-[15px] font-black uppercase text-neutral-900 tracking-wide">Categorías</span>
+                    </div>
+                    <ChevronDown className={`w-5 h-5 transition-transform text-neutral-900 stroke-[2.5] ${mobileCategoriesOpen ? "rotate-180" : ""}`} />
+                  </button>
+                  {mobileCategoriesOpen && (
+                    <div className="px-[52px] pb-4 space-y-4">
+                      {CATEGORIES.filter((c) => c.id !== "todos").map((cat) => (
+                        <button
+                          key={cat.id}
+                          onClick={() => {
+                            onGoHome();
+                            setMobileMenuOpen(false);
+                          }}
+                          className="w-full text-left text-neutral-800 text-[15px] font-medium block hover:text-red-600 transition-colors"
+                        >
+                          {cat.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                
+                {/* Mi Pedido Actual */}
                 <button
                   onClick={() => {
                     setIsCartOpen(true);
                     setMobileMenuOpen(false);
                   }}
-                  className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-neutral-100 text-left transition-colors"
+                  className="w-full flex items-center justify-between p-4 bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-neutral-100"
                 >
                   <div className="flex items-center gap-3">
-                    <ShoppingBag className="w-4 h-4 text-neutral-600" />
-                    <span>Mi Pedido Actual</span>
+                    <ShoppingBag className="w-5 h-5 text-red-600 shrink-0" />
+                    <span className="text-[15px] font-black uppercase text-neutral-900 tracking-wide">Mi Pedido Actual</span>
                   </div>
                   {cartCount > 0 && (
-                    <span className="text-xs font-black text-white bg-red-600 rounded-full px-2 py-0.5">
+                    <span className="text-sm font-black text-white bg-red-600 rounded-full px-2.5 py-0.5">
                       {cartCount}
                     </span>
                   )}
                 </button>
 
-                <button
-                  onClick={() => {
-                    onOpenKitchen();
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-neutral-100 text-left text-emerald-700 transition-colors"
-                >
-                  <ChefHat className="w-4 h-4 text-emerald-600" />
-                  <span>Panel de Cocina KDS</span>
-                </button>
-              </nav>
+                {/* Carta Salón Accordion */}
+                <div className="bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-neutral-100 overflow-hidden">
+                  <button
+                    onClick={() => setMobileSalonOpen(!mobileSalonOpen)}
+                    className="w-full flex items-center justify-between p-4"
+                  >
+                    <div className="flex items-center gap-3">
+                      <BookOpen className="w-5 h-5 text-red-600 shrink-0" />
+                      <span className="text-[15px] font-black uppercase text-neutral-900 tracking-wide">Carta Salón</span>
+                    </div>
+                    <ChevronDown className={`w-5 h-5 transition-transform text-neutral-900 stroke-[2.5] ${mobileSalonOpen ? "rotate-180" : ""}`} />
+                  </button>
+                  {mobileSalonOpen && (
+                    <div className="px-[52px] pb-4 space-y-4">
+                      {["Lima", "Provincia", "Asia", "Aeropuerto"].map((loc) => (
+                        <button
+                          key={loc}
+                          onClick={() => {
+                            setMobileMenuOpen(false);
+                          }}
+                          className="w-full text-left text-neutral-800 text-[15px] font-medium block hover:text-red-600 transition-colors"
+                        >
+                          {loc}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
 
-            {/* Bottom Section with Auth & WhatsApp */}
-            <div className="p-4 border-t border-neutral-200 space-y-2">
+            {/* Bottom Footer Area */}
+            <div className="p-4 bg-white border-t border-neutral-100 flex flex-col gap-5 pt-6 pb-8">
               <button
                 onClick={() => {
                   onOpenAuth();
                   setMobileMenuOpen(false);
                 }}
-                className="w-full py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm cursor-pointer"
+                className="w-full py-3.5 bg-[#E6192B] hover:bg-red-700 text-white rounded-lg text-[15px] font-medium flex items-center justify-center gap-2 shadow-sm transition-colors"
               >
                 <User className="w-4 h-4" />
-                <span>Iniciar Sesión / Registro</span>
+                <span>INGRESAR</span>
               </button>
-
+              
               <a
                 href={`https://wa.me/${RESTAURANT_INFO.phoneRaw}?text=${encodeURIComponent('¡Hola Buchisapa! Deseo hacer un pedido.')}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full py-2.5 bg-[#25D366]/15 hover:bg-[#25D366]/25 text-[#128C7E] rounded-xl text-xs font-bold flex items-center justify-center gap-2 border border-[#25D366]/30 transition-colors"
+                className="w-full py-3.5 bg-[#25D366]/10 hover:bg-[#25D366]/20 text-[#128C7E] rounded-lg text-[15px] font-bold flex items-center justify-center gap-2 border border-[#25D366]/30 transition-colors"
               >
-                <Phone className="w-4 h-4" />
-                <span>WhatsApp: {RESTAURANT_INFO.phone}</span>
+                <MessageCircle className="w-5 h-5" />
+                <span>Contactar por WhatsApp</span>
               </a>
+
+              <div className="text-center mt-2">
+                <span className="text-base text-neutral-700 font-bold tracking-wide uppercase">SABOR QUE TE </span>
+                <span className="text-base text-black font-black tracking-wide uppercase">LLENA</span>
+              </div>
             </div>
           </div>
 
@@ -456,3 +482,5 @@ export const Navbar: React.FC<NavbarProps> = ({
     </header>
   );
 };
+
+export default Navbar;
