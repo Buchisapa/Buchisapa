@@ -383,7 +383,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                         <button
                           key={cat.id}
                           onClick={() => {
-                            onGoHome();
+                            onSelectCategory(cat.id);
                             setMobileMenuOpen(false);
                           }}
                           className="w-full text-left text-neutral-800 text-[15px] font-medium block hover:text-red-600 transition-colors"

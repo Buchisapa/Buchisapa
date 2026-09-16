@@ -8,43 +8,43 @@ interface HeroCarouselProps {
 export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onPideAqui }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // Desktop Slides matching Desktop Screenshot 1
+  // Desktop Slides matching real categories
   const desktopSlides = [
     {
-      id: 'promo-chicha',
-      title: 'TU CHICHA',
-      subtitle: '1 Pollo a la brasa + papas familiares + ensalada + 1L Chicha Morada',
-      badge: 'PROMO',
-      image: 'https://images.unsplash.com/photo-1598103442097-8b74394b95c6?auto=format&fit=crop&w=1920&q=80',
-      buttonText: 'PIDE AQUÍ',
-      actionKey: 'promociones',
-    },
-    {
-      id: 'buchisapa-brasa',
-      title: 'POLLOS A LA BRASA',
-      subtitle: 'El auténtico sabor a la brasa con papas crocantes y ají de la casa',
-      badge: 'ESPECIALIDAD',
-      image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=1920&q=80',
-      buttonText: 'PIDE AQUÍ',
-      actionKey: 'brasa',
-    },
-    {
-      id: 'parrillas-anticuchos',
-      title: 'FUEGO & CARBÓN',
-      subtitle: 'Anticuchos de corazón, mollejitas, bife y cortes finos',
-      badge: 'PARRILLERO',
-      image: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1920&q=80',
-      buttonText: 'PIDE AQUÍ',
-      actionKey: 'anticuchos',
-    },
-    {
-      id: 'sanguches-combos',
-      title: 'SÁNGUCHES & BROASTER',
-      subtitle: 'Hamburguesas artesanales, royals y pollo broaster crocante',
-      badge: 'FAVORITOS',
+      id: 'hamburguesas-slide',
+      title: 'HAMBURGUESAS ARTESANALES',
+      subtitle: 'Clásica, Royal, Hawaiana, Bacon y La Suprema con papas al hilo',
+      badge: 'POPULAR',
       image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1920&q=80',
       buttonText: 'PIDE AQUÍ',
       actionKey: 'hamburguesas',
+    },
+    {
+      id: 'broaster-slide',
+      title: 'POLLO BROASTER CROCANTE',
+      subtitle: 'Pecho, Pierna, Encuentro y Ala bien doraditos con papas y ensalada',
+      badge: 'ESPECIALIDAD',
+      image: 'https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?auto=format&fit=crop&w=1920&q=80',
+      buttonText: 'PIDE AQUÍ',
+      actionKey: 'broaster',
+    },
+    {
+      id: 'amazonicos-slide',
+      title: 'PLATOS DE LA SELVA',
+      subtitle: 'Tacacho con Cecina, Juanes, Chaufa Amazónico y Chilcano de Pescado',
+      badge: 'TRADICIÓN',
+      image: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1920&q=80',
+      buttonText: 'PIDE AQUÍ',
+      actionKey: 'amazonicos',
+    },
+    {
+      id: 'salchipapas-slide',
+      title: 'SALCHIPAPAS & SALCHIBROASTERS',
+      subtitle: 'A lo Pobre, Salchichorizo y Salchibroasters contundentes',
+      badge: 'FAVORITOS',
+      image: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=1920&q=80',
+      buttonText: 'PIDE AQUÍ',
+      actionKey: 'salchipapas',
     },
   ];
 
