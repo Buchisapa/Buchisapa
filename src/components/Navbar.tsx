@@ -88,13 +88,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenKitchen, activeSection, se
           </div>
         </div>
 
-        {/* Desktop navigation links */}
-        <nav className="hidden lg:flex items-center gap-6 text-sm font-medium">
+        {/* Desktop and Tablet navigation links */}
+        <nav className="hidden md:flex items-center gap-3.5 lg:gap-6 text-xs lg:text-sm font-medium">
           {navLinks.map((link) => (
             <button
               key={link.id}
               onClick={() => handleNavClick(link.id)}
-              className={`transition-colors relative py-1 hover:text-amber-400 cursor-pointer ${
+              className={`transition-colors relative py-1 hover:text-amber-400 cursor-pointer whitespace-nowrap ${
                 activeSection === link.id ? 'text-amber-400 font-semibold' : 'text-neutral-300'
               }`}
             >
@@ -107,27 +107,28 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenKitchen, activeSection, se
         </nav>
 
         {/* Actions (Kitchen button + Cart trigger) */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           {/* Kitchen Orders View trigger */}
           <button
             id="kitchen-orders-btn"
             onClick={onOpenKitchen}
-            className="hidden sm:flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-white border border-neutral-700/80 transition-all shadow-sm cursor-pointer"
+            className="hidden sm:flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-white border border-neutral-700/80 transition-all shadow-sm cursor-pointer whitespace-nowrap"
             title="Ver panel de pedidos y cocina"
           >
             <ChefHat className="w-4 h-4 text-emerald-400" />
-            <span>Mis Pedidos</span>
+            <span className="hidden lg:inline">Mis Pedidos</span>
+            <span className="lg:hidden">Cocina</span>
           </button>
 
           {/* Floating Cart Button */}
           <button
             id="open-cart-btn"
             onClick={() => setIsCartOpen(true)}
-            className="relative flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-neutral-950 font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-amber-500/20 active:scale-95 transition-all cursor-pointer"
+            className="relative flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-neutral-950 font-bold px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl shadow-lg shadow-amber-500/20 active:scale-95 transition-all cursor-pointer"
             aria-label="Abrir carrito de compras"
           >
-            <ShoppingBag className="w-5 h-5 text-neutral-950" />
-            <span className="hidden sm:inline font-bold">Carrito</span>
+            <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-950" />
+            <span className="hidden sm:inline font-bold text-xs sm:text-sm">Carrito</span>
             {cartCount > 0 && (
               <span className="bg-neutral-950 text-amber-400 text-xs font-black rounded-full h-5 min-w-5 px-1.5 flex items-center justify-center animate-pulse">
                 {cartCount}
@@ -135,10 +136,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenKitchen, activeSection, se
             )}
           </button>
 
-          {/* Mobile menu toggle */}
+          {/* Mobile menu toggle (Only on mobile < md) */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 lg:hidden cursor-pointer"
+            className="p-2 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 md:hidden cursor-pointer"
             aria-label="Menu"
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}

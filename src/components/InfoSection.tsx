@@ -72,7 +72,7 @@ export const InfoSection: React.FC = () => {
         </div>
 
         {/* 4 Info Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-12">
           {/* Card 1: Horario 24 Horas */}
           <div className="bg-neutral-950 border border-neutral-800 rounded-2xl p-6 relative overflow-hidden shadow-lg flex flex-col justify-between">
             <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl pointer-events-none" />
@@ -178,41 +178,43 @@ export const InfoSection: React.FC = () => {
         </div>
 
         {/* Interactive Payment Showcase & Delivery Info */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-16">
           {/* Yape & Plin Card */}
-          <div className="lg:col-span-1 bg-gradient-to-b from-neutral-900 to-neutral-950 border border-neutral-800 rounded-3xl p-6 text-center shadow-xl">
-            <h4 className="text-lg font-bold text-white mb-1">Paga Fácil con Yape / Plin</h4>
-            <p className="text-xs text-neutral-400 mb-4">Escanea o transfiere directamente al número:</p>
+          <div className="md:col-span-5 lg:col-span-4 bg-gradient-to-b from-neutral-900 to-neutral-950 border border-neutral-800 rounded-3xl p-6 text-center shadow-xl flex flex-col justify-between">
+            <div>
+              <h4 className="text-lg font-bold text-white mb-1">Paga Fácil con Yape / Plin</h4>
+              <p className="text-xs text-neutral-400 mb-4">Escanea o transfiere directamente al número:</p>
 
-            {/* QR Simulation Card */}
-            <div className="bg-white p-4 rounded-2xl inline-block shadow-inner mx-auto mb-4">
-              <div className="w-40 h-40 bg-neutral-950 rounded-xl flex flex-col items-center justify-center p-2 text-white relative">
-                <div className="absolute inset-2 border-2 border-dashed border-amber-400/60 rounded-lg flex flex-col items-center justify-center text-center p-2">
-                  <span className="text-2xl font-black text-purple-400">yape</span>
-                  <span className="text-[11px] font-bold text-cyan-300">&amp; plin</span>
-                  <span className="text-[10px] text-neutral-400 mt-1 font-mono">943 312 024</span>
-                  <span className="text-[9px] text-neutral-500 mt-0.5">Buchisapa</span>
+              {/* QR Simulation Card */}
+              <div className="bg-white p-4 rounded-2xl inline-block shadow-inner mx-auto mb-4">
+                <div className="w-40 h-40 bg-neutral-950 rounded-xl flex flex-col items-center justify-center p-2 text-white relative">
+                  <div className="absolute inset-2 border-2 border-dashed border-amber-400/60 rounded-lg flex flex-col items-center justify-center text-center p-2">
+                    <span className="text-2xl font-black text-purple-400">yape</span>
+                    <span className="text-[11px] font-bold text-cyan-300">&amp; plin</span>
+                    <span className="text-[10px] text-neutral-400 mt-1 font-mono">943 312 024</span>
+                    <span className="text-[9px] text-neutral-500 mt-0.5">Buchisapa</span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="flex items-center justify-center gap-2">
-              <span className="text-sm font-black text-white font-mono">943 312 024</span>
-              <button
-                onClick={handleCopyYape}
-                className="px-2.5 py-1 bg-neutral-800 hover:bg-neutral-700 text-amber-400 text-xs font-semibold rounded-lg flex items-center gap-1 transition-colors cursor-pointer"
-              >
-                {copiedYape ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                <span>{copiedYape ? 'Copiado' : 'Copiar'}</span>
-              </button>
+              <div className="flex items-center justify-center gap-2">
+                <span className="text-sm font-black text-white font-mono">943 312 024</span>
+                <button
+                  onClick={handleCopyYape}
+                  className="px-2.5 py-1 bg-neutral-800 hover:bg-neutral-700 text-amber-400 text-xs font-semibold rounded-lg flex items-center gap-1 transition-colors cursor-pointer"
+                >
+                  {copiedYape ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                  <span>{copiedYape ? 'Copiado' : 'Copiar'}</span>
+                </button>
+              </div>
             </div>
-            <p className="text-[11px] text-neutral-500 mt-2">
+            <p className="text-[11px] text-neutral-500 mt-3 pt-3 border-t border-neutral-800">
               Titular: Restaurante Buchisapa
             </p>
           </div>
 
           {/* Delivery & Service Info */}
-          <div className="lg:col-span-2 bg-neutral-950 border border-neutral-800 rounded-3xl p-6 sm:p-8 flex flex-col justify-between">
+          <div className="md:col-span-7 lg:col-span-8 bg-neutral-950 border border-neutral-800 rounded-3xl p-6 sm:p-8 flex flex-col justify-between">
             <div>
               <div className="flex items-center gap-2 text-amber-400 text-xs font-bold uppercase tracking-wider mb-2">
                 <Truck className="w-4 h-4" />

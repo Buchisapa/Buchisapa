@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Phone } from 'lucide-react';
 import { CartProvider } from './context/CartContext';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
@@ -91,6 +92,20 @@ export function App() {
           isOpen={isKitchenOpen}
           onClose={() => setIsKitchenOpen(false)}
         />
+
+        {/* Floating WhatsApp Quick Contact Button for Tablet & Desktop */}
+        <a
+          href="https://wa.me/51943312024?text=%C2%A1Hola%20Buchisapa!%20Deseo%20hacer%20un%20pedido%20o%20consulta."
+          target="_blank"
+          rel="noopener noreferrer"
+          className="fixed bottom-5 left-5 z-40 bg-emerald-500 hover:bg-emerald-400 text-neutral-950 p-3 sm:px-4 sm:py-3 rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-2 border border-emerald-300/40 group cursor-pointer"
+          title="Escribir al WhatsApp oficial 24 Horas"
+        >
+          <Phone className="w-5 h-5 text-neutral-950 fill-neutral-950 shrink-0" />
+          <span className="hidden sm:inline text-xs font-black tracking-wide">
+            WhatsApp 24h
+          </span>
+        </a>
       </div>
     </CartProvider>
   );

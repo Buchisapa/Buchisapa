@@ -40,14 +40,14 @@ export const SelvaHighlight: React.FC<SelvaHighlightProps> = ({ onSelectItem, on
         </div>
 
         {/* 4 Cards Bento Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {selvaItems.map((item) => (
             <div
               key={item.id}
               onClick={() => onSelectItem(item)}
-              className="bg-neutral-900/90 border border-emerald-900/40 hover:border-emerald-500/60 rounded-2xl overflow-hidden shadow-lg transition-all group cursor-pointer flex flex-col justify-between"
+              className="bg-neutral-900/90 border border-emerald-900/40 hover:border-emerald-500/60 rounded-2xl overflow-hidden shadow-lg transition-all group cursor-pointer flex flex-col justify-between h-full"
             >
-              <div className="relative h-44 overflow-hidden bg-neutral-950">
+              <div className="relative h-44 sm:h-48 lg:h-44 xl:h-48 overflow-hidden bg-neutral-950">
                 <img
                   src={item.image}
                   alt={item.name}

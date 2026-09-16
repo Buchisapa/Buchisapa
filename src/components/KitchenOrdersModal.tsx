@@ -114,7 +114,7 @@ export const KitchenOrdersModal: React.FC<KitchenOrdersModalProps> = ({ isOpen, 
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-neutral-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6">
-      <div className="relative bg-neutral-900 border border-neutral-800 rounded-3xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
+      <div className="relative bg-neutral-900 border border-neutral-800 rounded-3xl max-w-4xl lg:max-w-5xl w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="p-5 bg-neutral-950 border-b border-neutral-800 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">

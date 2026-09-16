@@ -16,9 +16,9 @@ export const Hero: React.FC<HeroProps> = ({ onExploreMenu, onExploreSelva }) => 
       <div className="absolute top-48 -left-24 w-80 h-80 bg-emerald-600/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 items-center">
           {/* Text Content (Left Column) */}
-          <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
+          <div className="md:col-span-7 lg:col-span-7 space-y-6 text-center md:text-left">
             {/* 24-hour badge */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-neutral-900/90 border border-amber-500/30 text-xs sm:text-sm font-semibold text-neutral-200 shadow-sm">
               <span className="flex h-2.5 w-2.5 relative">
@@ -36,7 +36,7 @@ export const Hero: React.FC<HeroProps> = ({ onExploreMenu, onExploreSelva }) => 
                 El auténtico <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-500">sabor</span> que{' '}
                 <span className="underline decoration-amber-500 decoration-wavy decoration-2">te llena</span>
               </h1>
-              <p className="text-lg sm:text-xl text-neutral-300 max-w-2xl font-normal leading-relaxed">
+              <p className="text-base sm:text-lg lg:text-xl text-neutral-300 max-w-2xl font-normal leading-relaxed">
                 Disfruta de los más contundentes <span className="text-amber-300 font-semibold">Caldos</span>,{' '}
                 <span className="text-amber-300 font-semibold">Pollo Broaster</span> super crocante,{' '}
                 <span className="text-amber-300 font-semibold">Hamburguesas artesanales</span> y auténtica{' '}
@@ -45,21 +45,21 @@ export const Hero: React.FC<HeroProps> = ({ onExploreMenu, onExploreSelva }) => 
             </div>
 
             {/* CTAs */}
-            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5 pt-2">
+            <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-3 pt-2">
               <button
                 id="hero-order-btn"
                 onClick={onExploreMenu}
-                className="w-full sm:w-auto px-7 py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-neutral-950 font-bold text-base rounded-xl shadow-lg shadow-amber-500/25 flex items-center justify-center gap-2 active:scale-98 transition-all cursor-pointer"
+                className="w-full sm:w-auto px-6 lg:px-7 py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-neutral-950 font-bold text-sm sm:text-base rounded-xl shadow-lg shadow-amber-500/25 flex items-center justify-center gap-2 active:scale-98 transition-all cursor-pointer whitespace-nowrap"
               >
                 <UtensilsCrossed className="w-5 h-5 text-neutral-950" />
-                <span>Ver la Carta &amp; Pedir Online</span>
+                <span>Ver la Carta &amp; Pedir</span>
                 <ArrowRight className="w-4 h-4 text-neutral-950" />
               </button>
 
               <button
                 id="hero-selva-btn"
                 onClick={onExploreSelva}
-                className="w-full sm:w-auto px-6 py-3.5 bg-neutral-900/90 hover:bg-neutral-800 text-neutral-200 hover:text-white font-semibold text-base rounded-xl border border-neutral-700/80 flex items-center justify-center gap-2 transition-all cursor-pointer"
+                className="w-full sm:w-auto px-5 lg:px-6 py-3.5 bg-neutral-900/90 hover:bg-neutral-800 text-neutral-200 hover:text-white font-semibold text-sm sm:text-base rounded-xl border border-neutral-700/80 flex items-center justify-center gap-2 transition-all cursor-pointer whitespace-nowrap"
               >
                 <Sparkles className="w-5 h-5 text-emerald-400" />
                 <span>Platos de la Selva</span>
@@ -70,7 +70,7 @@ export const Hero: React.FC<HeroProps> = ({ onExploreMenu, onExploreSelva }) => 
                 href={`https://wa.me/${RESTAURANT_INFO.phoneRaw}?text=${encodeURIComponent('¡Hola Buchisapa! Quiero consultar la carta y hacer un pedido.')}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full sm:w-auto px-5 py-3.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 font-semibold text-base rounded-xl flex items-center justify-center gap-2 transition-all"
+                className="w-full sm:w-auto px-5 py-3.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 font-semibold text-sm sm:text-base rounded-xl flex items-center justify-center gap-2 transition-all whitespace-nowrap"
               >
                 <Phone className="w-4 h-4 text-emerald-400" />
                 <span>WhatsApp 24h</span>
@@ -78,44 +78,44 @@ export const Hero: React.FC<HeroProps> = ({ onExploreMenu, onExploreSelva }) => 
             </div>
 
             {/* Trust highlights */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-neutral-800/80">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 pt-4 border-t border-neutral-800/80">
               <div className="bg-neutral-900/60 p-3 rounded-xl border border-neutral-800/60 text-left">
-                <div className="flex items-center gap-2 text-amber-400 font-bold text-sm">
-                  <Clock className="w-4 h-4 text-amber-500" />
+                <div className="flex items-center gap-1.5 sm:gap-2 text-amber-400 font-bold text-xs sm:text-sm">
+                  <Clock className="w-4 h-4 text-amber-500 shrink-0" />
                   <span>24 Horas</span>
                 </div>
-                <p className="text-xs text-neutral-400 mt-0.5">Atención día y noche</p>
+                <p className="text-[11px] sm:text-xs text-neutral-400 mt-0.5">Atención día y noche</p>
               </div>
 
               <div className="bg-neutral-900/60 p-3 rounded-xl border border-neutral-800/60 text-left">
-                <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm">
-                  <Flame className="w-4 h-4 text-emerald-500" />
+                <div className="flex items-center gap-1.5 sm:gap-2 text-emerald-400 font-bold text-xs sm:text-sm">
+                  <Flame className="w-4 h-4 text-emerald-500 shrink-0" />
                   <span>100% Selva</span>
                 </div>
-                <p className="text-xs text-neutral-400 mt-0.5">Cecina y chorizo regional</p>
+                <p className="text-[11px] sm:text-xs text-neutral-400 mt-0.5">Cecina artesanal</p>
               </div>
 
               <div className="bg-neutral-900/60 p-3 rounded-xl border border-neutral-800/60 text-left">
-                <div className="flex items-center gap-2 text-amber-400 font-bold text-sm">
-                  <ShieldCheck className="w-4 h-4 text-amber-500" />
+                <div className="flex items-center gap-1.5 sm:gap-2 text-amber-400 font-bold text-xs sm:text-sm">
+                  <ShieldCheck className="w-4 h-4 text-amber-500 shrink-0" />
                   <span>Yape &amp; Plin</span>
                 </div>
-                <p className="text-xs text-neutral-400 mt-0.5">Pagos rápidos y seguros</p>
+                <p className="text-[11px] sm:text-xs text-neutral-400 mt-0.5">Pagos seguros</p>
               </div>
 
               <div className="bg-neutral-900/60 p-3 rounded-xl border border-neutral-800/60 text-left">
-                <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm">
-                  <Heart className="w-4 h-4 text-rose-400" />
-                  <span>Bien Despachado</span>
+                <div className="flex items-center gap-1.5 sm:gap-2 text-emerald-400 font-bold text-xs sm:text-sm">
+                  <Heart className="w-4 h-4 text-rose-400 shrink-0" />
+                  <span>Bien Servido</span>
                 </div>
-                <p className="text-xs text-neutral-400 mt-0.5">Porciones generosas</p>
+                <p className="text-[11px] sm:text-xs text-neutral-400 mt-0.5">Platos contundentes</p>
               </div>
             </div>
           </div>
 
           {/* Visual Showcase (Right Column) */}
-          <div className="lg:col-span-5 relative">
-            <div className="relative mx-auto max-w-md lg:max-w-none">
+          <div className="md:col-span-5 lg:col-span-5 relative mt-4 md:mt-0">
+            <div className="relative mx-auto max-w-sm md:max-w-md lg:max-w-none">
               {/* Main Card with Logo & Signature Specialties */}
               <div className="relative rounded-3xl bg-gradient-to-b from-neutral-900 to-neutral-950 p-6 border border-neutral-800 shadow-2xl overflow-hidden">
                 {/* Decorative background circle */}

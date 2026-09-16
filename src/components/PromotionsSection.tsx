@@ -43,24 +43,24 @@ export const PromotionsSection: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
           {PROMOTIONS.map((promo) => (
             <div
               key={promo.id}
               id={`promo-${promo.id}`}
-              className="relative rounded-2xl bg-neutral-950 border border-neutral-800 p-6 flex flex-col justify-between hover:border-amber-500/50 transition-all hover:shadow-xl hover:shadow-amber-500/5 group"
+              className="relative rounded-2xl bg-neutral-950 border border-neutral-800 p-5 sm:p-6 flex flex-col justify-between hover:border-amber-500/50 transition-all hover:shadow-xl hover:shadow-amber-500/5 group h-full"
             >
               {/* Badge Tag */}
               <div className="flex items-center justify-between gap-2 mb-4">
-                <span className="inline-flex items-center gap-1 text-xs font-black uppercase px-2.5 py-1 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                  <Tag className="w-3 h-3" />
-                  {promo.tag}
+                <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-black uppercase px-2.5 py-1 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 whitespace-nowrap">
+                  <Tag className="w-3 h-3 shrink-0" />
+                  <span>{promo.tag}</span>
                 </span>
-                <div className="text-right">
-                  <span className="text-xs text-neutral-500 line-through mr-2">
+                <div className="text-right whitespace-nowrap">
+                  <span className="text-xs text-neutral-500 line-through mr-1.5 sm:mr-2">
                     S/ {promo.originalPrice.toFixed(2)}
                   </span>
-                  <span className="text-xl font-black text-white">
+                  <span className="text-lg sm:text-xl font-black text-white">
                     S/ {promo.price.toFixed(2)}
                   </span>
                 </div>

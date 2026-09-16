@@ -114,15 +114,15 @@ export const MenuSection: React.FC<MenuSectionProps> = ({
           </div>
         </div>
 
-        {/* Category Tabs */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-8 scrollbar-none">
+        {/* Category Tabs: scrollable on mobile, wrapping flex toolbar on tablet and desktop */}
+        <div className="flex items-center gap-2 overflow-x-auto md:flex-wrap md:justify-start pb-3 md:pb-0 mb-8 scrollbar-none">
           {CATEGORIES.map((cat) => (
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer border ${
+              className={`px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer border shrink-0 ${
                 selectedCategory === cat.id
-                  ? 'bg-amber-500 text-neutral-950 border-amber-400 shadow-md shadow-amber-500/20 scale-102'
+                  ? 'bg-amber-500 text-neutral-950 border-amber-400 shadow-md shadow-amber-500/20'
                   : 'bg-neutral-900 hover:bg-neutral-800 text-neutral-300 border-neutral-800 hover:border-neutral-700'
               }`}
             >
@@ -142,22 +142,22 @@ export const MenuSection: React.FC<MenuSectionProps> = ({
                 setSelectedCategory('todos');
                 setOnlyPopular(false);
               }}
-              className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-xs font-bold text-amber-400 rounded-xl"
+              className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-xs font-bold text-amber-400 rounded-xl cursor-pointer"
             >
               Restablecer Filtros
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
             {filteredItems.map((item) => (
               <div
                 key={item.id}
                 id={`item-card-${item.id}`}
                 onClick={() => onSelectItem(item)}
-                className="group relative bg-neutral-900/90 border border-neutral-800 hover:border-amber-500/50 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-amber-500/10 transition-all duration-200 flex flex-col justify-between cursor-pointer"
+                className="group relative bg-neutral-900/90 border border-neutral-800 hover:border-amber-500/50 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-amber-500/10 transition-all duration-200 flex flex-col justify-between cursor-pointer h-full"
               >
                 {/* Image & Badges */}
-                <div className="relative h-44 w-full overflow-hidden bg-neutral-950">
+                <div className="relative h-44 sm:h-48 md:h-44 lg:h-48 w-full overflow-hidden bg-neutral-950">
                   <img
                     src={item.image}
                     alt={item.name}
