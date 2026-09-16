@@ -109,6 +109,7 @@ export const CategoryCardsView: React.FC<CategoryCardsViewProps> = ({
         src={card.image}
         alt={card.name}
         loading="lazy"
+        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
         className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
       />
 

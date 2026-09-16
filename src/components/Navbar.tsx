@@ -96,7 +96,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             <img
               src="/logo.svg"
               alt="Buchisapa Logo"
-              className="h-9 w-9 sm:h-10 sm:w-10 object-contain rounded-full bg-neutral-950 ring-2 ring-neutral-900 group-hover:scale-105 transition-transform"
+              width={40}
+              height={40}
+              style={{ width: '40px', height: '40px', maxWidth: '40px', maxHeight: '40px', objectFit: 'contain' }}
+              className="logo-img h-9 w-9 sm:h-10 sm:w-10 object-contain rounded-full bg-neutral-950 ring-2 ring-neutral-900 group-hover:scale-105 transition-transform"
             />
             <span className="hidden sm:inline text-lg font-black tracking-tight text-neutral-900 font-heading">
               Buchi<span className="text-red-600">Sapa</span>

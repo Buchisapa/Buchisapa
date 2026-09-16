@@ -13,4 +13,8 @@ export default defineConfig({
     port: 3000,
     allowedHosts: true,
   },
+  build: {
+    target: ['es2015', 'chrome70', 'edge79', 'firefox68', 'safari13'],
+    cssTarget: ['chrome70', 'firefox68', 'safari13'],
+  },
 })

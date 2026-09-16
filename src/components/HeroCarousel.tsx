@@ -71,7 +71,7 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onPideAqui }) => {
       {/* =========================================================================
           1. MOBILE CAROUSEL (< md) EXACTLY AS IN Screenshot_20260916-121646_Chrome.png
          ========================================================================= */}
-      <div className="md:hidden">
+      <div id="mobile-hero-carousel" className="md:hidden">
         {/* Banner container with relative positioning and navigation arrows */}
         <div className="relative w-full bg-[#f4f3ef] overflow-hidden border-b border-neutral-200">
           {/* SLIDE 0: Jorge Salinas Campaign Banner (Screenshot_20260916-121646_Chrome.png) */}
@@ -83,7 +83,7 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onPideAqui }) => {
                   src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"
                   alt="Jorge Salinas Diseñador"
                   className="w-full h-full object-cover object-top filter contrast-105"
-                  style={{ maskImage: 'linear-gradient(to left, black 65%, transparent 100%)' }}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', maskImage: 'linear-gradient(to left, black 65%, transparent 100%)' }}
                 />
               </div>
 
@@ -312,13 +312,14 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onPideAqui }) => {
       {/* =========================================================================
           2. DESKTOP & TABLET CAROUSEL (>= md) EXACTLY AS IN Desktop Screenshot 1
          ========================================================================= */}
-      <div className="hidden md:block relative w-full bg-[#111215] overflow-hidden border-b border-neutral-800">
+      <div id="desktop-hero-carousel" className="hidden md:block relative w-full bg-[#111215] overflow-hidden border-b border-neutral-800">
         <div className="relative w-full md:h-96 lg:h-[420px] max-w-[1400px] mx-auto overflow-hidden">
           {/* Background Image with Dark Vignette */}
           <img
             key={desktopSlides[currentSlide]?.id || 0}
             src={desktopSlides[currentSlide]?.image}
             alt={desktopSlides[currentSlide]?.title}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             className="w-full h-full object-cover object-center animate-in fade-in duration-700 brightness-90"
           />
 
