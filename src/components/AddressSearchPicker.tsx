@@ -206,6 +206,13 @@ export const AddressSearchPicker: React.FC<AddressSearchPickerProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Automatically trigger Geolocation API on modal open if no initial address was provided
+  useEffect(() => {
+    if (!initialAddress) {
+      handleUseGPS();
+    }
+  }, []);
+
   const handleSelectSuggestion = (place: string) => {
     setSearchQuery(place);
     setShowDropdown(false);
@@ -314,6 +321,17 @@ export const AddressSearchPicker: React.FC<AddressSearchPickerProps> = ({
       {/* Title */}
       <div>
         <h3 className="text-sm sm:text-base font-bold text-neutral-900">{title}</h3>
+        {isLocatingGps ? (
+          <p className="text-xs text-sky-600 font-medium flex items-center gap-1.5 mt-1 animate-pulse">
+            <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />
+            <span>Detectando tu ubicación actual con la API de Geolocation...</span>
+          </p>
+        ) : searchQuery ? (
+          <p className="text-xs text-emerald-600 font-medium flex items-center gap-1 mt-1">
+            <Check className="w-3.5 h-3.5 shrink-0" />
+            <span>Ubicación detectada automáticamente</span>
+          </p>
+        ) : null}
       </div>
 
       {/* Input Search Field with Floating Suggestions Dropdown */}
