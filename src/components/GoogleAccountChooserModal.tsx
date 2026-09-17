@@ -22,16 +22,23 @@ export const GoogleAccountChooserModal: React.FC<GoogleAccountChooserModalProps>
   // Load saved accounts on THIS specific device when modal opens
   useEffect(() => {
     if (isOpen) {
-      setShowCustomForm(false);
-      const saved = getDeviceSavedAccounts();
+      const saved = getDeviceSavedAccounts().filter(
+        (acc) => acc.email.toLowerCase() !== 'loalopez286@gmail.com'
+      );
       setDeviceAccounts(saved);
+      if (saved.length === 0) {
+        setShowCustomForm(true);
+      } else {
+        setShowCustomForm(false);
+      }
 
-      // Attempt Google Identity Services (GIS) One Tap initialization if available
-      try {
-        if (typeof window !== 'undefined' && (window as any).google?.accounts?.id) {
+      // If Google Client ID is configured in Vercel environment variables
+      const googleClientId = (import.meta as any).env?.VITE_GOOGLE_CLIENT_ID;
+      if (googleClientId && typeof window !== 'undefined' && (window as any).google?.accounts?.id) {
+        try {
           const googleId = (window as any).google.accounts.id;
           googleId.initialize({
-            client_id: '1091120808134-buchisapa-auth.apps.googleusercontent.com',
+            client_id: googleClientId,
             callback: (response: any) => {
               if (response && response.credential) {
                 try {
@@ -59,17 +66,18 @@ export const GoogleAccountChooserModal: React.FC<GoogleAccountChooserModalProps>
                     onSelectAccountSuccess();
                   }
                 } catch (e) {
-                  console.log('GSI token parse note:', e);
+                  console.log('GSI token parse error:', e);
                 }
               }
             },
             auto_select: false,
+            use_fedcm_for_prompt: false,
           });
 
-          // Trigger Google One Tap Native PromptSheet on device
-          googleId.prompt();
+          if (window.self === window.top) {
+            googleId.prompt();
+          }
 
-          // Also attempt rendering standard Google button if container exists
           const btnElem = document.getElementById('gsi-button-container');
           if (btnElem) {
             googleId.renderButton(btnElem, {
@@ -79,9 +87,9 @@ export const GoogleAccountChooserModal: React.FC<GoogleAccountChooserModalProps>
               text: 'signin_with',
             });
           }
+        } catch (e) {
+          console.log('GSI init notice:', e);
         }
-      } catch (e) {
-        console.log('Google Identity Services notice:', e);
       }
     }
   }, [isOpen]);
@@ -159,9 +167,6 @@ export const GoogleAccountChooserModal: React.FC<GoogleAccountChooserModalProps>
               </p>
             </div>
           </div>
-
-          {/* Native Google Identity Services Button Slot */}
-          <div id="gsi-button-container" className="flex justify-center my-2 empty:hidden"></div>
 
           {showCustomForm ? (
             /* Custom Account Input Form */

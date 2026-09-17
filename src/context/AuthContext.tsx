@@ -31,7 +31,8 @@ export const PREDEFINED_GOOGLE_ACCOUNTS: GoogleAccount[] = [];
 export const getDeviceSavedAccounts = (): GoogleAccount[] => {
   try {
     const saved = localStorage.getItem('buchisapa_device_accounts');
-    return saved ? JSON.parse(saved) : [];
+    const parsed: GoogleAccount[] = saved ? JSON.parse(saved) : [];
+    return parsed.filter((acc) => acc.email.toLowerCase() !== 'loalopez286@gmail.com');
   } catch {
     return [];
   }
