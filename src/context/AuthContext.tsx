@@ -24,7 +24,44 @@ export interface GoogleAccount {
   initial: string;
 }
 
-export const PREDEFINED_GOOGLE_ACCOUNTS: GoogleAccount[] = [];
+export const PREDEFINED_GOOGLE_ACCOUNTS: GoogleAccount[] = [
+  {
+    id: 'g-0',
+    name: 'Jean Loa',
+    givenName: 'Jean',
+    familyName: 'Loa',
+    email: 'loalopez286@gmail.com',
+    avatarBgColor: 'bg-red-600 text-white',
+    initial: 'J',
+  },
+  {
+    id: 'g-1',
+    name: 'Jean Loa Lopez',
+    givenName: 'Jean Loa',
+    familyName: 'Lopez',
+    email: 'loalopezjean@gmail.com',
+    avatarBgColor: 'bg-[#0d9488] text-white',
+    initial: 'J',
+  },
+  {
+    id: 'g-2',
+    name: 'Jean Loa',
+    givenName: 'Jean',
+    familyName: 'Loa',
+    email: 'jeanloa831@gmail.com',
+    avatarBgColor: 'bg-[#ea580c] text-white',
+    initial: 'J',
+  },
+  {
+    id: 'g-3',
+    name: 'NexAltusTec SAC',
+    givenName: 'NexAltusTec',
+    familyName: 'SAC',
+    email: 'nexaltustecsac@gmail.com',
+    avatarBgColor: 'bg-[#2563eb] text-white',
+    initial: 'N',
+  },
+];
 
 interface AuthContextType {
   user: UserProfile | null;

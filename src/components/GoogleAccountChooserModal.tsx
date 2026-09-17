@@ -14,9 +14,9 @@ export const GoogleAccountChooserModal: React.FC<GoogleAccountChooserModalProps>
   onSelectAccountSuccess,
 }) => {
   const { loginWithGoogleAccount, loginWithCustomAccount } = useAuth();
-  const [showCustomForm, setShowCustomForm] = useState(PREDEFINED_GOOGLE_ACCOUNTS.length === 0);
-  const [customName, setCustomName] = useState('');
-  const [customEmail, setCustomEmail] = useState('');
+  const [showCustomForm, setShowCustomForm] = useState(false);
+  const [customName, setCustomName] = useState('Jean Loa');
+  const [customEmail, setCustomEmail] = useState('loalopez286@gmail.com');
 
   if (!isOpen) return null;
 
