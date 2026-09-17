@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { X, User, ChevronDown, Check, ArrowLeft } from 'lucide-react';
-import { useAuth, PREDEFINED_GOOGLE_ACCOUNTS, GoogleAccount } from '../context/AuthContext';
+import React, { useState, useEffect } from 'react';
+import { X, User, ChevronDown, Check, ArrowLeft, Plus } from 'lucide-react';
+import { useAuth, GoogleAccount, getDeviceSavedAccounts } from '../context/AuthContext';
 
 interface GoogleAccountChooserModalProps {
   isOpen: boolean;
@@ -14,9 +14,24 @@ export const GoogleAccountChooserModal: React.FC<GoogleAccountChooserModalProps>
   onSelectAccountSuccess,
 }) => {
   const { loginWithGoogleAccount, loginWithCustomAccount } = useAuth();
+  const [deviceAccounts, setDeviceAccounts] = useState<GoogleAccount[]>([]);
   const [showCustomForm, setShowCustomForm] = useState(false);
-  const [customName, setCustomName] = useState('Jean Loa');
-  const [customEmail, setCustomEmail] = useState('loalopez286@gmail.com');
+  const [customName, setCustomName] = useState('');
+  const [customEmail, setCustomEmail] = useState('');
+
+  // Load saved accounts on THIS specific device when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      const saved = getDeviceSavedAccounts();
+      setDeviceAccounts(saved);
+      // If no accounts exist on this device yet, show form by default
+      if (saved.length === 0) {
+        setShowCustomForm(true);
+      } else {
+        setShowCustomForm(false);
+      }
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -27,8 +42,8 @@ export const GoogleAccountChooserModal: React.FC<GoogleAccountChooserModalProps>
 
   const handleCustomSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (customName && customEmail) {
-      loginWithCustomAccount(customName, customEmail);
+    if (customName.trim() && customEmail.trim()) {
+      loginWithCustomAccount(customName.trim(), customEmail.trim());
       onSelectAccountSuccess();
     }
   };
@@ -92,53 +107,17 @@ export const GoogleAccountChooserModal: React.FC<GoogleAccountChooserModalProps>
             </div>
           </div>
 
-          {/* Featured Primary Google Sign-In Button */}
-          {!showCustomForm && (
-            <button
-              type="button"
-              onClick={() => {
-                loginWithCustomAccount('Jean Loa', 'loalopez286@gmail.com');
-                onSelectAccountSuccess();
-              }}
-              className="w-full bg-[#1a73e8] hover:bg-[#1557b0] text-white font-medium py-3 px-4 rounded-xl flex items-center justify-center gap-3 transition-all shadow-md active:scale-[0.99] cursor-pointer group"
-            >
-              <div className="w-7 h-7 bg-white rounded-full flex items-center justify-center shrink-0 shadow-xs">
-                <svg className="w-4 h-4" viewBox="0 0 24 24">
-                  <path
-                    fill="#4285F4"
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                  />
-                  <path
-                    fill="#34A853"
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                  />
-                  <path
-                    fill="#FBBC05"
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-                  />
-                  <path
-                    fill="#EA4335"
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-                  />
-                </svg>
-              </div>
-              <span className="text-sm font-semibold tracking-wide">
-                Continuar con Google
-              </span>
-            </button>
-          )}
-
-          {showCustomForm || PREDEFINED_GOOGLE_ACCOUNTS.length === 0 ? (
+          {showCustomForm || deviceAccounts.length === 0 ? (
             /* Custom Account Input Form */
-            <form onSubmit={handleCustomSubmit} className="space-y-3 pt-2">
-              {PREDEFINED_GOOGLE_ACCOUNTS.length > 0 && (
+            <form onSubmit={handleCustomSubmit} className="space-y-3.5 pt-2">
+              {deviceAccounts.length > 0 && (
                 <button
                   type="button"
                   onClick={() => setShowCustomForm(false)}
-                  className="inline-flex items-center gap-1.5 text-xs text-sky-400 hover:underline mb-2 cursor-pointer"
+                  className="inline-flex items-center gap-1.5 text-xs text-sky-400 hover:underline mb-1 cursor-pointer"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
-                  <span>Volver a la lista de cuentas</span>
+                  <span>Volver a cuentas de este dispositivo</span>
                 </button>
               )}
 
@@ -151,7 +130,7 @@ export const GoogleAccountChooserModal: React.FC<GoogleAccountChooserModalProps>
                   required
                   value={customName}
                   onChange={(e) => setCustomName(e.target.value)}
-                  placeholder="Ej. Luis Loa"
+                  placeholder="Tu Nombre y Apellido"
                   className="w-full px-3.5 py-2.5 text-sm bg-neutral-900 border border-neutral-700 rounded-lg text-white placeholder-neutral-500 focus:outline-none focus:border-sky-500"
                 />
               </div>
@@ -165,22 +144,25 @@ export const GoogleAccountChooserModal: React.FC<GoogleAccountChooserModalProps>
                   required
                   value={customEmail}
                   onChange={(e) => setCustomEmail(e.target.value)}
-                  placeholder="tu@gmail.com"
+                  placeholder="tu.correo@gmail.com"
                   className="w-full px-3.5 py-2.5 text-sm bg-neutral-900 border border-neutral-700 rounded-lg text-white placeholder-neutral-500 focus:outline-none focus:border-sky-500"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full py-2.5 mt-2 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-lg transition-colors cursor-pointer"
+                className="w-full py-3 mt-2 bg-[#1a73e8] hover:bg-[#1557b0] text-white font-bold text-xs sm:text-sm rounded-xl transition-all shadow-md cursor-pointer flex items-center justify-center gap-2"
               >
-                Continuar con esta cuenta
+                <span>Acceder con esta cuenta</span>
               </button>
             </form>
           ) : (
-            /* Accounts List matching Screenshots 1, 2, 3 */
+            /* Accounts List recorded ONLY on THIS device */
             <div className="divide-y divide-neutral-800/80 border-y border-neutral-800/80 my-2">
-              {PREDEFINED_GOOGLE_ACCOUNTS.map((account) => (
+              <div className="text-xs text-neutral-400 font-medium pb-2 pt-1 px-1">
+                Cuentas registradas en este dispositivo:
+              </div>
+              {deviceAccounts.map((account) => (
                 <button
                   key={account.id}
                   type="button"
@@ -201,17 +183,21 @@ export const GoogleAccountChooserModal: React.FC<GoogleAccountChooserModalProps>
                 </button>
               ))}
 
-              {/* Option: Usar otra cuenta */}
+              {/* Option: Agregar otra cuenta en este dispositivo */}
               <button
                 type="button"
-                onClick={() => setShowCustomForm(true)}
+                onClick={() => {
+                  setCustomName('');
+                  setCustomEmail('');
+                  setShowCustomForm(true);
+                }}
                 className="w-full py-3 px-1 flex items-center gap-3.5 hover:bg-neutral-800/60 rounded-lg transition-colors text-left cursor-pointer"
               >
                 <div className="w-9 h-9 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center shrink-0">
-                  <User className="w-4 h-4 text-neutral-300" />
+                  <Plus className="w-4 h-4 text-neutral-300" />
                 </div>
                 <div className="text-sm font-medium text-neutral-200">
-                  Usar otra cuenta
+                  Agregar otra cuenta en este dispositivo
                 </div>
               </button>
             </div>

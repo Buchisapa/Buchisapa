@@ -24,44 +24,32 @@ export interface GoogleAccount {
   initial: string;
 }
 
-export const PREDEFINED_GOOGLE_ACCOUNTS: GoogleAccount[] = [
-  {
-    id: 'g-0',
-    name: 'Jean Loa',
-    givenName: 'Jean',
-    familyName: 'Loa',
-    email: 'loalopez286@gmail.com',
-    avatarBgColor: 'bg-red-600 text-white',
-    initial: 'J',
-  },
-  {
-    id: 'g-1',
-    name: 'Jean Loa Lopez',
-    givenName: 'Jean Loa',
-    familyName: 'Lopez',
-    email: 'loalopezjean@gmail.com',
-    avatarBgColor: 'bg-[#0d9488] text-white',
-    initial: 'J',
-  },
-  {
-    id: 'g-2',
-    name: 'Jean Loa',
-    givenName: 'Jean',
-    familyName: 'Loa',
-    email: 'jeanloa831@gmail.com',
-    avatarBgColor: 'bg-[#ea580c] text-white',
-    initial: 'J',
-  },
-  {
-    id: 'g-3',
-    name: 'NexAltusTec SAC',
-    givenName: 'NexAltusTec',
-    familyName: 'SAC',
-    email: 'nexaltustecsac@gmail.com',
-    avatarBgColor: 'bg-[#2563eb] text-white',
-    initial: 'N',
-  },
-];
+// Completely empty predefined accounts - no hardcoded emails!
+export const PREDEFINED_GOOGLE_ACCOUNTS: GoogleAccount[] = [];
+
+// Helper to get device-specific saved accounts from localStorage
+export const getDeviceSavedAccounts = (): GoogleAccount[] => {
+  try {
+    const saved = localStorage.getItem('buchisapa_device_accounts');
+    return saved ? JSON.parse(saved) : [];
+  } catch {
+    return [];
+  }
+};
+
+// Helper to save a new account to device's localStorage
+export const saveAccountToDevice = (account: GoogleAccount) => {
+  try {
+    const existing = getDeviceSavedAccounts();
+    const exists = existing.some((a) => a.email.toLowerCase() === account.email.toLowerCase());
+    if (!exists) {
+      const updated = [account, ...existing];
+      localStorage.setItem('buchisapa_device_accounts', JSON.stringify(updated));
+    }
+  } catch {
+    // ignore
+  }
+};
 
 interface AuthContextType {
   user: UserProfile | null;
@@ -107,6 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [user]);
 
   const loginWithGoogleAccount = (account: GoogleAccount) => {
+    saveAccountToDevice(account);
     const newUser: UserProfile = {
       id: account.id,
       name: account.name,
@@ -129,8 +118,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const givenName = parts[0] || name;
     const familyName = parts.slice(1).join(' ') || '';
 
+    const newAccount: GoogleAccount = {
+      id: `g-${Date.now()}`,
+      name,
+      givenName,
+      familyName,
+      email,
+      avatarBgColor: 'bg-red-600 text-white',
+      initial: givenName.charAt(0).toUpperCase(),
+    };
+    saveAccountToDevice(newAccount);
+
     const newUser: UserProfile = {
-      id: `usr-${Date.now()}`,
+      id: newAccount.id,
       name,
       givenName,
       familyName,
