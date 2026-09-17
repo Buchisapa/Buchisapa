@@ -19,27 +19,69 @@ export const GoogleAccountChooserModal: React.FC<GoogleAccountChooserModalProps>
   const [customName, setCustomName] = useState('');
   const [customEmail, setCustomEmail] = useState('');
 
-  // Default account to ensure the user always has a 1-click Google account available
-  const DEFAULT_GOOGLE_ACCOUNT: GoogleAccount = {
-    id: 'g-0',
-    name: 'Jean Loa',
-    givenName: 'Jean',
-    familyName: 'Loa',
-    email: 'loalopez286@gmail.com',
-    avatarBgColor: 'bg-red-600 text-white',
-    initial: 'J',
-  };
-
   // Load saved accounts on THIS specific device when modal opens
   useEffect(() => {
     if (isOpen) {
       setShowCustomForm(false);
       const saved = getDeviceSavedAccounts();
-      const existingEmails = new Set(saved.map((a) => a.email.toLowerCase()));
-      if (!existingEmails.has(DEFAULT_GOOGLE_ACCOUNT.email.toLowerCase())) {
-        setDeviceAccounts([DEFAULT_GOOGLE_ACCOUNT, ...saved]);
-      } else {
-        setDeviceAccounts(saved);
+      setDeviceAccounts(saved);
+
+      // Attempt Google Identity Services (GIS) One Tap initialization if available
+      try {
+        if (typeof window !== 'undefined' && (window as any).google?.accounts?.id) {
+          const googleId = (window as any).google.accounts.id;
+          googleId.initialize({
+            client_id: '1091120808134-buchisapa-auth.apps.googleusercontent.com',
+            callback: (response: any) => {
+              if (response && response.credential) {
+                try {
+                  const base64Url = response.credential.split('.')[1];
+                  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                  const jsonPayload = decodeURIComponent(
+                    atob(base64)
+                      .split('')
+                      .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                      .join('')
+                  );
+                  const payload = JSON.parse(jsonPayload);
+                  if (payload && payload.email) {
+                    const nameParts = (payload.name || payload.email.split('@')[0]).split(' ');
+                    const googleAcc: GoogleAccount = {
+                      id: payload.sub || `g-${Date.now()}`,
+                      name: payload.name || payload.email.split('@')[0],
+                      givenName: payload.given_name || nameParts[0] || '',
+                      familyName: payload.family_name || nameParts.slice(1).join(' ') || '',
+                      email: payload.email,
+                      avatarBgColor: 'bg-[#1a73e8] text-white',
+                      initial: (payload.name || payload.email).charAt(0).toUpperCase(),
+                    };
+                    loginWithGoogleAccount(googleAcc);
+                    onSelectAccountSuccess();
+                  }
+                } catch (e) {
+                  console.log('GSI token parse note:', e);
+                }
+              }
+            },
+            auto_select: false,
+          });
+
+          // Trigger Google One Tap Native PromptSheet on device
+          googleId.prompt();
+
+          // Also attempt rendering standard Google button if container exists
+          const btnElem = document.getElementById('gsi-button-container');
+          if (btnElem) {
+            googleId.renderButton(btnElem, {
+              theme: 'filled_blue',
+              size: 'large',
+              width: 280,
+              text: 'signin_with',
+            });
+          }
+        }
+      } catch (e) {
+        console.log('Google Identity Services notice:', e);
       }
     }
   }, [isOpen]);
@@ -117,6 +159,9 @@ export const GoogleAccountChooserModal: React.FC<GoogleAccountChooserModalProps>
               </p>
             </div>
           </div>
+
+          {/* Native Google Identity Services Button Slot */}
+          <div id="gsi-button-container" className="flex justify-center my-2 empty:hidden"></div>
 
           {showCustomForm ? (
             /* Custom Account Input Form */
