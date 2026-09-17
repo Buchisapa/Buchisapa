@@ -75,7 +75,11 @@ export const GoogleAccountChooserModal: React.FC<GoogleAccountChooserModalProps>
           });
 
           if (window.self === window.top) {
-            googleId.prompt();
+            googleId.prompt((notification: any) => {
+              if (notification.isNotDisplayed && notification.isNotDisplayed()) {
+                console.log('GSI Prompt not displayed:', notification.getNotDisplayedReason());
+              }
+            });
           }
 
           const btnElem = document.getElementById('gsi-button-container');
