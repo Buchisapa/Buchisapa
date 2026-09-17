@@ -19,16 +19,27 @@ export const GoogleAccountChooserModal: React.FC<GoogleAccountChooserModalProps>
   const [customName, setCustomName] = useState('');
   const [customEmail, setCustomEmail] = useState('');
 
+  // Default account to ensure the user always has a 1-click Google account available
+  const DEFAULT_GOOGLE_ACCOUNT: GoogleAccount = {
+    id: 'g-0',
+    name: 'Jean Loa',
+    givenName: 'Jean',
+    familyName: 'Loa',
+    email: 'loalopez286@gmail.com',
+    avatarBgColor: 'bg-red-600 text-white',
+    initial: 'J',
+  };
+
   // Load saved accounts on THIS specific device when modal opens
   useEffect(() => {
     if (isOpen) {
+      setShowCustomForm(false);
       const saved = getDeviceSavedAccounts();
-      setDeviceAccounts(saved);
-      // If no accounts exist on this device yet, show form by default
-      if (saved.length === 0) {
-        setShowCustomForm(true);
+      const existingEmails = new Set(saved.map((a) => a.email.toLowerCase()));
+      if (!existingEmails.has(DEFAULT_GOOGLE_ACCOUNT.email.toLowerCase())) {
+        setDeviceAccounts([DEFAULT_GOOGLE_ACCOUNT, ...saved]);
       } else {
-        setShowCustomForm(false);
+        setDeviceAccounts(saved);
       }
     }
   }, [isOpen]);
@@ -107,7 +118,7 @@ export const GoogleAccountChooserModal: React.FC<GoogleAccountChooserModalProps>
             </div>
           </div>
 
-          {showCustomForm || deviceAccounts.length === 0 ? (
+          {showCustomForm ? (
             /* Custom Account Input Form */
             <form onSubmit={handleCustomSubmit} className="space-y-3.5 pt-2">
               {deviceAccounts.length > 0 && (
