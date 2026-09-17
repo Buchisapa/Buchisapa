@@ -14,7 +14,7 @@ export const GoogleAccountChooserModal: React.FC<GoogleAccountChooserModalProps>
   onSelectAccountSuccess,
 }) => {
   const { loginWithGoogleAccount, loginWithCustomAccount } = useAuth();
-  const [showCustomForm, setShowCustomForm] = useState(false);
+  const [showCustomForm, setShowCustomForm] = useState(PREDEFINED_GOOGLE_ACCOUNTS.length === 0);
   const [customName, setCustomName] = useState('');
   const [customEmail, setCustomEmail] = useState('');
 
@@ -92,17 +92,19 @@ export const GoogleAccountChooserModal: React.FC<GoogleAccountChooserModalProps>
             </div>
           </div>
 
-          {showCustomForm ? (
+          {showCustomForm || PREDEFINED_GOOGLE_ACCOUNTS.length === 0 ? (
             /* Custom Account Input Form */
             <form onSubmit={handleCustomSubmit} className="space-y-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setShowCustomForm(false)}
-                className="inline-flex items-center gap-1.5 text-xs text-sky-400 hover:underline mb-2"
-              >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span>Volver a la lista de cuentas</span>
-              </button>
+              {PREDEFINED_GOOGLE_ACCOUNTS.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setShowCustomForm(false)}
+                  className="inline-flex items-center gap-1.5 text-xs text-sky-400 hover:underline mb-2 cursor-pointer"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Volver a la lista de cuentas</span>
+                </button>
+              )}
 
               <div>
                 <label className="block text-xs font-medium text-neutral-300 mb-1">
