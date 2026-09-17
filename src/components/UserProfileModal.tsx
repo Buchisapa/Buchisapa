@@ -12,8 +12,25 @@ import {
   Plus,
   Trash2,
   CheckCircle2,
+  Crosshair,
+  Search,
+  Star,
+  Maximize2,
+  Loader2,
+  Radio,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { AddressSearchPicker, AddressData } from './AddressSearchPicker';
+
+const ScooterIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="6" cy="17" r="2.5" />
+    <circle cx="18" cy="17" r="2.5" />
+    <path d="M8.5 17h6.5l2-6H19" />
+    <path d="M14 11h3" />
+    <path d="M9 17V8a1.5 1.5 0 0 1 1.5-1.5H12" />
+  </svg>
+);
 
 interface UserProfileModalProps {
   isOpen: boolean;
@@ -37,9 +54,29 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   // Local states for subviews
   const [addressTab, setAddressTab] = useState<'favoritas' | 'todas'>('favoritas');
   const [showAddAddressForm, setShowAddAddressForm] = useState(false);
-  const [newAddress, setNewAddress] = useState('');
-  const [newRef, setNewRef] = useState('');
-  const [userAddresses, setUserAddresses] = useState<Array<{ id: string; address: string; ref: string }>>([]);
+  
+  // Form fields for address creation matching Screenshots 2, 3, 4, 5
+  const [addrSearch, setAddrSearch] = useState('');
+  const [addrStreetNumber, setAddrStreetNumber] = useState('0');
+  const [addrInteriorDpto, setAddrInteriorDpto] = useState('');
+  const [addrReference, setAddrReference] = useState('');
+  const [addrTag, setAddrTag] = useState('');
+  const [addrPhone, setAddrPhone] = useState(user?.phone || '');
+  const [mapExpanded, setMapExpanded] = useState(false);
+  const [isLocatingGps, setIsLocatingGps] = useState(false);
+  const [liveGpsCoords, setLiveGpsCoords] = useState<{ lat: number; lng: number } | null>(null);
+
+  // Address list state
+  const [userAddresses, setUserAddresses] = useState<Array<{
+    id: string;
+    address: string;
+    streetNumber: string;
+    interiorDpto?: string;
+    reference: string;
+    tag: string;
+    phone: string;
+    isFavorite: boolean;
+  }>>([]);
 
   // Edit form state
   const [editDocType, setEditDocType] = useState<'DNI' | 'CE' | 'Pasaporte'>(
@@ -75,22 +112,86 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
     }, 1200);
   };
 
-  const handleAddAddress = (e: React.FormEvent) => {
+  const handleConfirmAddress = (e: React.FormEvent) => {
     e.preventDefault();
-    if (newAddress.trim()) {
-      setUserAddresses([
-        ...userAddresses,
-        { id: `addr-${Date.now()}`, address: newAddress, ref: newRef },
-      ]);
-      setNewAddress('');
-      setNewRef('');
-      setShowAddAddressForm(false);
+    const finalAddress = addrSearch.trim() || 'Ate, Lima, Perú';
+    const newAddr = {
+      id: `addr-${Date.now()}`,
+      address: finalAddress,
+      streetNumber: addrStreetNumber || '0',
+      interiorDpto: addrInteriorDpto,
+      reference: addrReference,
+      tag: addrTag || 'Mi casa',
+      phone: addrPhone || user?.phone || '',
+      isFavorite: addressTab === 'favoritas',
+    };
+    setUserAddresses([newAddr, ...userAddresses]);
+    setShowAddAddressForm(false);
+    // Reset form
+    setAddrSearch('');
+    setAddrStreetNumber('0');
+    setAddrInteriorDpto('');
+    setAddrReference('');
+    setAddrTag('');
+  };
+
+  const handleUseCurrentLocation = () => {
+    setIsLocatingGps(true);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          setLiveGpsCoords({ lat: latitude, lng: longitude });
+
+          try {
+            const res = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`
+            );
+            if (res.ok) {
+              const data = await res.json();
+              const road = data.address?.road || data.address?.pedestrian || '';
+              const houseNum = data.address?.house_number || '0';
+              const suburb = data.address?.suburb || data.address?.neighbourhood || 'Ate';
+              const city = data.address?.city || 'Lima';
+
+              if (road) {
+                setAddrSearch(`${road}, ${suburb}, ${city}`);
+              } else {
+                setAddrSearch(`${suburb}, ${city}`);
+              }
+
+              if (houseNum && houseNum !== '0') setAddrStreetNumber(houseNum);
+              setAddrReference(`Ubicación GPS real-time (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`);
+            } else {
+              setAddrSearch(`Ate, Lima, Perú`);
+              setAddrReference(`GPS: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+            }
+          } catch {
+            setAddrSearch(`Ate, Lima, Perú`);
+            setAddrReference(`GPS: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+          } finally {
+            setIsLocatingGps(false);
+          }
+        },
+        () => {
+          setIsLocatingGps(false);
+          setAddrSearch('Ate, Lima, Perú');
+          setAddrReference('Ubicación detectada');
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    } else {
+      setIsLocatingGps(false);
+      setAddrSearch('Ate, Lima, Perú');
     }
   };
 
   const handleBackToProfile = () => {
-    setProfileActiveTab('profile');
-    setShowAddAddressForm(false);
+    if (showAddAddressForm) {
+      setShowAddAddressForm(false);
+    } else {
+      setProfileActiveTab('profile');
+    }
   };
 
   const initialLetter = (user.givenName || user.name || 'U').charAt(0).toUpperCase();
@@ -311,145 +412,181 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
             </div>
           )}
 
-          {/* TAB: MIS DIRECCIONES matching Screenshot 8 */}
+          {/* TAB: MIS DIRECCIONES matching Screenshots 1, 2, 3, 4, 5, 6 */}
           {profileActiveTab === 'direcciones' && (
-            <div className="space-y-5 animate-in fade-in duration-200">
-              <h1 className="text-2xl font-black text-neutral-900 font-heading tracking-tight uppercase">
-                MIS DIRECCIONES
-              </h1>
+            <div className="space-y-4 animate-in fade-in duration-200">
+              {!showAddAddressForm ? (
+                <>
+                  <h1 className="text-2xl font-black text-neutral-900 font-heading tracking-tight uppercase">
+                    MIS DIRECCIONES
+                  </h1>
 
-              {/* Tabs: FAVORITAS | TODAS MIS DIRECCIONES */}
-              <div className="flex gap-2 p-1 bg-neutral-100 rounded-xl">
-                <button
-                  type="button"
-                  onClick={() => setAddressTab('favoritas')}
-                  className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                    addressTab === 'favoritas'
-                      ? 'bg-red-600 text-white shadow-xs'
-                      : 'text-neutral-600 hover:text-neutral-900'
-                  }`}
-                >
-                  FAVORITAS
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setAddressTab('todas')}
-                  className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                    addressTab === 'todas'
-                      ? 'bg-red-600 text-white shadow-xs'
-                      : 'text-neutral-600 hover:text-neutral-900'
-                  }`}
-                >
-                  TODAS MIS DIRECCIONES
-                </button>
-              </div>
-
-              {userAddresses.length > 0 ? (
-                <div className="space-y-3 pt-2">
-                  {userAddresses.map((addr) => (
-                    <div
-                      key={addr.id}
-                      className="p-3.5 border border-neutral-200 rounded-xl flex items-center justify-between"
+                  {/* Tabs: FAVORITAS | TODAS MIS DIRECCIONES */}
+                  <div className="flex gap-2 p-1 bg-neutral-100/90 rounded-2xl">
+                    <button
+                      type="button"
+                      onClick={() => setAddressTab('favoritas')}
+                      className={`flex-1 py-3 text-xs font-extrabold rounded-xl transition-all cursor-pointer ${
+                        addressTab === 'favoritas'
+                          ? 'bg-[#e30613] text-white shadow-xs'
+                          : 'text-neutral-700 hover:text-neutral-900 bg-transparent'
+                      }`}
                     >
-                      <div className="flex items-center gap-3">
-                        <MapPin className="w-5 h-5 text-red-600 shrink-0" />
-                        <div>
-                          <div className="text-xs font-bold text-neutral-900">
-                            {addr.address}
-                          </div>
-                          {addr.ref && (
-                            <div className="text-[11px] text-neutral-500">
-                              Ref: {addr.ref}
+                      FAVORITAS
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAddressTab('todas')}
+                      className={`flex-1 py-3 text-xs font-extrabold rounded-xl transition-all cursor-pointer ${
+                        addressTab === 'todas'
+                          ? 'bg-[#e30613] text-white shadow-xs'
+                          : 'text-neutral-700 hover:text-neutral-900 bg-transparent'
+                      }`}
+                    >
+                      TODAS MIS DIRECCIONES
+                    </button>
+                  </div>
+
+                  {/* List or Empty State */}
+                  {userAddresses.length > 0 ? (
+                    <div className="space-y-3 pt-2">
+                      {userAddresses
+                        .filter((a) => (addressTab === 'favoritas' ? a.isFavorite : true))
+                        .map((addr) => (
+                          <div
+                            key={addr.id}
+                            className="p-4 border border-neutral-200 rounded-2xl flex items-start justify-between bg-white shadow-xs hover:border-neutral-300 transition-colors"
+                          >
+                            <div className="flex items-start gap-3">
+                              <MapPin className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+                              <div className="space-y-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs font-black text-neutral-900 uppercase">
+                                    {addr.tag || 'Mi Casa'}
+                                  </span>
+                                  {addr.isFavorite && (
+                                    <span className="bg-amber-100 text-amber-800 text-[10px] font-extrabold px-1.5 py-0.5 rounded-full">
+                                      Favorito
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="text-xs font-medium text-neutral-700 leading-snug">
+                                  {addr.address}
+                                </div>
+                                {addr.reference && (
+                                  <div className="text-[11px] text-neutral-500">
+                                    Ref: {addr.reference}
+                                  </div>
+                                )}
+                                {addr.phone && (
+                                  <div className="text-[11px] text-neutral-400">
+                                    Tel: {addr.phone}
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                          )}
+                            <div className="flex items-center gap-1">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setUserAddresses(
+                                    userAddresses.map((a) =>
+                                      a.id === addr.id ? { ...a, isFavorite: !a.isFavorite } : a
+                                    )
+                                  )
+                                }
+                                className="p-1.5 text-neutral-400 hover:text-amber-500 transition-colors cursor-pointer"
+                                title="Marcar como favorita"
+                              >
+                                <Star
+                                  className={`w-4 h-4 ${
+                                    addr.isFavorite ? 'fill-amber-400 text-amber-400' : ''
+                                  }`}
+                                />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setUserAddresses(userAddresses.filter((a) => a.id !== addr.id))
+                                }
+                                className="p-1.5 text-neutral-400 hover:text-red-600 transition-colors cursor-pointer"
+                                title="Eliminar"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      {userAddresses.filter((a) => (addressTab === 'favoritas' ? a.isFavorite : true)).length === 0 && (
+                        <div className="py-6 text-center space-y-2">
+                          <p className="text-xs font-medium text-neutral-600">
+                            {addressTab === 'favoritas'
+                              ? 'Aun no cuentas con direcciones guardadas cómo favoritas'
+                              : 'Aun no has utilizado ninguna dirección'}
+                          </p>
+                          <p className="text-xs font-bold text-neutral-900">
+                            Realiza una compra y guarda tus direcciones para futuras compras
+                          </p>
                         </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setUserAddresses(userAddresses.filter((a) => a.id !== addr.id))
-                        }
-                        className="text-neutral-400 hover:text-red-600 p-1"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      )}
                     </div>
-                  ))}
-                </div>
+                  ) : (
+                    <div className="py-8 text-center space-y-2">
+                      <p className="text-xs font-medium text-neutral-600">
+                        {addressTab === 'favoritas'
+                          ? 'Aun no cuentas con direcciones guardadas cómo favoritas'
+                          : 'Aun no has utilizado ninguna dirección'}
+                      </p>
+                      <p className="text-xs font-bold text-neutral-900">
+                        Realiza una compra y guarda tus direcciones para futuras compras
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Action Buttons matching Screenshots 1 & 6 */}
+                  <div className="space-y-3 pt-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClose();
+                        if (onOpenPromotions) onOpenPromotions();
+                      }}
+                      className="w-full py-3.5 bg-[#e30613] hover:bg-red-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-colors shadow-sm cursor-pointer"
+                    >
+                      VER PROMOCIONES
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowAddAddressForm(true)}
+                      className="w-full py-3.5 bg-[#001D3D] hover:bg-[#002855] text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-sm"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Agregar dirección</span>
+                    </button>
+                  </div>
+                </>
               ) : (
-                <div className="py-6 text-center space-y-3">
-                  <p className="text-xs font-medium text-neutral-700">
-                    Aun no cuentas con direcciones guardadas cómo favoritas
-                  </p>
-                  <p className="text-xs font-bold text-neutral-900">
-                    Realiza una compra y guarda tus direcciones para futuras compras
-                  </p>
-                </div>
-              )}
-
-              {/* Action Buttons matching Screenshot 8 */}
-              <div className="space-y-2.5 pt-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    onClose();
-                    if (onOpenPromotions) onOpenPromotions();
+                /* ADD ADDRESS FORM VIEW matching Screenshots 1, 2, 3, 4, 5, 6, 7 */
+                <AddressSearchPicker
+                  onClose={() => setShowAddAddressForm(false)}
+                  defaultPhone={user?.phone || ''}
+                  onConfirmAddress={(data: AddressData) => {
+                    const newAddr = {
+                      id: `addr-${Date.now()}`,
+                      address: data.address,
+                      streetNumber: data.streetNumber || '0',
+                      interiorDpto: data.interiorDpto,
+                      reference: data.reference,
+                      tag: data.tag || 'Mi Casa',
+                      phone: data.phone,
+                      isFavorite: addressTab === 'favoritas',
+                    };
+                    setUserAddresses([newAddr, ...userAddresses]);
+                    setShowAddAddressForm(false);
                   }}
-                  className="w-full py-3.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-colors shadow-sm cursor-pointer"
-                >
-                  VER PROMOCIONES
-                </button>
-
-                {!showAddAddressForm ? (
-                  <button
-                    type="button"
-                    onClick={() => setShowAddAddressForm(true)}
-                    className="w-full py-3.5 bg-[#001D3D] hover:bg-[#002855] text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span>Agregar dirección</span>
-                  </button>
-                ) : (
-                  <form onSubmit={handleAddAddress} className="p-4 bg-neutral-50 rounded-2xl border border-neutral-200 space-y-3 animate-in fade-in">
-                    <div>
-                      <label className="text-xs font-bold block mb-1">Dirección exacta</label>
-                      <input
-                        type="text"
-                        required
-                        value={newAddress}
-                        onChange={(e) => setNewAddress(e.target.value)}
-                        placeholder="Ej. Av. Javier Prado 1234, San Isidro"
-                        className="w-full px-3 py-2 text-xs border border-neutral-200 rounded-lg bg-white"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs font-bold block mb-1">Referencia</label>
-                      <input
-                        type="text"
-                        value={newRef}
-                        onChange={(e) => setNewRef(e.target.value)}
-                        placeholder="Ej. Dpto 302, frente al parque"
-                        className="w-full px-3 py-2 text-xs border border-neutral-200 rounded-lg bg-white"
-                      />
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        type="submit"
-                        className="flex-1 py-2 bg-red-600 text-white font-bold text-xs rounded-lg"
-                      >
-                        Guardar
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setShowAddAddressForm(false)}
-                        className="px-3 py-2 bg-neutral-200 text-neutral-700 font-bold text-xs rounded-lg"
-                      >
-                        Cancelar
-                      </button>
-                    </div>
-                  </form>
-                )}
-              </div>
+                />
+              )}
             </div>
           )}
 

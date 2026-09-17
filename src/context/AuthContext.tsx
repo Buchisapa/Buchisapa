@@ -26,12 +26,21 @@ export interface GoogleAccount {
 
 export const PREDEFINED_GOOGLE_ACCOUNTS: GoogleAccount[] = [
   {
+    id: 'g-0',
+    name: 'Jean Loa',
+    givenName: 'Jean',
+    familyName: 'Loa',
+    email: 'loalopez286@gmail.com',
+    avatarBgColor: 'bg-red-600 text-white',
+    initial: 'J',
+  },
+  {
     id: 'g-1',
     name: 'NexAltusTec SAC',
     givenName: 'NexAltusTec',
     familyName: 'SAC',
     email: 'nexaltustecsac@gmail.com',
-    avatarBgColor: 'bg-blue-900 text-white',
+    avatarBgColor: 'bg-[#2563eb] text-white',
     initial: 'M',
   },
   {
@@ -40,7 +49,7 @@ export const PREDEFINED_GOOGLE_ACCOUNTS: GoogleAccount[] = [
     givenName: 'Jean',
     familyName: 'Loa',
     email: 'jeanloa831@gmail.com',
-    avatarBgColor: 'bg-orange-600 text-white',
+    avatarBgColor: 'bg-[#ea580c] text-white',
     initial: 'J',
   },
   {
@@ -49,7 +58,7 @@ export const PREDEFINED_GOOGLE_ACCOUNTS: GoogleAccount[] = [
     givenName: 'Jean Loa',
     familyName: 'Lopez',
     email: 'loalopezjean@gmail.com',
-    avatarBgColor: 'bg-teal-600 text-white',
+    avatarBgColor: 'bg-[#0d9488] text-white',
     initial: 'J',
   },
   {
@@ -58,7 +67,7 @@ export const PREDEFINED_GOOGLE_ACCOUNTS: GoogleAccount[] = [
     givenName: 'Jean',
     familyName: 'Luis',
     email: 'josesitoloa6310@gmail.com',
-    avatarBgColor: 'bg-sky-600 text-white',
+    avatarBgColor: 'bg-[#0284c7] text-white',
     initial: 'J',
   },
   {
@@ -67,7 +76,7 @@ export const PREDEFINED_GOOGLE_ACCOUNTS: GoogleAccount[] = [
     givenName: 'Luis',
     familyName: 'Loa',
     email: 'luisloa055@gmail.com',
-    avatarBgColor: 'bg-purple-600 text-white',
+    avatarBgColor: 'bg-[#9333ea] text-white',
     initial: 'L',
   },
   {
@@ -76,7 +85,7 @@ export const PREDEFINED_GOOGLE_ACCOUNTS: GoogleAccount[] = [
     givenName: 'Jean',
     familyName: 'Loa',
     email: 'jeanloa837@gmail.com',
-    avatarBgColor: 'bg-emerald-600 text-white',
+    avatarBgColor: 'bg-[#059669] text-white',
     initial: 'J',
   },
   {
@@ -85,7 +94,7 @@ export const PREDEFINED_GOOGLE_ACCOUNTS: GoogleAccount[] = [
     givenName: 'Restaurante',
     familyName: 'Juanekos',
     email: 'juanekos2026@gmail.com',
-    avatarBgColor: 'bg-blue-600 text-white',
+    avatarBgColor: 'bg-[#2563eb] text-white',
     initial: 'R',
   },
   {
@@ -94,7 +103,7 @@ export const PREDEFINED_GOOGLE_ACCOUNTS: GoogleAccount[] = [
     givenName: 'Jean',
     familyName: 'Loa',
     email: 'jeanloa0510@gmail.com',
-    avatarBgColor: 'bg-amber-600 text-white',
+    avatarBgColor: 'bg-[#d97706] text-white',
     initial: 'J',
   },
   {
@@ -103,7 +112,7 @@ export const PREDEFINED_GOOGLE_ACCOUNTS: GoogleAccount[] = [
     givenName: 'Jean',
     familyName: 'Loa',
     email: 'netflixloa05@gmail.com',
-    avatarBgColor: 'bg-indigo-600 text-white',
+    avatarBgColor: 'bg-[#4f46e5] text-white',
     initial: 'J',
   },
   {
@@ -112,7 +121,7 @@ export const PREDEFINED_GOOGLE_ACCOUNTS: GoogleAccount[] = [
     givenName: 'Pana',
     familyName: 'Burger',
     email: 'panaburger31@gmail.com',
-    avatarBgColor: 'bg-yellow-700 text-white',
+    avatarBgColor: 'bg-[#a16207] text-white',
     initial: 'P',
   },
 ];

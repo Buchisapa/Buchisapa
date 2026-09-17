@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { X, MapPin, Check, Navigation, Building2, Store } from 'lucide-react';
+import { X, MapPin, Check, Navigation, Building2, Store, Crosshair, Loader2, Compass, Radio } from 'lucide-react';
+import { AddressSearchPicker, AddressData } from './AddressSearchPicker';
 
 interface LocationModalProps {
   isOpen: boolean;
@@ -25,8 +26,84 @@ export const LocationModal: React.FC<LocationModalProps> = ({
 }) => {
   const [selectedType, setSelectedType] = useState<'delivery' | 'pickup'>('delivery');
   const [customAddress, setCustomAddress] = useState('');
+  const [isLocating, setIsLocating] = useState(false);
+  const [gpsError, setGpsError] = useState<string | null>(null);
+  const [detectedGpsInfo, setDetectedGpsInfo] = useState<{
+    lat: number;
+    lng: number;
+    address: string;
+    accuracy?: number;
+  } | null>(null);
 
   if (!isOpen) return null;
+
+  const handleUseRealTimeGPS = async () => {
+    setIsLocating(true);
+    setGpsError(null);
+
+    if (!navigator.geolocation) {
+      setGpsError('Tu navegador no soporta geolocalización en tiempo real.');
+      setIsLocating(false);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude, accuracy } = position.coords;
+        let formattedAddr = `Ubicación GPS (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`;
+
+        try {
+          // Attempt reverse geocoding via Nominatim API
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`
+          );
+          if (response.ok) {
+            const data = await response.json();
+            const road = data.address?.road || data.address?.pedestrian || data.address?.suburb || '';
+            const suburb = data.address?.suburb || data.address?.neighbourhood || data.address?.district || 'Ate';
+            const city = data.address?.city || data.address?.town || 'Lima';
+
+            if (road) {
+              formattedAddr = `${road}, ${suburb}, ${city}`;
+            } else if (suburb) {
+              formattedAddr = `${suburb}, ${city}`;
+            } else if (data.display_name) {
+              formattedAddr = data.display_name.split(',').slice(0, 3).join(',');
+            }
+          }
+        } catch {
+          // Fallback location formatting
+          formattedAddr = `Ate, Lima (GPS: ${latitude.toFixed(3)}, ${longitude.toFixed(3)})`;
+        }
+
+        const info = {
+          lat: latitude,
+          lng: longitude,
+          address: formattedAddr,
+          accuracy: Math.round(accuracy),
+        };
+
+        setDetectedGpsInfo(info);
+        setIsLocating(false);
+        onSelectZone(formattedAddr);
+      },
+      (error) => {
+        setIsLocating(false);
+        if (error.code === error.PERMISSION_DENIED) {
+          setGpsError('Permiso de GPS denegado. Puedes escribir tu dirección abajo.');
+        } else if (error.code === error.POSITION_UNAVAILABLE) {
+          setGpsError('La señal GPS no está disponible en este momento.');
+        } else {
+          setGpsError('Tiempo de espera agotado obteniendo GPS.');
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
+    );
+  };
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-neutral-950/70 backdrop-blur-sm flex items-center justify-center p-4">
@@ -42,7 +119,7 @@ export const LocationModal: React.FC<LocationModalProps> = ({
                 ¿Dónde deseas recibir tu pedido?
               </h3>
               <p className="text-xs text-neutral-500">
-                Servicio continuo las 24 horas del día
+                Ubicación en tiempo real y servicio las 24 horas
               </p>
             </div>
           </div>
@@ -60,7 +137,7 @@ export const LocationModal: React.FC<LocationModalProps> = ({
             onClick={() => setSelectedType('delivery')}
             className={`flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
               selectedType === 'delivery'
-                ? 'bg-red-600 text-white shadow-sm'
+                ? 'bg-[#e30613] text-white shadow-sm'
                 : 'bg-white text-neutral-600 hover:text-neutral-900 border border-neutral-200'
             }`}
           >
@@ -71,7 +148,7 @@ export const LocationModal: React.FC<LocationModalProps> = ({
             onClick={() => setSelectedType('pickup')}
             className={`flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
               selectedType === 'pickup'
-                ? 'bg-red-600 text-white shadow-sm'
+                ? 'bg-[#e30613] text-white shadow-sm'
                 : 'bg-white text-neutral-600 hover:text-neutral-900 border border-neutral-200'
             }`}
           >
@@ -81,76 +158,15 @@ export const LocationModal: React.FC<LocationModalProps> = ({
         </div>
 
         {/* Body content */}
-        <div className="p-5 space-y-3 max-h-[60vh] overflow-y-auto">
+        <div className="p-5 max-h-[75vh] overflow-y-auto">
           {selectedType === 'delivery' ? (
-            <>
-              <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">
-                Selecciona tu zona en Ate y alrededores:
-              </p>
-              <div className="space-y-2">
-                {ZONES.filter((z) => z.id !== 'recojo').map((zone) => {
-                  const isSelected = currentZone.includes(zone.name.split(' - ')[1] || zone.name);
-                  return (
-                    <button
-                      key={zone.id}
-                      onClick={() => {
-                        onSelectZone(zone.name);
-                        onClose();
-                      }}
-                      className={`w-full text-left p-3.5 rounded-xl border transition-all flex items-start justify-between cursor-pointer ${
-                        isSelected
-                          ? 'border-red-600 bg-red-50/50'
-                          : 'border-neutral-200 hover:border-red-300 hover:bg-neutral-50'
-                      }`}
-                    >
-                      <div className="flex items-start gap-3">
-                        <Building2 className={`w-4 h-4 mt-0.5 ${isSelected ? 'text-red-600' : 'text-neutral-400'}`} />
-                        <div>
-                          <p className="text-sm font-bold text-neutral-900">{zone.name}</p>
-                          <p className="text-xs text-neutral-500">{zone.desc}</p>
-                          <span className="inline-block mt-1 text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">
-                            Tiempo est.: {zone.time}
-                          </span>
-                        </div>
-                      </div>
-                      {isSelected && (
-                        <div className="w-5 h-5 rounded-full bg-red-600 text-white flex items-center justify-center shrink-0">
-                          <Check className="w-3 h-3" />
-                        </div>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Optional Custom street input */}
-              <div className="pt-2">
-                <label className="text-xs font-semibold text-neutral-600 block mb-1">
-                  O ingresa tu dirección exacta / referencia:
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={customAddress}
-                    onChange={(e) => setCustomAddress(e.target.value)}
-                    placeholder="Ej: Av. Nicolás Ayllón 1420, Ate"
-                    className="flex-1 text-xs border border-neutral-200 rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-red-600"
-                  />
-                  <button
-                    onClick={() => {
-                      if (customAddress.trim()) {
-                        onSelectZone(customAddress);
-                        onClose();
-                      }
-                    }}
-                    disabled={!customAddress.trim()}
-                    className="px-4 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer"
-                  >
-                    Guardar
-                  </button>
-                </div>
-              </div>
-            </>
+            <AddressSearchPicker
+              onClose={onClose}
+              onConfirmAddress={(data: AddressData) => {
+                onSelectZone(data.address);
+                onClose();
+              }}
+            />
           ) : (
             <div className="space-y-4 py-2">
               <div className="p-4 rounded-xl border border-neutral-200 bg-neutral-50 space-y-2">
@@ -174,7 +190,7 @@ export const LocationModal: React.FC<LocationModalProps> = ({
                   onSelectZone('Recojo en Tienda (Ate)');
                   onClose();
                 }}
-                className="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-bold text-sm rounded-xl transition-colors cursor-pointer"
+                className="w-full py-3 bg-[#e30613] hover:bg-red-700 text-white font-bold text-sm rounded-xl transition-colors cursor-pointer uppercase tracking-wider"
               >
                 Confirmar Recojo en Salón
               </button>
@@ -185,3 +201,4 @@ export const LocationModal: React.FC<LocationModalProps> = ({
     </div>
   );
 };
+
