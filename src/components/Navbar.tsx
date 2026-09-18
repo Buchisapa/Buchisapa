@@ -15,6 +15,8 @@ import {
   LayoutList,
   BookOpen,
   MessageCircle,
+  Facebook,
+  Mail,
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -523,15 +525,44 @@ export const Navbar: React.FC<NavbarProps> = ({
                 href={`https://wa.me/${RESTAURANT_INFO.phoneRaw}?text=${encodeURIComponent('¡Hola Buchisapa! Deseo hacer un pedido.')}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full py-3.5 bg-[#25D366]/10 hover:bg-[#25D366]/20 text-[#128C7E] rounded-lg text-[15px] font-bold flex items-center justify-center gap-2 border border-[#25D366]/30 transition-colors"
+                className="w-full py-3 bg-[#25D366]/10 hover:bg-[#25D366]/20 text-[#128C7E] rounded-lg text-[14px] font-bold flex items-center justify-center gap-2 border border-[#25D366]/30 transition-colors"
               >
-                <MessageCircle className="w-5 h-5" />
+                <MessageCircle className="w-4 h-4" />
                 <span>Contactar por WhatsApp</span>
               </a>
 
-              <div className="text-center mt-2">
-                <span className="text-base text-neutral-700 font-bold tracking-wide uppercase">SABOR QUE TE </span>
-                <span className="text-base text-black font-black tracking-wide uppercase">LLENA</span>
+              {/* Social Channels (Facebook, TikTok, Email) */}
+              <div className="grid grid-cols-3 gap-2">
+                <a
+                  href={RESTAURANT_INFO.facebookUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="py-2.5 px-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-bold flex flex-col items-center justify-center gap-1 border border-blue-200 transition-colors text-center"
+                >
+                  <Facebook className="w-4 h-4 text-blue-600 fill-blue-600" />
+                  <span className="text-[10px]">Facebook</span>
+                </a>
+                <a
+                  href={RESTAURANT_INFO.tiktokUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="py-2.5 px-2 bg-neutral-900 hover:bg-black text-white rounded-lg text-xs font-bold flex flex-col items-center justify-center gap-1 transition-colors text-center"
+                >
+                  <span className="text-xs font-black">♪</span>
+                  <span className="text-[10px]">TikTok</span>
+                </a>
+                <a
+                  href={`mailto:${RESTAURANT_INFO.email}`}
+                  className="py-2.5 px-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded-lg text-xs font-bold flex flex-col items-center justify-center gap-1 border border-neutral-200 transition-colors text-center"
+                >
+                  <Mail className="w-4 h-4 text-neutral-700" />
+                  <span className="text-[10px]">Email</span>
+                </a>
+              </div>
+
+              <div className="text-center mt-1">
+                <span className="text-sm text-neutral-700 font-bold tracking-wide uppercase">SABOR QUE TE </span>
+                <span className="text-sm text-black font-black tracking-wide uppercase">LLENA</span>
               </div>
             </div>
           </div>

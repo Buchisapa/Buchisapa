@@ -52,7 +52,8 @@ const FOOTER_SECTIONS: AccordionSection[] = [
     id: 'contactanos',
     title: 'CONTÁCTANOS',
     items: [
-      { label: 'Escríbenos', href: `https://wa.me/${RESTAURANT_INFO.phoneRaw}` },
+      { label: 'Escríbenos al WhatsApp', href: `https://wa.me/${RESTAURANT_INFO.phoneRaw}` },
+      { label: 'Correo: buchisapaweb@gmail.com', href: `mailto:${RESTAURANT_INFO.email}` },
       { label: 'Trabaja con nosotros', href: `https://wa.me/${RESTAURANT_INFO.phoneRaw}?text=${encodeURIComponent('Deseo postular a Buchisapa')}` },
       { label: 'Portal de proveedores', href: '#' },
     ],
@@ -206,43 +207,37 @@ export const Footer: React.FC = () => {
 
           {/* Divider Line */}
           <div className="pt-6 border-t border-neutral-800/80 flex flex-col sm:flex-row items-center justify-between gap-4">
-            {/* Social Icons (Screenshot 4: white minimal icons f, X, insta, tiktok) */}
+            {/* Social Icons (Facebook, TikTok, Instagram, Email) */}
             <div className="flex items-center gap-4 text-white">
               <a
-                href="https://facebook.com"
+                href={RESTAURANT_INFO.facebookUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-white hover:text-red-500 transition-colors"
-                aria-label="Facebook"
+                className="text-white hover:text-red-500 transition-colors p-1"
+                aria-label="Facebook Buchisapa"
+                title="Facebook Buchisapa"
               >
                 <Facebook className="w-5 h-5 fill-white text-white" />
               </a>
               <a
-                href="https://x.com"
+                href={RESTAURANT_INFO.tiktokUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-white hover:text-red-500 transition-colors font-black text-sm"
-                aria-label="X"
+                className="text-white hover:text-red-500 transition-colors flex items-center justify-center font-black p-1 text-base leading-none"
+                aria-label="TikTok Buchisapa"
+                title="TikTok @buchisapa.web"
               >
-                𝕏
+                <span className="text-base font-black">♪</span>
               </a>
               <a
-                href="https://instagram.com"
+                href={RESTAURANT_INFO.instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-white hover:text-red-500 transition-colors"
-                aria-label="Instagram"
+                className="text-white hover:text-red-500 transition-colors p-1"
+                aria-label="Instagram Buchisapa"
+                title="Instagram Buchisapa"
               >
                 <Instagram className="w-5 h-5" />
-              </a>
-              <a
-                href="https://tiktok.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white hover:text-red-500 transition-colors text-base font-black"
-                aria-label="TikTok"
-              >
-                <span>♪</span>
               </a>
             </div>
 
