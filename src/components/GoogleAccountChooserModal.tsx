@@ -22,9 +22,7 @@ export const GoogleAccountChooserModal: React.FC<GoogleAccountChooserModalProps>
   // Load saved accounts on THIS specific device when modal opens
   useEffect(() => {
     if (isOpen) {
-      const saved = getDeviceSavedAccounts().filter(
-        (acc) => acc.email.toLowerCase() !== 'loalopez286@gmail.com'
-      );
+      const saved = getDeviceSavedAccounts();
       setDeviceAccounts(saved);
       if (saved.length === 0) {
         setShowCustomForm(true);
