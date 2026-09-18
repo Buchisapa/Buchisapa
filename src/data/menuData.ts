@@ -101,12 +101,17 @@ export const CATEGORIES: Category[] = [
 ];
 
 export const SAUCES_LIST = [
-  "Mayonesa Casera",
-  "Tártara Especial",
-  "Ají de Pollería",
-  "Kétchup",
+  "Acevichada",
+  "BBQ",
+  "Aceituna",
+  "Ají de Rocoto",
+  "Salsa Golf",
+  "Ocopa",
+  "Mayonesa",
+  "Vinagreta",
+  "Tártara",
   "Mostaza",
-  "Ají Charapita"
+  "Ketchup"
 ];
 
 export const MENU_ITEMS: MenuItem[] = [

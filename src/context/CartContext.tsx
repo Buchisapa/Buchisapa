@@ -88,7 +88,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     item: MenuItem,
     quantity: number = 1,
     selectedOption?: string,
-    selectedSauces: string[] = ["Mayonesa Casera", "Tártara Especial", "Ají de Cocona con Charapita"],
+    selectedSauces: string[] = ["Mayonesa", "Tártara", "Ají de Rocoto"],
     notes?: string
   ) => {
     setCart(prevCart => {

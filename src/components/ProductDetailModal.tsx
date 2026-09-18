@@ -21,9 +21,9 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ item, on
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const [selectedChoices, setSelectedChoices] = useState<Record<string, string>>({});
   const [selectedSauces, setSelectedSauces] = useState<string[]>([
-    'Mayonesa Casera',
-    'Tártara Especial',
-    'Ají de Pollería',
+    'Mayonesa',
+    'Tártara',
+    'Ají de Rocoto',
   ]);
   const [notes, setNotes] = useState('');
   const [showAllergens, setShowAllergens] = useState(false);
@@ -146,7 +146,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ item, on
 
       setSelectedChoices(defaults);
       setOpenSections(initialOpen);
-      setSelectedSauces(['Mayonesa Casera', 'Tártara Especial', 'Ají de Pollería']);
+      setSelectedSauces(['Mayonesa', 'Tártara', 'Ají de Rocoto']);
     }
   }, [item, sections]);
 
