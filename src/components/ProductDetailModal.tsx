@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Minus, Check, ShoppingBag, Flame, Sparkles } from 'lucide-react';
+import { X, Plus, Minus, ChevronDown, ChevronUp, Check, Info, ShieldAlert } from 'lucide-react';
 import { MenuItem, SAUCES_LIST } from '../data/menuData';
 import { useCart } from '../context/CartContext';
 
@@ -8,45 +8,179 @@ interface ProductDetailModalProps {
   onClose: () => void;
 }
 
+interface CustomOptionSection {
+  id: string;
+  title: string;
+  required: boolean;
+  choices: string[];
+}
+
 export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ item, onClose }) => {
   const { addToCart } = useCart();
   const [quantity, setQuantity] = useState(1);
-  const [selectedOption, setSelectedOption] = useState<string>('');
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
+  const [selectedChoices, setSelectedChoices] = useState<Record<string, string>>({});
   const [selectedSauces, setSelectedSauces] = useState<string[]>([
-    "Mayonesa Casera",
-    "Tártara Especial",
-    "Ají de Cocona con Charapita"
+    'Mayonesa Casera',
+    'Tártara Especial',
+    'Ají de Pollería',
   ]);
   const [notes, setNotes] = useState('');
+  const [showAllergens, setShowAllergens] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
+
+  // Derive customized option sections based on the selected item's category/name
+  const sections: CustomOptionSection[] = React.useMemo(() => {
+    if (!item) return [];
+
+    const list: CustomOptionSection[] = [];
+
+    // 1. Primary choice (Sánguche / Presa / Término / Preparación)
+    if (item.category === 'hamburguesas') {
+      list.push({
+        id: 'sanguche',
+        title: 'Sánguche / Pan',
+        required: true,
+        choices: [
+          'Pan Brioche Brasa',
+          'Pan Clásico Tostado',
+          'Pan Integral de Granos',
+        ],
+      });
+    } else if (item.category === 'broaster') {
+      list.push({
+        id: 'presa',
+        title: 'Presa Broaster',
+        required: true,
+        choices: [
+          'Pecho Broaster Crocante',
+          'Pierna Broaster Crocante',
+          'Encuentro Broaster Jugoso',
+        ],
+      });
+    } else if (item.category === 'amazonicos') {
+      list.push({
+        id: 'guarnicion_selva',
+        title: 'Preparación / Estilo',
+        required: true,
+        choices: [
+          'Tacacho Tradicional con Cecina',
+          'Plátano Bellaco Frito con Cecina',
+          'Yuca Frita Amazónica',
+        ],
+      });
+    } else if (item.category === 'alitas') {
+      list.push({
+        id: 'salsa_alitas',
+        title: 'Sabor de Baño',
+        required: true,
+        choices: [
+          'Salsa BBQ Ahumada Artesanal',
+          'Salsa Acevichada Especial',
+          'Alitas Crocantes Naturales',
+        ],
+      });
+    } else if (item.options && item.options.length > 0) {
+      list.push({
+        id: 'opcion_principal',
+        title: item.options[0].name,
+        required: true,
+        choices: item.options[0].choices,
+      });
+    }
+
+    // 2. Complemento / Guarnición
+    if (item.category !== 'bebidas' && item.category !== 'refrescos') {
+      list.push({
+        id: 'complemento',
+        title: 'Complemento',
+        required: true,
+        choices: [
+          'Papas Fritas (1 Ají y 1 Mayonesa)',
+          'Papas Doradas Nativas',
+          'Ensalada Fresca de la Casa',
+          'Yuca Frita Crocante',
+        ],
+      });
+    }
+
+    // 3. Bebida
+    list.push({
+      id: 'bebida',
+      title: 'Bebida',
+      required: true,
+      choices: [
+        'Chicha Buchisapa Personal (500ml)',
+        'Refresco Natural de Cocona (500ml)',
+        'Botella Inca Kola Personal',
+        'Botella Inca Kola sin azúcar Personal',
+        'Botella Coca Cola Personal',
+        'Botella Coca Cola sin azúcar Personal',
+        'Refresco Natural de Maracuyá (500ml)',
+        'Sin bebida adicional',
+      ],
+    });
+
+    return list;
+  }, [item]);
 
   useEffect(() => {
     if (item) {
       setQuantity(1);
       setNotes('');
       setIsAdded(false);
-      if (item.options && item.options.length > 0) {
-        setSelectedOption(item.options[0].choices[0]);
-      } else {
-        setSelectedOption('');
-      }
-      // Default sauces
-      setSelectedSauces(["Mayonesa Casera", "Tártara Especial", "Ají de Cocona con Charapita"]);
+      setShowAllergens(false);
+
+      // Default selections for each section
+      const defaults: Record<string, string> = {};
+      const initialOpen: Record<string, boolean> = {};
+
+      sections.forEach((sec, idx) => {
+        defaults[sec.id] = sec.choices[0];
+        // Open the last required section or first section by default like in Pardos
+        if (sec.id === 'bebida' || idx === 0) {
+          initialOpen[sec.id] = true;
+        } else {
+          initialOpen[sec.id] = false;
+        }
+      });
+
+      setSelectedChoices(defaults);
+      setOpenSections(initialOpen);
+      setSelectedSauces(['Mayonesa Casera', 'Tártara Especial', 'Ají de Pollería']);
     }
-  }, [item]);
+  }, [item, sections]);
 
   if (!item) return null;
 
+  const toggleSection = (sectionId: string) => {
+    setOpenSections((prev) => ({
+      ...prev,
+      [sectionId]: !prev[sectionId],
+    }));
+  };
+
+  const handleSelectChoice = (sectionId: string, choice: string) => {
+    setSelectedChoices((prev) => ({
+      ...prev,
+      [sectionId]: choice,
+    }));
+  };
+
   const toggleSauce = (sauce: string) => {
     if (selectedSauces.includes(sauce)) {
-      setSelectedSauces(selectedSauces.filter(s => s !== sauce));
+      setSelectedSauces(selectedSauces.filter((s) => s !== sauce));
     } else {
       setSelectedSauces([...selectedSauces, sauce]);
     }
   };
 
   const handleAddToCart = () => {
-    addToCart(item, quantity, selectedOption, selectedSauces, notes);
+    const combinedOption = Object.entries(selectedChoices)
+      .map(([k, v]) => `${k}: ${v}`)
+      .join(' | ');
+
+    addToCart(item, quantity, combinedOption, selectedSauces, notes);
     setIsAdded(true);
     setTimeout(() => {
       onClose();
@@ -56,184 +190,292 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ item, on
   const totalPrice = (item.price * quantity).toFixed(2);
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-neutral-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 md:p-6">
-      <div className="relative bg-neutral-900 border border-neutral-800 rounded-3xl max-w-lg md:max-w-3xl lg:max-w-4xl w-full overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 flex flex-col md:flex-row max-h-[92vh]">
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute top-3.5 right-3.5 z-20 p-2 rounded-full bg-neutral-950/80 text-neutral-300 hover:text-white hover:bg-neutral-800 transition-colors shadow-md cursor-pointer"
-          aria-label="Cerrar modal"
-        >
-          <X className="w-5 h-5" />
-        </button>
-
-        {/* Item Header / Media Banner (Left side on tablet/desktop) */}
-        <div className="relative h-48 sm:h-56 md:h-auto md:w-5/12 lg:w-5/12 bg-neutral-950 shrink-0 overflow-hidden flex flex-col justify-between">
-          <img
-            src={item.image}
-            alt={item.name}
-            className="w-full h-full object-cover min-h-[190px] md:min-h-full"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-transparent to-neutral-950/40 md:bg-gradient-to-r md:from-transparent md:to-neutral-900/60" />
-
-          {/* Badges */}
-          <div className="absolute top-3.5 left-3.5 flex flex-wrap gap-1.5 z-10">
-            {item.badge && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-500 text-neutral-950 font-black text-[11px] uppercase tracking-wider shadow-lg">
-                <Sparkles className="w-3 h-3" />
-                <span>{item.badge}</span>
-              </span>
-            )}
-            {item.popular && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-rose-600 text-white font-black text-[11px] uppercase tracking-wider shadow-lg">
-                <Flame className="w-3 h-3" />
-                <span>Popular</span>
-              </span>
-            )}
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4">
+      <div className="relative bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[92vh] border border-neutral-100">
+        {/* Sticky Header with Close Button */}
+        <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-md px-4 py-3 border-b border-neutral-100 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h2 className="text-base sm:text-lg font-bold text-neutral-900 line-clamp-1">
+              {item.name}
+            </h2>
           </div>
-
-          {/* Subtle reassurance footer on desktop/tablet */}
-          <div className="hidden md:block absolute bottom-4 left-4 right-4 bg-neutral-950/85 backdrop-blur-sm p-3 rounded-xl border border-neutral-800 text-[11px] text-neutral-300">
-            <span className="font-bold text-amber-400 block mb-0.5">Sabor 100% Buchisapa</span>
-            <span>Preparado caliente al momento con porciones generosas.</span>
-          </div>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-full bg-neutral-100 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200 transition-colors cursor-pointer"
+            aria-label="Cerrar modal"
+          >
+            <X className="w-5 h-5 stroke-[2.5]" />
+          </button>
         </div>
 
-        {/* Right side: Modal Body & Footer */}
-        <div className="flex-1 flex flex-col justify-between overflow-hidden bg-neutral-900">
-          <div className="p-5 sm:p-6 space-y-4 sm:space-y-5 overflow-y-auto max-h-[60vh] md:max-h-[68vh]">
+        {/* Scrollable Content Body */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
+          {/* Top Product Summary */}
+          <div className="flex gap-3 items-center pb-3 border-b border-neutral-100">
+            <img
+              src={item.image}
+              alt={item.name}
+              className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover shrink-0 bg-neutral-100 border border-neutral-100 shadow-xs"
+            />
             <div>
-              <div className="flex items-baseline justify-between gap-2 pr-8 md:pr-10">
-                <h3 className="text-xl sm:text-2xl font-black text-white font-heading">
-                  {item.name}
-                </h3>
-                <span className="text-xl sm:text-2xl font-black text-amber-400 whitespace-nowrap">
-                  S/ {item.price.toFixed(2)}
-                </span>
-              </div>
-              <p className="text-xs sm:text-sm text-neutral-300 mt-2 leading-relaxed">
+              <h3 className="text-base sm:text-lg font-bold text-neutral-900 leading-tight">
+                {item.name}
+              </h3>
+              <p className="text-xs text-neutral-500 line-clamp-2 mt-1 leading-snug">
                 {item.description}
               </p>
+              <span className="text-base sm:text-lg font-bold text-neutral-900 block mt-1">
+                S/{item.price.toFixed(2)}
+              </span>
             </div>
+          </div>
 
-            {/* Includes badge list */}
-            {item.includes && item.includes.length > 0 && (
-              <div className="bg-neutral-950/70 p-3 sm:p-3.5 rounded-xl border border-neutral-800/80">
-                <p className="text-[11px] sm:text-xs font-bold text-neutral-400 uppercase tracking-wider mb-2">
-                  ¿Qué incluye este plato?
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs text-neutral-200">
-                  {item.includes.map((inc, i) => (
-                    <div key={i} className="flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0"></span>
-                      <span>{inc}</span>
+          {/* Prompt Instruction (Exact match to screenshot) */}
+          <div className="pt-1">
+            <h4 className="text-sm sm:text-base font-bold text-neutral-900 leading-snug">
+              Por favor, elige todas las opciones necesarias para avanzar con tu pedido.
+            </h4>
+          </div>
+
+          {/* Accordion Customization Sections */}
+          <div className="space-y-2.5">
+            {sections.map((sec) => {
+              const isOpen = !!openSections[sec.id];
+              const selectedValue = selectedChoices[sec.id];
+
+              return (
+                <div
+                  key={sec.id}
+                  className="bg-white rounded-2xl border border-neutral-200/90 shadow-xs overflow-hidden transition-all"
+                >
+                  {/* Accordion Header */}
+                  <button
+                    type="button"
+                    onClick={() => toggleSection(sec.id)}
+                    className="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-neutral-50/80 transition-colors cursor-pointer"
+                  >
+                    <div className="flex items-center flex-wrap gap-1.5 pr-2">
+                      <span className="font-bold text-sm sm:text-base text-neutral-900">
+                        {sec.title}:
+                      </span>
+                      {isOpen ? (
+                        <span className="bg-neutral-400 text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded">
+                          {sec.required ? 'Obligatorio' : 'Opcional'}
+                        </span>
+                      ) : (
+                        selectedValue && (
+                          <span className="text-emerald-700 font-semibold text-xs sm:text-sm">
+                            ({selectedValue})
+                          </span>
+                        )
+                      )}
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
 
-            {/* Custom Options if any */}
-            {item.options && item.options.length > 0 && (
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-amber-400 uppercase tracking-wider">
-                  {item.options[0].name} (Elige 1)
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {item.options[0].choices.map((choice) => (
-                    <button
-                      key={choice}
-                      type="button"
-                      onClick={() => setSelectedOption(choice)}
-                      className={`py-2 px-3 text-xs font-semibold rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer ${
-                        selectedOption === choice
-                          ? 'bg-amber-500/20 border-amber-500 text-amber-300'
-                          : 'bg-neutral-950 border-neutral-800 text-neutral-400 hover:text-neutral-200'
-                      }`}
-                    >
-                      <span>{choice}</span>
-                      {selectedOption === choice && <Check className="w-3.5 h-3.5 text-amber-400" />}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+                    <div className="shrink-0 text-neutral-800">
+                      {isOpen ? (
+                        <ChevronUp className="w-5 h-5 stroke-[2.5]" />
+                      ) : (
+                        <ChevronDown className="w-5 h-5 stroke-[2.5]" />
+                      )}
+                    </div>
+                  </button>
 
-            {/* Cremas / Salsas */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-bold text-neutral-300 uppercase tracking-wider">
-                  Salsas y Cremas Buchisapa
-                </label>
-                <span className="text-[11px] text-neutral-500">Selecciona tus favoritas</span>
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {SAUCES_LIST.map((sauce) => {
-                  const checked = selectedSauces.includes(sauce);
-                  return (
-                    <button
-                      key={sauce}
-                      type="button"
-                      onClick={() => toggleSauce(sauce)}
-                      className={`text-xs px-2.5 py-1.5 rounded-lg border transition-all flex items-center gap-1.5 cursor-pointer ${
-                        checked
-                          ? 'bg-amber-500/15 border-amber-500/50 text-amber-300 font-medium'
-                          : 'bg-neutral-950 border-neutral-800 text-neutral-400 hover:text-neutral-200'
-                      }`}
-                    >
-                      <span className={`w-2 h-2 rounded-full ${checked ? 'bg-amber-400' : 'bg-neutral-700'}`} />
-                      <span>{sauce}</span>
-                    </button>
-                  );
-                })}
-              </div>
+                  {/* Accordion Choices List */}
+                  {isOpen && (
+                    <div className="px-4 pb-4 pt-1 space-y-2.5 border-t border-neutral-100 bg-neutral-50/40">
+                      {sec.choices.map((choice) => {
+                        const isSelected = selectedValue === choice;
+                        return (
+                          <label
+                            key={choice}
+                            onClick={() => handleSelectChoice(sec.id, choice)}
+                            className="flex items-center gap-3 py-1.5 cursor-pointer group"
+                          >
+                            {/* Custom Radio Circle */}
+                            <div
+                              className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all shrink-0 ${
+                                isSelected
+                                  ? 'border-neutral-900 bg-white'
+                                  : 'border-neutral-300 group-hover:border-neutral-400 bg-white'
+                              }`}
+                            >
+                              {isSelected && (
+                                <div className="w-2.5 h-2.5 rounded-full bg-neutral-900" />
+                              )}
+                            </div>
+                            <span
+                              className={`text-xs sm:text-sm leading-tight select-none ${
+                                isSelected
+                                  ? 'text-neutral-900 font-medium'
+                                  : 'text-neutral-700 font-normal'
+                              }`}
+                            >
+                              {choice}
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
+            {/* Salsas y Cremas Section */}
+            <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-xs overflow-hidden">
+              <button
+                type="button"
+                onClick={() =>
+                  setOpenSections((p) => ({ ...p, salsas: !p.salsas }))
+                }
+                className="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-neutral-50/80 transition-colors cursor-pointer"
+              >
+                <div className="flex items-center flex-wrap gap-1.5 pr-2">
+                  <span className="font-bold text-sm sm:text-base text-neutral-900">
+                    Salsas y Cremas:
+                  </span>
+                  {!openSections.salsas ? (
+                    <span className="text-emerald-700 font-semibold text-xs sm:text-sm">
+                      ({selectedSauces.length} seleccionadas)
+                    </span>
+                  ) : (
+                    <span className="bg-neutral-300 text-neutral-700 text-[10px] font-bold uppercase px-2 py-0.5 rounded">
+                      Opcional
+                    </span>
+                  )}
+                </div>
+                <div className="shrink-0 text-neutral-800">
+                  {openSections.salsas ? (
+                    <ChevronUp className="w-5 h-5 stroke-[2.5]" />
+                  ) : (
+                    <ChevronDown className="w-5 h-5 stroke-[2.5]" />
+                  )}
+                </div>
+              </button>
+
+              {openSections.salsas && (
+                <div className="px-4 pb-4 pt-1 border-t border-neutral-100 bg-neutral-50/40">
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    {SAUCES_LIST.map((sauce) => {
+                      const isChecked = selectedSauces.includes(sauce);
+                      return (
+                        <button
+                          key={sauce}
+                          type="button"
+                          onClick={() => toggleSauce(sauce)}
+                          className={`text-left px-2.5 py-2 rounded-xl border text-xs font-medium transition-all flex items-center justify-between cursor-pointer ${
+                            isChecked
+                              ? 'bg-red-50 border-[#E6192B] text-neutral-900'
+                              : 'bg-white border-neutral-200 text-neutral-600 hover:border-neutral-300'
+                          }`}
+                        >
+                          <span className="line-clamp-1">{sauce}</span>
+                          {isChecked && (
+                            <Check className="w-3.5 h-3.5 text-[#E6192B] shrink-0" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Custom Notes */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-neutral-400 uppercase tracking-wider">
+            {/* Special Instructions Note Input */}
+            <div className="pt-1">
+              <label className="text-xs font-bold text-neutral-700 block mb-1">
                 Indicaciones especiales para la cocina
               </label>
               <input
                 type="text"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Ej: Sin cebolla, papas bien doradas, ají extra..."
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-amber-500"
+                placeholder="Ej: Sin ensalada, papas bien doradas..."
+                className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-3.5 py-2.5 text-xs text-neutral-900 placeholder-neutral-400 focus:bg-white focus:outline-none focus:border-neutral-400 transition-all"
               />
             </div>
           </div>
 
-          {/* Footer actions: Quantity + Add to Cart */}
-          <div className="p-4 bg-neutral-950 border-t border-neutral-800 flex items-center justify-between gap-3 sm:gap-4">
-            {/* Quantity selector */}
-            <div className="flex items-center bg-neutral-900 border border-neutral-800 rounded-xl p-1">
+          {/* Allergen Notice (Exact to Screenshot) */}
+          <div className="pt-2 pb-1 text-xs text-neutral-600">
+            <p>
+              Si tienes alguna alergia por favor revisa nuestra{' '}
+              <button
+                type="button"
+                onClick={() => setShowAllergens(!showAllergens)}
+                className="text-[#E6192B] font-semibold underline cursor-pointer hover:text-red-700"
+              >
+                Carta de Alérgenos
+              </button>
+            </p>
+
+            {showAllergens && (
+              <div className="mt-2.5 p-3 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-900 text-xs space-y-1 animate-in fade-in duration-150">
+                <div className="flex items-center gap-1.5 font-bold text-amber-950">
+                  <ShieldAlert className="w-4 h-4 text-amber-600" />
+                  <span>Información de Alérgenos Buchisapa:</span>
+                </div>
+                <p className="text-[11px] leading-relaxed">
+                  Nuestros productos pueden contener o entrar en contacto con
+                  gluten (trigo), huevos (mayonesas), lácteos (queso), soya y
+                  ajonjolí. Si tienes requerimientos especiales, indícalo en las
+                  notas.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Sticky Bottom Action Bar with Pill Button (Exact Pardos Style) */}
+        <div className="sticky bottom-0 z-30 bg-white px-4 py-3 border-t border-neutral-100 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+          <div className="flex items-center gap-3">
+            {/* Quantity Controls */}
+            <div className="flex items-center bg-neutral-100 rounded-2xl p-1 shrink-0">
               <button
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
                 disabled={quantity <= 1}
-                className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-400 hover:text-white disabled:opacity-40 transition-colors cursor-pointer"
+                className="p-1.5 rounded-xl hover:bg-neutral-200 text-neutral-700 disabled:opacity-30 transition-colors cursor-pointer"
+                aria-label="Disminuir cantidad"
               >
-                <Minus className="w-4 h-4" />
+                <Minus className="w-4 h-4 stroke-[2.5]" />
               </button>
-              <span className="w-8 text-center text-sm font-bold text-white">
+              <span className="w-7 text-center text-xs font-bold text-neutral-900">
                 {quantity}
               </span>
               <button
                 onClick={() => setQuantity(quantity + 1)}
-                className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                className="p-1.5 rounded-xl hover:bg-neutral-200 text-neutral-700 transition-colors cursor-pointer"
+                aria-label="Aumentar cantidad"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-4 h-4 stroke-[2.5]" />
               </button>
             </div>
 
-            {/* Add to Cart button */}
+            {/* Floating Red Pill Button */}
             <button
               id="modal-add-to-cart-btn"
+              type="button"
               onClick={handleAddToCart}
-              className="flex-1 py-3 px-4 sm:px-5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-neutral-950 font-black text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 active:scale-98 transition-all cursor-pointer whitespace-nowrap"
+              className={`flex-1 py-3 px-4 rounded-2xl font-bold text-sm flex items-center justify-between shadow-md active:scale-98 transition-all cursor-pointer ${
+                isAdded
+                  ? 'bg-emerald-600 text-white'
+                  : 'bg-[#E6192B] hover:bg-[#c91222] text-white'
+              }`}
             >
-              <ShoppingBag className="w-4 h-4 text-neutral-950" />
-              <span>Agregar • S/ {totalPrice}</span>
+              {/* Quantity indicator circle */}
+              <span className="w-6 h-6 rounded-full bg-white/20 text-white flex items-center justify-center text-xs font-bold shrink-0">
+                {quantity}
+              </span>
+
+              {/* Text */}
+              <span className="text-center font-bold px-2">
+                {isAdded ? '¡Agregado al pedido!' : 'Agregar a mi pedido'}
+              </span>
+
+              {/* Total Price */}
+              <span className="text-xs sm:text-sm font-black whitespace-nowrap">
+                S/ {totalPrice}
+              </span>
             </button>
           </div>
         </div>
@@ -241,3 +483,4 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ item, on
     </div>
   );
 };
+

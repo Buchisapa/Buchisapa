@@ -74,27 +74,32 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onPideAqui }) => {
       <div id="mobile-hero-carousel" className="md:hidden">
         {/* Banner container with relative positioning and navigation arrows */}
         <div className="relative w-full bg-[#f4f3ef] overflow-hidden border-b border-neutral-200">
-          {/* SLIDE 0: Jorge Salinas Campaign Banner (Screenshot_20260916-121646_Chrome.png) */}
+          {/* SLIDE 0: Especialidad Pollo Broaster Buchisapa */}
           {currentSlide === 0 && (
-            <div className="relative w-full min-h-[510px] p-4 flex flex-col justify-between animate-in fade-in duration-300">
-              {/* Background Designer Photo positioned on right */}
-              <div className="absolute right-0 top-6 bottom-12 w-1/2 pointer-events-none overflow-hidden flex items-end justify-end">
+            <div className="relative w-full min-h-[490px] p-5 flex flex-col justify-between animate-in fade-in duration-300 bg-gradient-to-br from-amber-50 via-white to-orange-50/50">
+              {/* Background Broaster Photo on the right with soft blend */}
+              <div className="absolute right-0 top-0 bottom-10 w-3/5 pointer-events-none overflow-hidden flex items-center justify-end">
                 <img
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"
-                  alt="Jorge Salinas Diseñador"
-                  className="w-full h-full object-cover object-top filter contrast-105"
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', maskImage: 'linear-gradient(to left, black 65%, transparent 100%)' }}
+                  src="https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?auto=format&fit=crop&w=1000&q=80"
+                  alt="Pollo Broaster Crocante Buchisapa"
+                  className="w-full h-full object-cover object-center filter contrast-110"
+                  style={{
+                    maskImage:
+                      'linear-gradient(to left, black 70%, transparent 100%)',
+                    WebkitMaskImage:
+                      'linear-gradient(to left, black 70%, transparent 100%)',
+                  }}
                 />
               </div>
 
-              {/* Top Collaboration Header */}
-              <div className="relative z-10 flex items-center justify-center gap-2 pt-1 pb-2">
-                <span className="text-[13px] font-black tracking-[0.2em] text-neutral-900 uppercase font-heading">
-                  J. SALINAS
-                </span>
-                <span className="text-neutral-500 font-serif italic text-xs">x</span>
-                <span className="text-sm font-black italic tracking-wide text-red-600 font-heading">
-                  Buchisapa
+              {/* Top Branding Header */}
+              <div className="relative z-10 flex items-center justify-between pt-1 pb-1">
+                <div className="flex items-center gap-1.5 bg-red-600 text-white px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider shadow-xs">
+                  <Sparkles className="w-3 h-3 text-amber-300 fill-amber-300" />
+                  <span>Especialidad de la Casa</span>
+                </div>
+                <span className="text-xs font-black italic tracking-wide text-red-600 font-heading">
+                  BUCHISAPA
                 </span>
               </div>
 
@@ -102,79 +107,77 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ onPideAqui }) => {
               <div className="relative z-10 max-w-[62%] space-y-2.5 pt-1">
                 {/* Big Bold Headline */}
                 <div>
-                  <h1 className="text-2xl font-black tracking-tight text-neutral-950 uppercase leading-none font-heading">
-                    DISEÑADO POR
+                  <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-neutral-950 uppercase leading-none font-heading">
+                    POLLO BROASTER
                   </h1>
-                  <h2 className="text-2xl font-black tracking-tight text-red-600 uppercase leading-none font-heading mt-0.5">
-                    JORGE SALINAS
+                  <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-red-600 uppercase leading-none font-heading mt-0.5">
+                    ULTRA CROCANTE
                   </h2>
                 </div>
 
                 {/* Subtext description */}
-                <p className="text-[10px] leading-tight text-neutral-700 font-medium pr-1">
-                  Diseñador de modas peruano reconocido a nivel nacional e internacional, con más de 25 años de trayectoria y una visión que une moda, arte y propósito.
+                <p className="text-[11px] leading-tight text-neutral-700 font-medium pr-1">
+                  Empanizado artesanal dorado a la perfección, jugoso por dentro con papas crocantes y nuestras mejores cremas caseras.
                 </p>
 
-                {/* 100% Ganancias Box */}
-                <div className="bg-white/90 backdrop-blur-xs p-2 rounded-xl border border-red-200/80 shadow-xs">
-                  <p className="text-[10px] font-black text-red-600 uppercase leading-none">
-                    EL 100% DE LAS GANANCIAS
+                {/* Combo Promo Highlight Box */}
+                <div className="bg-white/95 backdrop-blur-xs p-2.5 rounded-2xl border border-amber-200/90 shadow-xs space-y-0.5">
+                  <p className="text-[10px] font-black text-red-600 uppercase leading-none flex items-center gap-1">
+                    <Award className="w-3 h-3 text-amber-500 shrink-0" />
+                    <span>RECETA SECRETA BUCHISAPA</span>
                   </p>
-                  <p className="text-[9px] text-neutral-700 font-medium leading-tight mt-0.5">
-                    serán donadas a la fundación que ayuda a niños con cáncer.{' '}
-                    <span className="font-serif italic font-black text-indigo-700 text-[11px]">Magia</span>
+                  <p className="text-[10px] text-neutral-700 font-bold leading-tight">
+                    Pecho, Pierna, Encuentro y Alitas desde <span className="text-red-600 font-black">S/ 12.00</span>
                   </p>
                 </div>
 
                 {/* Red CTA Button */}
                 <button
-                  onClick={() => onPideAqui('promociones')}
-                  className="w-full bg-red-600 hover:bg-red-700 active:scale-95 text-white font-black text-[10px] uppercase tracking-wider py-2 px-2.5 rounded-md flex items-center justify-center gap-1.5 shadow-md transition-all cursor-pointer"
+                  onClick={() => onPideAqui('broaster')}
+                  className="w-full bg-[#E6192B] hover:bg-[#c91222] active:scale-95 text-white font-black text-[11px] uppercase tracking-wider py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 shadow-md transition-all cursor-pointer"
                 >
                   <ShoppingBag className="w-3.5 h-3.5 text-white shrink-0" />
-                  <span className="truncate">COMPRA TU POLO Y HAZ EL BIEN</span>
+                  <span>PIDE TU BROASTER AQUÍ</span>
                 </button>
 
                 {/* 3 Circle Badge Features */}
-                <div className="grid grid-cols-3 gap-1 pt-1 text-center">
+                <div className="grid grid-cols-3 gap-1.5 pt-1 text-center">
                   <div className="flex flex-col items-center">
-                    <div className="w-7 h-7 rounded-full border border-neutral-400 bg-white flex items-center justify-center text-neutral-800 mb-1">
-                      <Scissors className="w-3.5 h-3.5 stroke-[1.8]" />
+                    <div className="w-8 h-8 rounded-full border border-amber-300 bg-amber-50/80 flex items-center justify-center text-amber-900 mb-1 shadow-2xs">
+                      <Sparkles className="w-3.5 h-3.5 stroke-[2] text-amber-600" />
                     </div>
-                    <span className="text-[7.5px] font-black leading-tight text-neutral-800 uppercase tracking-tighter">
-                      DISEÑO PERUANO CON IDENTIDAD
+                    <span className="text-[8px] font-black leading-tight text-neutral-800 uppercase tracking-tighter">
+                      100% POLLO FRESCO
                     </span>
                   </div>
 
                   <div className="flex flex-col items-center">
-                    <div className="w-7 h-7 rounded-full border border-neutral-400 bg-white flex items-center justify-center text-neutral-800 mb-1">
-                      <Award className="w-3.5 h-3.5 stroke-[1.8]" />
+                    <div className="w-8 h-8 rounded-full border border-amber-300 bg-amber-50/80 flex items-center justify-center text-amber-900 mb-1 shadow-2xs">
+                      <Award className="w-3.5 h-3.5 stroke-[2] text-amber-600" />
                     </div>
-                    <span className="text-[7.5px] font-black leading-tight text-neutral-800 uppercase tracking-tighter">
-                      25 AÑOS DE TRAYECTORIA
+                    <span className="text-[8px] font-black leading-tight text-neutral-800 uppercase tracking-tighter">
+                      EMPANIZADO CRUJIENTE
                     </span>
                   </div>
 
                   <div className="flex flex-col items-center">
-                    <div className="w-7 h-7 rounded-full border border-neutral-400 bg-white flex items-center justify-center text-neutral-800 mb-1">
-                      <Heart className="w-3.5 h-3.5 stroke-[1.8]" />
+                    <div className="w-8 h-8 rounded-full border border-amber-300 bg-amber-50/80 flex items-center justify-center text-amber-900 mb-1 shadow-2xs">
+                      <Heart className="w-3.5 h-3.5 stroke-[2] text-amber-600" />
                     </div>
-                    <span className="text-[7.5px] font-black leading-tight text-neutral-800 uppercase tracking-tighter">
-                      MODA CON PROPÓSITO
+                    <span className="text-[8px] font-black leading-tight text-neutral-800 uppercase tracking-tighter">
+                      CREMAS CASERAS
                     </span>
                   </div>
                 </div>
               </div>
 
-              {/* Bottom Strip: "Una prenda, un propósito." */}
-              <div className="relative z-10 mt-3 -mx-4 -mb-4 bg-black text-white px-4 py-2.5 flex items-center justify-between">
+              {/* Bottom Strip: "Sabor, crocancia y pasión en cada presa." */}
+              <div className="relative z-10 mt-3 -mx-5 -mb-5 bg-neutral-950 text-white px-4 py-2.5 flex items-center justify-between">
                 <span className="font-serif italic text-xs sm:text-sm text-neutral-200">
-                  Una prenda, un propósito.
+                  Crocante por fuera, jugoso por dentro.
                 </span>
-                <div className="flex items-center gap-2 bg-white/90 px-2 py-0.5 rounded text-neutral-900 text-[9px] font-bold">
-                  <span className="font-black text-[9px]">J. SALINAS</span>
-                  <span className="text-red-600 font-black">| BUCHISAPA |</span>
-                  <span className="text-indigo-800 font-serif italic font-bold">Magia</span>
+                <div className="flex items-center gap-1.5 bg-red-600 px-2.5 py-0.5 rounded-md text-white text-[9px] font-bold uppercase tracking-wider">
+                  <span>BUCHISAPA BROASTER</span>
                 </div>
               </div>
             </div>
