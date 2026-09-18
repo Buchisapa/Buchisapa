@@ -102,7 +102,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             title="Ir al inicio"
           >
             <img
-              src="/buchisapa_oficial_hd.png"
+              src="/images/logo/logo-buchisapa.png"
               alt="Buchisapa Logo"
               width={40}
               height={40}
@@ -354,7 +354,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <div className="flex items-center gap-3">
                   <div className="h-12 w-12 flex items-center justify-center bg-transparent">
                     <img
-                      src="/buchisapa_oficial_hd.png"
+                      src="/images/logo/logo-buchisapa.png"
                       alt="Buchisapa Burger Logo"
                       className="h-full w-full object-contain"
                     />

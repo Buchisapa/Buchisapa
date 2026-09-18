@@ -118,7 +118,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onOpenKit
           {mode !== 'register' && mode !== 'success' && (
             <div className="mb-2 text-center">
               <img
-                src="/buchisapa_oficial_hd.png"
+                src="/images/logo/logo-buchisapa.png"
                 alt="Logo Restaurante Buchisapa"
                 className="w-28 h-28 sm:w-32 sm:h-32 mx-auto object-contain drop-shadow-xs"
               />

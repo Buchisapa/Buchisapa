@@ -155,7 +155,7 @@ export const GoogleAccountChooserModal: React.FC<GoogleAccountChooserModalProps>
           <div className="space-y-3 text-left">
             <div className="w-12 h-12 rounded-xl bg-[#0066FF] flex items-center justify-center shadow-md">
               <img
-                src="/buchisapa_oficial_hd.png"
+                src="/images/logo/logo-buchisapa.png"
                 alt="Buchisapa Logo"
                 className="w-9 h-9 object-contain"
               />
