@@ -40,16 +40,6 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ item, on
   const hasAccompaniments = !!item?.includes && item.includes.length > 0;
 
   useEffect(() => {
-    // Lock background body scroll to prevent duplicate page scrollbars
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-
-    return () => {
-      document.body.style.overflow = prevOverflow;
-    };
-  }, []);
-
-  useEffect(() => {
     if (item) {
       setQuantity(1);
       setNotes('');
