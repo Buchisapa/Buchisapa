@@ -15,7 +15,7 @@ import { LocationModal } from './components/LocationModal';
 import { AuthModal } from './components/AuthModal';
 import { GoogleAccountChooserModal } from './components/GoogleAccountChooserModal';
 import { UserProfileModal } from './components/UserProfileModal';
-import { AdminPanelModal } from './components/AdminPanelModal';
+import { AdminPanelModal } from './components/admin';
 import { MenuItem, RESTAURANT_INFO } from './data/menuData';
 
 type ViewMode = 'categories' | 'category-detail' | 'promotions';
