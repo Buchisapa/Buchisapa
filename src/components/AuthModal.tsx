@@ -9,13 +9,15 @@ interface AuthModalProps {
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onOpenKitchen }) => {
-  const { loginWithCustomAccount, setIsGoogleChooserOpen } = useAuth();
+  const { loginWithCustomAccount, setIsGoogleChooserOpen, signInWithSupabaseEmail, signUpWithSupabaseEmail, isSupabaseActive } = useAuth();
   const [mode, setMode] = useState<'login' | 'register' | 'forgot' | 'success'>('login');
   
   // Login State
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   // Register State matching screenshots
   const [docType, setDocType] = useState<'DNI' | 'CE' | 'Pasaporte'>('DNI');
@@ -37,30 +39,73 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onOpenKit
 
   if (!isOpen) return null;
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) {
-      loginWithCustomAccount(email.split('@')[0], email);
+    setAuthError(null);
+    if (!email) return;
+
+    if (isSupabaseActive && password) {
+      setLoading(true);
+      const res = await signInWithSupabaseEmail(email, password);
+      setLoading(false);
+      if (!res.success) {
+        setAuthError(res.error || 'Error al iniciar sesión con Supabase');
+        return;
+      }
       setSuccessMessage(`¡Bienvenido de nuevo!`);
       setMode('success');
       setTimeout(() => {
         onClose();
         setMode('login');
       }, 1500);
+      return;
     }
+
+    // Default fast login
+    loginWithCustomAccount(email.split('@')[0], email);
+    setSuccessMessage(`¡Bienvenido de nuevo!`);
+    setMode('success');
+    setTimeout(() => {
+      onClose();
+      setMode('login');
+    }, 1500);
   };
 
-  const handleRegisterSubmit = (e: React.FormEvent) => {
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (acceptTerms && regEmail && nombres) {
-      loginWithCustomAccount(`${nombres} ${apellidos}`, regEmail);
-      setSuccessMessage(`¡Cuenta creada con éxito, ${nombres}!`);
+    setAuthError(null);
+    if (!acceptTerms || !regEmail || !nombres) return;
+
+    if (regPassword !== repeatPassword) {
+      setAuthError('Las contraseñas no coinciden');
+      return;
+    }
+
+    if (isSupabaseActive && regPassword) {
+      setLoading(true);
+      const fullName = `${nombres.trim()} ${apellidos.trim()}`;
+      const res = await signUpWithSupabaseEmail(regEmail, regPassword, fullName);
+      setLoading(false);
+      if (!res.success) {
+        setAuthError(res.error || 'Error al registrar la cuenta en Supabase');
+        return;
+      }
+      setSuccessMessage(`¡Cuenta creada con éxito en Supabase, ${nombres}!`);
       setMode('success');
       setTimeout(() => {
         onClose();
         setMode('login');
       }, 1500);
+      return;
     }
+
+    loginWithCustomAccount(`${nombres} ${apellidos}`, regEmail);
+    setSuccessMessage(`¡Cuenta creada con éxito, ${nombres}!`);
+    setMode('success');
+    setTimeout(() => {
+      onClose();
+      setMode('login');
+    }, 1500);
   };
 
   const handleForgot = (e: React.FormEvent) => {
@@ -144,6 +189,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onOpenKit
               <h2 className="text-xl sm:text-2xl font-black text-center text-neutral-900 font-heading">
                 ¡Bienvenido a Buchisapa!
               </h2>
+
+              {authError && (
+                <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-medium">
+                  {authError}
+                </div>
+              )}
 
               <form onSubmit={handleLogin} className="space-y-3.5">
                 {/* Correo Electrónico */}
@@ -290,6 +341,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onOpenKit
               <h1 className="text-2xl font-black text-neutral-900 font-heading tracking-tight">
                 Crea tu cuenta
               </h1>
+
+              {authError && (
+                <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-medium">
+                  {authError}
+                </div>
+              )}
 
               <form onSubmit={handleRegisterSubmit} className="space-y-4">
                 {/* Tipo y número de documento* */}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   ChefHat,
@@ -9,12 +9,16 @@ import {
   Plus,
   RefreshCw,
   Phone,
-  Printer,
+  Server,
+  Database,
+  Check,
   Copy,
-  Check
+  ExternalLink,
+  Code
 } from 'lucide-react';
 import { useCart, Order } from '../context/CartContext';
 import { MENU_ITEMS, RESTAURANT_INFO } from '../data/menuData';
+import { ApiService } from '../services/apiService';
 
 interface KitchenOrdersModalProps {
   isOpen: boolean;
@@ -23,8 +27,48 @@ interface KitchenOrdersModalProps {
 
 export const KitchenOrdersModal: React.FC<KitchenOrdersModalProps> = ({ isOpen, onClose }) => {
   const { orders, updateOrderStatus, createOrder } = useCart();
+  const [activeTab, setActiveTab] = useState<'orders' | 'php'>('orders');
   const [filterStatus, setFilterStatus] = useState<string>('todos');
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [copiedSql, setCopiedSql] = useState(false);
+  const [phpStatus, setPhpStatus] = useState<{ isOnline: boolean; dbConnected: boolean; message: string; checking: boolean }>({
+    isOnline: false,
+    dbConnected: false,
+    message: 'Presiona "Comprobar Conexión"',
+    checking: false
+  });
+  const [customApiUrl, setCustomApiUrl] = useState(ApiService.getEndpointUrl());
+
+  useEffect(() => {
+    if (isOpen && activeTab === 'php') {
+      checkPhpHealth();
+    }
+  }, [isOpen, activeTab]);
+
+  const checkPhpHealth = async () => {
+    setPhpStatus(prev => ({ ...prev, checking: true }));
+    const result = await ApiService.checkHealth();
+    setPhpStatus({
+      isOnline: result.isOnline,
+      dbConnected: result.dbConnected,
+      message: result.message,
+      checking: false
+    });
+  };
+
+  const handleSaveApiUrl = () => {
+    ApiService.setEndpointUrl(customApiUrl);
+    checkPhpHealth();
+  };
+
+  const copySqlToClipboard = () => {
+    const sampleSql = `-- Script MySQL para Restaurante Buchisapa
+-- Puedes descargarlo desde la carpeta /php-api/database.sql
+-- Incluye 45 platos, 7 categorías y 11 cremas oficiales.`;
+    navigator.clipboard.writeText(sampleSql);
+    setCopiedSql(true);
+    setTimeout(() => setCopiedSql(false), 2000);
+  };
 
   if (!isOpen) return null;
 
@@ -123,22 +167,50 @@ export const KitchenOrdersModal: React.FC<KitchenOrdersModalProps> = ({ isOpen, 
             </div>
             <div>
               <h3 className="text-xl font-black text-white font-heading">
-                Panel de Pedidos &amp; Cocina
+                Panel de Administración &amp; Cocina
               </h3>
               <p className="text-xs text-neutral-400">
-                Monitoreo en tiempo real de comandas para salón y delivery
+                Monitoreo de comandas en vivo y gestión de backend PHP / MySQL
               </p>
             </div>
           </div>
 
+          {/* Navigation Tabs */}
           <div className="flex items-center gap-2">
-            <button
-              onClick={handleCreateDemoOrder}
-              className="px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-xs font-bold text-amber-400 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Simular Pedido de Prueba</span>
-            </button>
+            <div className="flex bg-neutral-900 p-1 rounded-xl border border-neutral-800">
+              <button
+                onClick={() => setActiveTab('orders')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 ${
+                  activeTab === 'orders'
+                    ? 'bg-amber-500 text-neutral-950'
+                    : 'text-neutral-400 hover:text-white'
+                }`}
+              >
+                <ChefHat className="w-3.5 h-3.5" />
+                <span>Comandas ({orders.length})</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('php')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 ${
+                  activeTab === 'php'
+                    ? 'bg-amber-500 text-neutral-950'
+                    : 'text-neutral-400 hover:text-white'
+                }`}
+              >
+                <Server className="w-3.5 h-3.5" />
+                <span>Supabase &amp; BD</span>
+              </button>
+            </div>
+
+            {activeTab === 'orders' && (
+              <button
+                onClick={handleCreateDemoOrder}
+                className="px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-xs font-bold text-amber-400 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Pedido Demo</span>
+              </button>
+            )}
 
             <button
               onClick={onClose}
@@ -150,183 +222,255 @@ export const KitchenOrdersModal: React.FC<KitchenOrdersModalProps> = ({ isOpen, 
           </div>
         </div>
 
-        {/* Filter Toolbar */}
-        <div className="px-5 py-3 bg-neutral-900 border-b border-neutral-800 flex items-center gap-2 overflow-x-auto">
-          <span className="text-xs font-semibold text-neutral-400 mr-2">Filtrar:</span>
-          {['todos', 'recibido', 'preparando', 'en_camino', 'entregado'].map((status) => (
-            <button
-              key={status}
-              onClick={() => setFilterStatus(status)}
-              className={`text-xs px-3 py-1.5 rounded-lg font-bold capitalize transition-all whitespace-nowrap cursor-pointer ${
-                filterStatus === status
-                  ? 'bg-amber-500 text-neutral-950 shadow-sm'
-                  : 'bg-neutral-950 text-neutral-400 hover:text-white border border-neutral-800'
-              }`}
-            >
-              {status === 'todos' ? 'Todos' : status.replace('_', ' ')}
-            </button>
-          ))}
-          <span className="ml-auto text-xs text-neutral-500 hidden sm:inline">
-            Total órdenes registradas: {orders.length}
-          </span>
-        </div>
-
-        {/* Body (Orders Grid) */}
-        <div className="p-5 overflow-y-auto flex-1 space-y-4">
-          {filteredOrders.length === 0 ? (
-            <div className="text-center py-16 text-neutral-500 space-y-3">
-              <ChefHat className="w-12 h-12 mx-auto text-neutral-600" />
-              <p className="text-sm font-bold text-neutral-300">
-                No hay pedidos en este estado en este momento.
-              </p>
-              <p className="text-xs text-neutral-500 max-w-sm mx-auto">
-                Realiza un pedido desde el menú o pulsa en "Simular Pedido de Prueba" para visualizar el flujo completo de cocina.
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {filteredOrders.map((order) => (
-                <div
-                  key={order.id}
-                  className="bg-neutral-950 border border-neutral-800 rounded-2xl p-4 flex flex-col justify-between shadow-lg"
+        {activeTab === 'orders' ? (
+          <>
+            {/* Filter Toolbar */}
+            <div className="px-5 py-3 bg-neutral-900 border-b border-neutral-800 flex items-center gap-2 overflow-x-auto">
+              <span className="text-xs font-semibold text-neutral-400 mr-2">Filtrar:</span>
+              {['todos', 'recibido', 'preparando', 'en_camino', 'entregado'].map((status) => (
+                <button
+                  key={status}
+                  onClick={() => setFilterStatus(status)}
+                  className={`text-xs px-3 py-1.5 rounded-lg font-bold capitalize transition-all whitespace-nowrap cursor-pointer ${
+                    filterStatus === status
+                      ? 'bg-amber-500 text-neutral-950 shadow-sm'
+                      : 'bg-neutral-950 text-neutral-400 hover:text-white border border-neutral-800'
+                  }`}
                 >
-                  {/* Top info */}
-                  <div>
-                    <div className="flex items-center justify-between pb-3 border-b border-neutral-800/80">
+                  {status === 'todos' ? 'Todos' : status.replace('_', ' ')}
+                </button>
+              ))}
+              <span className="ml-auto text-xs text-neutral-500 hidden sm:inline">
+                Total órdenes registradas: {orders.length}
+              </span>
+            </div>
+
+            {/* Body (Orders Grid) */}
+            <div className="p-5 overflow-y-auto flex-1 space-y-4">
+              {filteredOrders.length === 0 ? (
+                <div className="text-center py-16 text-neutral-500 space-y-3">
+                  <ChefHat className="w-12 h-12 mx-auto text-neutral-600" />
+                  <p className="text-sm font-bold text-neutral-300">
+                    No hay pedidos en este estado en este momento.
+                  </p>
+                  <p className="text-xs text-neutral-500 max-w-sm mx-auto">
+                    Realiza un pedido desde el menú o pulsa en "Pedido Demo" para visualizar el flujo completo de cocina.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {filteredOrders.map((order) => (
+                    <div
+                      key={order.id}
+                      className="bg-neutral-950 border border-neutral-800 rounded-2xl p-4 flex flex-col justify-between shadow-lg"
+                    >
+                      {/* Top info */}
                       <div>
-                        <span className="text-xs font-mono text-neutral-500 font-semibold">
-                          Orden #{order.orderNumber}
-                        </span>
-                        <h4 className="text-sm font-bold text-white leading-tight">
-                          {order.customerName}
-                        </h4>
-                      </div>
-                      {getStatusBadge(order.status)}
-                    </div>
-
-                    <div className="py-2.5 text-xs text-neutral-400 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <Phone className="w-3.5 h-3.5 text-amber-500" />
-                        <span>{order.customerPhone}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <ShoppingBag className="w-3.5 h-3.5 text-emerald-500" />
-                        <span className="capitalize font-semibold text-neutral-300">
-                          {order.orderType === 'delivery'
-                            ? `Delivery: ${order.deliveryAddress}`
-                            : order.orderType === 'pickup'
-                            ? 'Para Llevar / Recojo'
-                            : `Consumo en Salón ${order.tableNumber ? `(${order.tableNumber})` : ''}`}
-                        </span>
-                      </div>
-                      {order.deliveryReference && (
-                        <p className="text-[11px] text-neutral-500 ml-5">
-                          Ref: {order.deliveryReference}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Items List */}
-                    <div className="bg-neutral-900/70 rounded-xl p-3 space-y-2 border border-neutral-800/60 my-2">
-                      <p className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">
-                        Comanda / Platos:
-                      </p>
-                      {order.items.map((it, idx) => (
-                        <div key={idx} className="text-xs text-neutral-200 flex justify-between border-b border-neutral-800/40 pb-1.5 last:border-none last:pb-0">
+                        <div className="flex items-center justify-between pb-3 border-b border-neutral-800/80">
                           <div>
-                            <span className="font-bold text-white mr-1.5">{it.quantity}x</span>
-                            <span>{it.item.name}</span>
-                            {it.selectedOption && (
-                              <span className="text-[11px] text-amber-300 block ml-4">
-                                • {it.selectedOption}
-                              </span>
-                            )}
-                            {it.selectedSauces && it.selectedSauces.length > 0 && (
-                              <span className="text-[10px] text-neutral-400 block ml-4">
-                                Salsas: {it.selectedSauces.join(', ')}
-                              </span>
-                            )}
-                            {it.notes && (
-                              <span className="text-[10px] text-rose-300 block ml-4 font-semibold">
-                                Nota: {it.notes}
-                              </span>
-                            )}
+                            <span className="text-xs font-mono text-neutral-500 font-semibold">
+                              Orden #{order.orderNumber}
+                            </span>
+                            <h4 className="text-sm font-bold text-white leading-tight">
+                              {order.customerName}
+                            </h4>
                           </div>
-                          <span className="font-mono text-neutral-400 shrink-0">
-                            S/ {(it.item.price * it.quantity).toFixed(2)}
+                          {getStatusBadge(order.status)}
+                        </div>
+
+                        <div className="py-2.5 text-xs text-neutral-400 space-y-1">
+                          <div className="flex items-center gap-2">
+                            <Phone className="w-3.5 h-3.5 text-amber-500" />
+                            <span>{order.customerPhone}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <ShoppingBag className="w-3.5 h-3.5 text-emerald-500" />
+                            <span className="capitalize font-semibold text-neutral-300">
+                              {order.orderType === 'delivery'
+                                ? `Delivery: ${order.deliveryAddress}`
+                                : order.orderType === 'pickup'
+                                ? 'Para Llevar / Recojo'
+                                : `Consumo en Salón ${order.tableNumber ? `(${order.tableNumber})` : ''}`}
+                            </span>
+                          </div>
+                          {order.deliveryReference && (
+                            <p className="text-[11px] text-neutral-500 ml-5">
+                              Ref: {order.deliveryReference}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Items List */}
+                        <div className="bg-neutral-900/70 rounded-xl p-3 space-y-2 border border-neutral-800/60 my-2">
+                          <p className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">
+                            Comanda / Platos:
+                          </p>
+                          {order.items.map((it, idx) => (
+                            <div key={idx} className="text-xs text-neutral-200 flex justify-between border-b border-neutral-800/40 pb-1.5 last:border-none last:pb-0">
+                              <div>
+                                <span className="font-bold text-white mr-1.5">{it.quantity}x</span>
+                                <span>{it.item.name}</span>
+                                {it.selectedOption && (
+                                  <span className="text-[11px] text-amber-300 block ml-4">
+                                    • {it.selectedOption}
+                                  </span>
+                                )}
+                                {it.selectedSauces && it.selectedSauces.length > 0 && (
+                                  <span className="text-[10px] text-neutral-400 block ml-4">
+                                    Salsas: {it.selectedSauces.join(', ')}
+                                  </span>
+                                )}
+                                {it.notes && (
+                                  <span className="text-[10px] text-rose-300 block ml-4 font-semibold">
+                                    Nota: {it.notes}
+                                  </span>
+                                )}
+                              </div>
+                              <span className="font-mono text-neutral-400 shrink-0">
+                                S/ {(it.item.price * it.quantity).toFixed(2)}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+
+                        {order.notes && (
+                          <div className="text-xs bg-amber-500/10 border border-amber-500/20 p-2 rounded-lg text-amber-200 mt-2">
+                            <span className="font-bold">Observación: </span>
+                            {order.notes}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Bottom: Status Changer Buttons */}
+                      <div className="pt-3 border-t border-neutral-800/80 mt-2">
+                        <div className="flex items-center justify-between text-xs font-bold text-neutral-300 mb-2">
+                          <span>Total: <strong className="text-amber-400 font-mono text-sm">S/ {order.total.toFixed(2)}</strong></span>
+                          <span className="text-[11px] text-neutral-400 uppercase">
+                            Pago: {order.paymentMethod}
                           </span>
                         </div>
-                      ))}
-                    </div>
 
-                    {order.notes && (
-                      <div className="text-xs bg-amber-500/10 border border-amber-500/20 p-2 rounded-lg text-amber-200 mt-2">
-                        <span className="font-bold">Observación: </span>
-                        {order.notes}
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            onClick={() => updateOrderStatus(order.id, 'recibido')}
+                            className={`flex-1 py-1.5 text-[11px] rounded-lg font-bold border transition-colors cursor-pointer ${
+                              order.status === 'recibido'
+                                ? 'bg-amber-500/20 border-amber-500 text-amber-300'
+                                : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white'
+                            }`}
+                          >
+                            Recibido
+                          </button>
+
+                          <button
+                            onClick={() => updateOrderStatus(order.id, 'preparando')}
+                            className={`flex-1 py-1.5 text-[11px] rounded-lg font-bold border transition-colors cursor-pointer ${
+                              order.status === 'preparando'
+                                ? 'bg-blue-500/20 border-blue-500 text-blue-300'
+                                : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white'
+                            }`}
+                          >
+                            En Cocina
+                          </button>
+
+                          <button
+                            onClick={() => updateOrderStatus(order.id, 'en_camino')}
+                            className={`flex-1 py-1.5 text-[11px] rounded-lg font-bold border transition-colors cursor-pointer ${
+                              order.status === 'en_camino'
+                                ? 'bg-purple-500/20 border-purple-500 text-purple-300'
+                                : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white'
+                            }`}
+                          >
+                            En Camino
+                          </button>
+
+                          <button
+                            onClick={() => updateOrderStatus(order.id, 'entregado')}
+                            className={`flex-1 py-1.5 text-[11px] rounded-lg font-bold border transition-colors cursor-pointer ${
+                              order.status === 'entregado'
+                                ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300'
+                                : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white'
+                            }`}
+                          >
+                            Entregado
+                          </button>
+                        </div>
                       </div>
-                    )}
-                  </div>
-
-                  {/* Bottom: Status Changer Buttons */}
-                  <div className="pt-3 border-t border-neutral-800/80 mt-2">
-                    <div className="flex items-center justify-between text-xs font-bold text-neutral-300 mb-2">
-                      <span>Total: <strong className="text-amber-400 font-mono text-sm">S/ {order.total.toFixed(2)}</strong></span>
-                      <span className="text-[11px] text-neutral-400 uppercase">
-                        Pago: {order.paymentMethod}
-                      </span>
                     </div>
-
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        onClick={() => updateOrderStatus(order.id, 'recibido')}
-                        className={`flex-1 py-1.5 text-[11px] rounded-lg font-bold border transition-colors cursor-pointer ${
-                          order.status === 'recibido'
-                            ? 'bg-amber-500/20 border-amber-500 text-amber-300'
-                            : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white'
-                        }`}
-                      >
-                        Recibido
-                      </button>
-
-                      <button
-                        onClick={() => updateOrderStatus(order.id, 'preparando')}
-                        className={`flex-1 py-1.5 text-[11px] rounded-lg font-bold border transition-colors cursor-pointer ${
-                          order.status === 'preparando'
-                            ? 'bg-blue-500/20 border-blue-500 text-blue-300'
-                            : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white'
-                        }`}
-                      >
-                        En Cocina
-                      </button>
-
-                      <button
-                        onClick={() => updateOrderStatus(order.id, 'en_camino')}
-                        className={`flex-1 py-1.5 text-[11px] rounded-lg font-bold border transition-colors cursor-pointer ${
-                          order.status === 'en_camino'
-                            ? 'bg-purple-500/20 border-purple-500 text-purple-300'
-                            : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white'
-                        }`}
-                      >
-                        En Camino
-                      </button>
-
-                      <button
-                        onClick={() => updateOrderStatus(order.id, 'entregado')}
-                        className={`flex-1 py-1.5 text-[11px] rounded-lg font-bold border transition-colors cursor-pointer ${
-                          order.status === 'entregado'
-                            ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300'
-                            : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white'
-                        }`}
-                      >
-                        Entregado
-                      </button>
-                    </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
-          )}
-        </div>
+          </>
+        ) : (
+          /* TAB 2: SUPABASE & DATABASE SUITE */
+          <div className="p-6 overflow-y-auto flex-1 space-y-6 text-neutral-300">
+            {/* Health banner */}
+            <div className="p-4 rounded-2xl bg-neutral-950 border border-neutral-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className={`p-3 rounded-xl ${phpStatus.dbConnected ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}`}>
+                  <Database className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="text-base font-bold text-white">Estado de la Base de Datos &amp; Autenticación</h4>
+                  <p className="text-xs text-neutral-400">
+                    {phpStatus.checking ? 'Comprobando conexión...' : phpStatus.message}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={checkPhpHealth}
+                disabled={phpStatus.checking}
+                className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-xs font-bold text-white rounded-xl flex items-center gap-2 transition-colors cursor-pointer"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${phpStatus.checking ? 'animate-spin' : ''}`} />
+                <span>Comprobar Estado</span>
+              </button>
+            </div>
+
+            {/* Supabase details & schema */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="bg-neutral-950 border border-neutral-800 rounded-2xl p-4 space-y-2">
+                <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs uppercase">
+                  <Database className="w-4 h-4" />
+                  <span>Conexión Supabase (PostgreSQL 15+)</span>
+                </div>
+                <p className="text-xs text-neutral-400">
+                  El cliente <code className="text-emerald-300 font-mono">@supabase/supabase-js</code> está completamente integrado para autenticación, sincronización de perfiles, pedidos en tiempo real y catálogo.
+                </p>
+                <ul className="text-xs text-neutral-400 space-y-1 font-mono">
+                  <li>• <strong className="text-neutral-200">VITE_SUPABASE_URL:</strong> URL de tu proyecto.</li>
+                  <li>• <strong className="text-neutral-200">VITE_SUPABASE_ANON_KEY:</strong> Llave pública anónima.</li>
+                  <li>• <strong className="text-neutral-200">supabase-schema.sql:</strong> Script SQL con RLS y Realtime.</li>
+                </ul>
+              </div>
+
+              <div className="bg-neutral-950 border border-neutral-800 rounded-2xl p-4 space-y-2">
+                <div className="flex items-center gap-2 text-amber-400 font-bold text-xs uppercase">
+                  <Code className="w-4 h-4" />
+                  <span>Tablas Sincronizadas</span>
+                </div>
+                <ul className="text-xs text-neutral-400 space-y-1.5 font-mono">
+                  <li>• <strong className="text-neutral-200">profiles:</strong> Perfiles de usuarios vinculados a Auth.</li>
+                  <li>• <strong className="text-neutral-200">categories:</strong> 7 categorías de la carta.</li>
+                  <li>• <strong className="text-neutral-200">products:</strong> 46 platos con guarniciones y precios.</li>
+                  <li>• <strong className="text-neutral-200">sauces:</strong> 11 cremas de la casa.</li>
+                  <li>• <strong className="text-neutral-200">promotions:</strong> 6 combos y promociones.</li>
+                  <li>• <strong className="text-neutral-200">orders:</strong> Pedidos con soporte Realtime.</li>
+                  <li>• <strong className="text-neutral-200">claims:</strong> Libro de Reclamaciones oficial.</li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Architecture summary */}
+            <div className="bg-neutral-950 border border-neutral-800 rounded-2xl p-4 text-xs text-neutral-400 space-y-1">
+              <span className="font-bold text-neutral-200 block">Arquitectura Híbrida Resiliente:</span>
+              <p>
+                Si configuras las variables en <code className="text-amber-300 font-mono">.env</code> o Settings, las consultas se ejecutan directamente en Supabase. Si estás en modo desarrollo o local, el sistema activa automáticamente el backend Express y caché optimizada sin interrupción de servicio.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Footer */}
         <div className="p-4 bg-neutral-950 border-t border-neutral-800 flex items-center justify-between text-xs text-neutral-400">

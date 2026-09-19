@@ -1,4 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase, isSupabaseConfigured } from '../lib/supabase.ts';
+import { auth, googleAuthProvider } from '../lib/firebase.ts';
+import { signInWithPopup, signOut as fbSignOut, onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 
 export interface UserProfile {
   id: string;
@@ -7,6 +10,7 @@ export interface UserProfile {
   familyName: string;
   email: string;
   avatarBgColor?: string;
+  photoUrl?: string;
   docType?: 'DNI' | 'CE' | 'Pasaporte';
   docNumber?: string;
   birthDate?: string;
@@ -22,23 +26,21 @@ export interface GoogleAccount {
   email: string;
   avatarBgColor: string;
   initial: string;
+  photoUrl?: string;
 }
 
-// Completely empty predefined accounts - no hardcoded emails!
 export const PREDEFINED_GOOGLE_ACCOUNTS: GoogleAccount[] = [];
 
-// Helper to get device-specific saved accounts from localStorage
 export const getDeviceSavedAccounts = (): GoogleAccount[] => {
   try {
     const saved = localStorage.getItem('buchisapa_device_accounts');
     const parsed: GoogleAccount[] = saved ? JSON.parse(saved) : [];
-    return parsed.filter((acc) => acc.email.toLowerCase() !== 'loalopez286@gmail.com');
+    return parsed;
   } catch {
     return [];
   }
 };
 
-// Helper to save a new account to device's localStorage
 export const saveAccountToDevice = (account: GoogleAccount) => {
   try {
     const existing = getDeviceSavedAccounts();
@@ -54,11 +56,17 @@ export const saveAccountToDevice = (account: GoogleAccount) => {
 
 interface AuthContextType {
   user: UserProfile | null;
+  firebaseUser: FirebaseUser | null;
+  idToken: string | null;
+  isSupabaseActive: boolean;
   setUser: React.Dispatch<React.SetStateAction<UserProfile | null>>;
+  signInWithGoogle: () => Promise<boolean>;
+  signInWithSupabaseEmail: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  signUpWithSupabaseEmail: (email: string, password: string, fullName: string) => Promise<{ success: boolean; error?: string }>;
   loginWithGoogleAccount: (account: GoogleAccount) => void;
   loginWithCustomAccount: (name: string, email: string) => void;
-  updateUserProfile: (data: Partial<UserProfile>) => void;
-  logout: () => void;
+  updateUserProfile: (data: Partial<UserProfile>) => Promise<void>;
+  logout: () => Promise<void>;
   isGoogleChooserOpen: boolean;
   setIsGoogleChooserOpen: (open: boolean) => void;
   isProfileModalOpen: boolean;
@@ -79,10 +87,136 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   });
 
+  const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
+  const [idToken, setIdToken] = useState<string | null>(null);
   const [isGoogleChooserOpen, setIsGoogleChooserOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [profileActiveTab, setProfileActiveTab] = useState<'profile' | 'pedidos' | 'direcciones' | 'tarjetas' | 'editar' | 'configuraciones'>('profile');
 
+  // 1. SUPABASE AUTH LISTENER
+  useEffect(() => {
+    if (!isSupabaseConfigured()) return;
+
+    // Check existing Supabase session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        const sbUser = session.user;
+        const displayName =
+          sbUser.user_metadata?.full_name ||
+          sbUser.user_metadata?.name ||
+          sbUser.email?.split('@')[0] ||
+          'Usuario';
+        const parts = displayName.split(' ');
+        const givenName = parts[0] || displayName;
+        const familyName = parts.slice(1).join(' ') || '';
+
+        const profileUser: UserProfile = {
+          id: sbUser.id,
+          name: displayName,
+          givenName,
+          familyName,
+          email: sbUser.email || '',
+          photoUrl: sbUser.user_metadata?.avatar_url || undefined,
+          avatarBgColor: 'bg-red-600 text-white',
+          docType: 'DNI',
+          docNumber: '',
+          birthDate: '',
+          phone: sbUser.phone || '',
+          acceptPromos: true,
+        };
+        setUser(profileUser);
+      }
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        const sbUser = session.user;
+        const displayName =
+          sbUser.user_metadata?.full_name ||
+          sbUser.user_metadata?.name ||
+          sbUser.email?.split('@')[0] ||
+          'Usuario';
+        const parts = displayName.split(' ');
+        const givenName = parts[0] || displayName;
+        const familyName = parts.slice(1).join(' ') || '';
+
+        const profileUser: UserProfile = {
+          id: sbUser.id,
+          name: displayName,
+          givenName,
+          familyName,
+          email: sbUser.email || '',
+          photoUrl: sbUser.user_metadata?.avatar_url || undefined,
+          avatarBgColor: 'bg-red-600 text-white',
+          docType: 'DNI',
+          docNumber: '',
+          birthDate: '',
+          phone: sbUser.phone || '',
+          acceptPromos: true,
+        };
+        setUser(profileUser);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  // 2. FIREBASE AUTH LISTENER (Fallback / Parallel)
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+      setFirebaseUser(fbUser);
+      if (fbUser && !isSupabaseConfigured()) {
+        try {
+          const token = await fbUser.getIdToken();
+          setIdToken(token);
+
+          // Sync with PostgreSQL backend
+          await fetch('/api/auth/sync', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              name: fbUser.displayName || '',
+              photoUrl: fbUser.photoURL || '',
+            }),
+          });
+
+          const displayName = fbUser.displayName || fbUser.email?.split('@')[0] || 'Usuario';
+          const parts = displayName.split(' ');
+          const givenName = parts[0] || displayName;
+          const familyName = parts.slice(1).join(' ') || '';
+
+          const profileUser: UserProfile = {
+            id: fbUser.uid,
+            name: displayName,
+            givenName,
+            familyName,
+            email: fbUser.email || '',
+            photoUrl: fbUser.photoURL || undefined,
+            avatarBgColor: 'bg-red-600 text-white',
+            docType: 'DNI',
+            docNumber: '',
+            birthDate: '',
+            phone: fbUser.phoneNumber || '',
+            acceptPromos: true,
+          };
+          setUser(profileUser);
+        } catch (err) {
+          console.warn('Auth sync notice:', err);
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Sync to local memory
   useEffect(() => {
     try {
       if (user) {
@@ -95,6 +229,81 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [user]);
 
+  const signInWithGoogle = async (): Promise<boolean> => {
+    // If Supabase is configured, use Supabase OAuth
+    if (isSupabaseConfigured()) {
+      try {
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: window.location.origin,
+          },
+        });
+        if (!error) return true;
+      } catch (err) {
+        console.warn('Supabase OAuth notice:', err);
+      }
+    }
+
+    // Try Firebase popup
+    try {
+      const result = await signInWithPopup(auth, googleAuthProvider);
+      if (result.user) {
+        setIsGoogleChooserOpen(false);
+        return true;
+      }
+      return false;
+    } catch (error: any) {
+      console.warn('Google Sign-In notice:', error);
+      setIsGoogleChooserOpen(true);
+      return false;
+    }
+  };
+
+  const signInWithSupabaseEmail = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    if (!isSupabaseConfigured()) {
+      return { success: false, error: 'Supabase no está configurado aún.' };
+    }
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) return { success: false, error: error.message };
+      if (data.user) {
+        return { success: true };
+      }
+      return { success: false, error: 'Credenciales inválidas' };
+    } catch (err: any) {
+      return { success: false, error: err.message || 'Error al iniciar sesión' };
+    }
+  };
+
+  const signUpWithSupabaseEmail = async (
+    email: string,
+    password: string,
+    fullName: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    if (!isSupabaseConfigured()) {
+      return { success: false, error: 'Supabase no está configurado aún.' };
+    }
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+          },
+        },
+      });
+      if (error) return { success: false, error: error.message };
+      if (data.user) {
+        return { success: true };
+      }
+      return { success: false, error: 'No se pudo completar el registro' };
+    } catch (err: any) {
+      return { success: false, error: err.message || 'Error al registrarse' };
+    }
+  };
+
   const loginWithGoogleAccount = (account: GoogleAccount) => {
     saveAccountToDevice(account);
     const newUser: UserProfile = {
@@ -104,6 +313,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       familyName: account.familyName,
       email: account.email,
       avatarBgColor: account.avatarBgColor,
+      photoUrl: account.photoUrl,
       docType: 'DNI',
       docNumber: '',
       birthDate: '',
@@ -147,12 +357,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsGoogleChooserOpen(false);
   };
 
-  const updateUserProfile = (data: Partial<UserProfile>) => {
+  const updateUserProfile = async (data: Partial<UserProfile>) => {
     setUser((prev) => (prev ? { ...prev, ...data } : null));
+
+    // Update in Supabase profiles table if active
+    if (isSupabaseConfigured() && user?.id) {
+      try {
+        await supabase
+          .from('profiles')
+          .update({
+            name: data.name || user.name,
+            given_name: data.givenName || user.givenName,
+            family_name: data.familyName || user.familyName,
+            phone: data.phone !== undefined ? data.phone : user.phone,
+            doc_type: data.docType || user.docType,
+            doc_number: data.docNumber !== undefined ? data.docNumber : user.docNumber,
+            birth_date: data.birthDate !== undefined ? data.birthDate : user.birthDate,
+            avatar_url: data.photoUrl || user.photoUrl,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', user.id);
+      } catch (err) {
+        console.warn('Supabase profile update notice:', err);
+      }
+    }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    if (isSupabaseConfigured()) {
+      try {
+        await supabase.auth.signOut();
+      } catch {
+        // ignore
+      }
+    }
+    try {
+      await fbSignOut(auth);
+    } catch {
+      // ignore
+    }
     setUser(null);
+    setFirebaseUser(null);
+    setIdToken(null);
     setIsProfileModalOpen(false);
   };
 
@@ -160,7 +406,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     <AuthContext.Provider
       value={{
         user,
+        firebaseUser,
+        idToken,
+        isSupabaseActive: isSupabaseConfigured(),
         setUser,
+        signInWithGoogle,
+        signInWithSupabaseEmail,
+        signUpWithSupabaseEmail,
         loginWithGoogleAccount,
         loginWithCustomAccount,
         updateUserProfile,

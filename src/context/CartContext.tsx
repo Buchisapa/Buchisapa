@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { MenuItem, RESTAURANT_INFO } from '../data/menuData';
+import { MenuItem } from '../data/menuData';
+import { ApiService } from '../services/apiService';
 
 export interface CartItem {
   cartId: string;
@@ -152,6 +153,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     setOrders(prev => [newOrder, ...prev]);
     clearCart();
+
+    // Sincronizar en segundo plano con el backend PHP si está disponible
+    ApiService.submitOrder(orderData).catch(() => {
+      // Modo local activo
+    });
+
     return newOrder;
   };
 
