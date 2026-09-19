@@ -292,34 +292,21 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Desktop Ingresar / Profile Button */}
           {user ? (
-            <div className="hidden md:flex items-center gap-2">
-              {(isAdmin || user.email.toLowerCase() === 'buchisapaweb@gmail.com') && (
-                <button
-                  onClick={onOpenAdmin}
-                  className="flex items-center gap-1.5 bg-neutral-900 hover:bg-black text-amber-400 hover:text-amber-300 font-bold text-xs uppercase tracking-wider py-1.5 px-3 rounded-full border border-neutral-700 shadow-sm transition-all cursor-pointer hover:scale-105 active:scale-95"
-                  title="Abrir Panel de Administración Buchisapa"
-                >
-                  <ChefHat className="w-3.5 h-3.5 text-red-500" />
-                  <span>Panel Admin</span>
-                </button>
-              )}
-
-              <button
-                onClick={() => {
-                  setProfileActiveTab('profile');
-                  setIsProfileModalOpen(true);
-                }}
-                className="flex items-center gap-2 bg-neutral-100 hover:bg-neutral-200 border border-neutral-200 text-neutral-900 py-1.5 px-3 rounded-full transition-all cursor-pointer shadow-xs"
-              >
-                <div className="w-6 h-6 rounded-full bg-purple-600 text-white flex items-center justify-center font-bold text-xs shrink-0">
-                  {(user.givenName || user.name || 'U').charAt(0).toUpperCase()}
-                </div>
-                <span className="text-xs font-bold truncate max-w-[100px]">
-                  Hola, {user.givenName || user.name.split(' ')[0]}
-                </span>
-                <ChevronDown className="w-3.5 h-3.5 text-neutral-500" />
-              </button>
-            </div>
+            <button
+              onClick={() => {
+                setProfileActiveTab('profile');
+                setIsProfileModalOpen(true);
+              }}
+              className="hidden md:flex items-center gap-2 bg-neutral-100 hover:bg-neutral-200 border border-neutral-200 text-neutral-900 py-1.5 px-3 rounded-full transition-all cursor-pointer shadow-xs"
+            >
+              <div className="w-6 h-6 rounded-full bg-purple-600 text-white flex items-center justify-center font-bold text-xs shrink-0">
+                {(user.givenName || user.name || 'U').charAt(0).toUpperCase()}
+              </div>
+              <span className="text-xs font-bold truncate max-w-[100px]">
+                Hola, {user.givenName || user.name.split(' ')[0]}
+              </span>
+              <ChevronDown className="w-3.5 h-3.5 text-neutral-500" />
+            </button>
           ) : (
             <button
               onClick={onOpenAuth}

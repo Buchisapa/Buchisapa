@@ -169,6 +169,7 @@ function MainApp() {
         isOpen={isAuthOpen}
         onClose={() => setIsAuthOpen(false)}
         onOpenKitchen={() => setIsKitchenOpen(true)}
+        onOpenAdmin={() => setIsAdminOpen(true)}
       />
 
       <GoogleAccountChooserModal

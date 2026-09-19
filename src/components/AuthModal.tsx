@@ -6,10 +6,11 @@ interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   onOpenKitchen?: () => void;
+  onOpenAdmin?: () => void;
 }
 
-export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onOpenKitchen }) => {
-  const { loginWithCustomAccount, setIsGoogleChooserOpen, signInWithSupabaseEmail, signUpWithSupabaseEmail, isSupabaseActive } = useAuth();
+export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onOpenKitchen, onOpenAdmin }) => {
+  const { loginWithCustomAccount, setIsGoogleChooserOpen, signInWithSupabaseEmail, signUpWithSupabaseEmail, isSupabaseActive, adminLogin } = useAuth();
   const [mode, setMode] = useState<'login' | 'register' | 'forgot' | 'success'>('login');
   
   // Login State
@@ -44,7 +45,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onOpenKit
     setAuthError(null);
     if (!email) return;
 
-    const isUserBuchisapaAdmin = email.toLowerCase().trim() === 'buchisapaweb@gmail.com';
+    const isUserBuchisapaAdmin = email.toLowerCase().trim() === 'buchisapaweb@gmail.com' || email.toLowerCase().trim() === 'admin';
 
     if (isSupabaseActive && password) {
       setLoading(true);
@@ -54,7 +55,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onOpenKit
         setAuthError(res.error || 'Error al iniciar sesión con Supabase');
         return;
       }
-      setSuccessMessage(isUserBuchisapaAdmin ? '¡Bienvenido Administrador Buchisapa!' : '¡Bienvenido de nuevo!');
+      if (isUserBuchisapaAdmin) {
+        adminLogin('buchisapaweb@gmail.com');
+        localStorage.setItem('buchisapa_admin_auth', 'true');
+        localStorage.setItem('buchisapa_admin_email', 'buchisapaweb@gmail.com');
+        setSuccessMessage('¡Bienvenido Administrador Buchisapa! Abriendo panel de administración...');
+        setMode('success');
+        setTimeout(() => {
+          onClose();
+          setMode('login');
+          onOpenAdmin?.();
+        }, 800);
+        return;
+      }
+      setSuccessMessage('¡Bienvenido de nuevo!');
       setMode('success');
       setTimeout(() => {
         onClose();
@@ -63,9 +77,24 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onOpenKit
       return;
     }
 
-    // Default fast login
-    loginWithCustomAccount(isUserBuchisapaAdmin ? 'Administrador Buchisapa' : email.split('@')[0], email);
-    setSuccessMessage(isUserBuchisapaAdmin ? '¡Bienvenido Administrador Buchisapa!' : '¡Bienvenido de nuevo!');
+    // Direct Login check
+    if (isUserBuchisapaAdmin) {
+      adminLogin('buchisapaweb@gmail.com');
+      localStorage.setItem('buchisapa_admin_auth', 'true');
+      localStorage.setItem('buchisapa_admin_email', 'buchisapaweb@gmail.com');
+      setSuccessMessage('¡Bienvenido Administrador Buchisapa! Abriendo panel de administración...');
+      setMode('success');
+      setTimeout(() => {
+        onClose();
+        setMode('login');
+        onOpenAdmin?.();
+      }, 800);
+      return;
+    }
+
+    // Default fast login for regular customer
+    loginWithCustomAccount(email.split('@')[0], email);
+    setSuccessMessage('¡Bienvenido de nuevo!');
     setMode('success');
     setTimeout(() => {
       onClose();
