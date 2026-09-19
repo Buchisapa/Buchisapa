@@ -4,7 +4,9 @@ import {
   TrendingUp,
   ShoppingBag,
   CheckCircle2,
-  Clock
+  CreditCard,
+  Banknote,
+  Smartphone
 } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 
@@ -38,70 +40,92 @@ export const AdminReportsTab: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      {/* Metric Cards Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="p-4 rounded-2xl bg-neutral-950 border border-neutral-800 space-y-1">
-          <div className="flex items-center justify-between text-neutral-400 text-xs">
+      {/* Metric Cards Grid (Clean White Cards) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+        <div className="p-4 rounded-2xl bg-white border border-neutral-200 space-y-1 shadow-xs">
+          <div className="flex items-center justify-between text-neutral-500 text-xs font-semibold">
             <span>Ventas Totales</span>
-            <DollarSign className="w-4 h-4 text-emerald-400" />
+            <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600">
+              <DollarSign className="w-4 h-4" />
+            </div>
           </div>
-          <p className="text-xl font-black text-emerald-400 font-mono">
+          <p className="text-2xl font-black text-emerald-700 font-mono tracking-tight">
             S/ {metrics.totalSales.toFixed(2)}
           </p>
-          <span className="text-[10px] text-neutral-500">Caja acumulada en vivo</span>
+          <span className="text-[11px] text-neutral-500 block">Caja acumulada del turno</span>
         </div>
 
-        <div className="p-4 rounded-2xl bg-neutral-950 border border-neutral-800 space-y-1">
-          <div className="flex items-center justify-between text-neutral-400 text-xs">
+        <div className="p-4 rounded-2xl bg-white border border-neutral-200 space-y-1 shadow-xs">
+          <div className="flex items-center justify-between text-neutral-500 text-xs font-semibold">
             <span>Total Comandas</span>
-            <ShoppingBag className="w-4 h-4 text-amber-400" />
+            <div className="p-2 rounded-xl bg-amber-50 text-amber-600">
+              <ShoppingBag className="w-4 h-4" />
+            </div>
           </div>
-          <p className="text-xl font-black text-white font-mono">
+          <p className="text-2xl font-black text-neutral-900 font-mono tracking-tight">
             {metrics.totalOrders}
           </p>
-          <span className="text-[10px] text-neutral-500">Pedidos registrados hoy</span>
+          <span className="text-[11px] text-neutral-500 block">Pedidos registrados hoy</span>
         </div>
 
-        <div className="p-4 rounded-2xl bg-neutral-950 border border-neutral-800 space-y-1">
-          <div className="flex items-center justify-between text-neutral-400 text-xs">
+        <div className="p-4 rounded-2xl bg-white border border-neutral-200 space-y-1 shadow-xs">
+          <div className="flex items-center justify-between text-neutral-500 text-xs font-semibold">
             <span>Ticket Promedio</span>
-            <TrendingUp className="w-4 h-4 text-blue-400" />
+            <div className="p-2 rounded-xl bg-blue-50 text-blue-600">
+              <TrendingUp className="w-4 h-4" />
+            </div>
           </div>
-          <p className="text-xl font-black text-blue-400 font-mono">
+          <p className="text-2xl font-black text-blue-700 font-mono tracking-tight">
             S/ {metrics.avgTicket.toFixed(2)}
           </p>
-          <span className="text-[10px] text-neutral-500">Gasto medio por cliente</span>
+          <span className="text-[11px] text-neutral-500 block">Consumo medio por cliente</span>
         </div>
 
-        <div className="p-4 rounded-2xl bg-neutral-950 border border-neutral-800 space-y-1">
-          <div className="flex items-center justify-between text-neutral-400 text-xs">
-            <span>Entregados / En Curso</span>
-            <CheckCircle2 className="w-4 h-4 text-purple-400" />
+        <div className="p-4 rounded-2xl bg-white border border-neutral-200 space-y-1 shadow-xs">
+          <div className="flex items-center justify-between text-neutral-500 text-xs font-semibold">
+            <span>Entregados / Pendientes</span>
+            <div className="p-2 rounded-xl bg-purple-50 text-purple-600">
+              <CheckCircle2 className="w-4 h-4" />
+            </div>
           </div>
-          <p className="text-xl font-black text-purple-400 font-mono">
+          <p className="text-2xl font-black text-purple-700 font-mono tracking-tight">
             {metrics.completedOrders} / {metrics.pendingOrders}
           </p>
-          <span className="text-[10px] text-neutral-500">Finalizados vs Pendientes</span>
+          <span className="text-[11px] text-neutral-500 block">Finalizados vs En preparación</span>
         </div>
       </div>
 
       {/* Payment methods breakdown */}
-      <div className="bg-neutral-950 border border-neutral-800 rounded-2xl p-4 space-y-3">
-        <h4 className="text-xs font-bold uppercase tracking-wider text-neutral-300">
+      <div className="bg-white border border-neutral-200 rounded-2xl p-5 space-y-4 shadow-xs">
+        <h4 className="text-xs font-black uppercase tracking-wider text-neutral-700">
           Distribución de Ingresos por Medio de Pago
         </h4>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="p-3 rounded-xl bg-purple-950/20 border border-purple-800/40 space-y-1">
-            <span className="text-[11px] font-bold text-purple-400 block">🟣 Yape</span>
-            <p className="text-lg font-bold font-mono text-white">S/ {metrics.yapeTotal.toFixed(2)}</p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+          <div className="p-4 rounded-2xl bg-purple-50/70 border border-purple-200 space-y-1">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-black text-purple-900">🟣 Yape</span>
+              <Smartphone className="w-4 h-4 text-purple-600" />
+            </div>
+            <p className="text-xl font-black font-mono text-purple-950">S/ {metrics.yapeTotal.toFixed(2)}</p>
+            <span className="text-[11px] text-purple-700">Transferencias Yape directas</span>
           </div>
-          <div className="p-3 rounded-xl bg-cyan-950/20 border border-cyan-800/40 space-y-1">
-            <span className="text-[11px] font-bold text-cyan-400 block">🔵 Plin</span>
-            <p className="text-lg font-bold font-mono text-white">S/ {metrics.plinTotal.toFixed(2)}</p>
+
+          <div className="p-4 rounded-2xl bg-cyan-50/70 border border-cyan-200 space-y-1">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-black text-cyan-900">🔵 Plin</span>
+              <Smartphone className="w-4 h-4 text-cyan-600" />
+            </div>
+            <p className="text-xl font-black font-mono text-cyan-950">S/ {metrics.plinTotal.toFixed(2)}</p>
+            <span className="text-[11px] text-cyan-700">Transferencias Plin</span>
           </div>
-          <div className="p-3 rounded-xl bg-emerald-950/20 border border-emerald-800/40 space-y-1">
-            <span className="text-[11px] font-bold text-emerald-400 block">💵 Efectivo (Contra Entrega)</span>
-            <p className="text-lg font-bold font-mono text-white">S/ {metrics.cashTotal.toFixed(2)}</p>
+
+          <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-1">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-black text-emerald-900">💵 Efectivo (Contra Entrega)</span>
+              <Banknote className="w-4 h-4 text-emerald-600" />
+            </div>
+            <p className="text-xl font-black font-mono text-emerald-950">S/ {metrics.cashTotal.toFixed(2)}</p>
+            <span className="text-[11px] text-emerald-700">Cobros en mostrador y delivery</span>
           </div>
         </div>
       </div>
