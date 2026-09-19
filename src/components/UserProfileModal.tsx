@@ -18,6 +18,8 @@ import {
   Maximize2,
   Loader2,
   Radio,
+  ChefHat,
+  ShieldCheck,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { AddressSearchPicker, AddressData } from './AddressSearchPicker';
@@ -36,15 +38,18 @@ interface UserProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
   onOpenPromotions?: () => void;
+  onOpenAdmin?: () => void;
 }
 
 export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   isOpen,
   onClose,
   onOpenPromotions,
+  onOpenAdmin,
 }) => {
   const {
     user,
+    isAdmin,
     updateUserProfile,
     logout,
     profileActiveTab,
@@ -241,18 +246,85 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-purple-600 text-white flex items-center justify-center text-2xl font-black shrink-0 shadow-md">
                   {initialLetter}
                 </div>
-                <div>
-                  <h2 className="text-lg font-bold text-neutral-900">
-                    {user.name}
-                  </h2>
-                  <p className="text-xs text-neutral-500 font-medium mt-0.5">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h2 className="text-lg font-bold text-neutral-900 truncate">
+                      {user.name}
+                    </h2>
+                    {(isAdmin || user.email.toLowerCase() === 'buchisapaweb@gmail.com') && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 shadow-xs">
+                        👑 Administrador
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-neutral-500 font-medium mt-0.5 truncate">
                     {user.email}
                   </p>
                 </div>
               </div>
 
+              {/* Special Admin Quick Action Banner for buchisapaweb@gmail.com */}
+              {(isAdmin || user.email.toLowerCase() === 'buchisapaweb@gmail.com') && (
+                <div className="p-3.5 rounded-2xl bg-gradient-to-r from-neutral-900 via-neutral-900 to-neutral-800 text-white border border-neutral-700 shadow-lg flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-xl bg-red-600 flex items-center justify-center shrink-0 shadow-sm">
+                      <ChefHat className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-xs font-black tracking-wider uppercase text-amber-400">
+                        Cuenta de Gestión
+                      </div>
+                      <div className="text-sm font-bold text-white truncate">
+                        Panel de Administración
+                      </div>
+                      <div className="text-[11px] text-neutral-300">
+                        Comandas, cocina, productos y caja
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      onOpenAdmin?.();
+                    }}
+                    className="px-3.5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-xs uppercase tracking-wider shrink-0 transition-transform active:scale-95 shadow-sm cursor-pointer"
+                  >
+                    Abrir Panel
+                  </button>
+                </div>
+              )}
+
               {/* Options List matching Screenshot 5 & 6 */}
               <div className="space-y-1.5 pt-2 border-t border-neutral-100">
+                {/* 0. Panel de Administración Option if Admin */}
+                {(isAdmin || user.email.toLowerCase() === 'buchisapaweb@gmail.com') && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      onOpenAdmin?.();
+                    }}
+                    className="w-full py-4 px-3 flex items-center justify-between bg-amber-50/50 hover:bg-amber-100/70 rounded-2xl transition-colors text-left group cursor-pointer border border-amber-200/80 mb-1"
+                  >
+                    <div className="flex items-center gap-3.5">
+                      <div className="p-2.5 rounded-xl bg-amber-500 text-neutral-950 font-black group-hover:scale-110 transition-transform">
+                        <ChefHat className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <div className="text-sm font-black text-neutral-900 flex items-center gap-1.5">
+                          <span>Panel de Administración</span>
+                          <span className="text-[10px] font-black uppercase bg-red-600 text-white px-1.5 py-0.2 rounded-md">ADMIN</span>
+                        </div>
+                        <div className="text-xs text-amber-800/80 font-medium">
+                          Gestiona pedidos, menú, precios y reportes en vivo
+                        </div>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-amber-600 group-hover:translate-x-0.5 transition-transform" />
+                  </button>
+                )}
+
                 {/* 1. Historial de pedidos */}
                 <button
                   type="button"

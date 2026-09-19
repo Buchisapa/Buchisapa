@@ -44,6 +44,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onOpenKit
     setAuthError(null);
     if (!email) return;
 
+    const isUserBuchisapaAdmin = email.toLowerCase().trim() === 'buchisapaweb@gmail.com';
+
     if (isSupabaseActive && password) {
       setLoading(true);
       const res = await signInWithSupabaseEmail(email, password);
@@ -52,7 +54,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onOpenKit
         setAuthError(res.error || 'Error al iniciar sesión con Supabase');
         return;
       }
-      setSuccessMessage(`¡Bienvenido de nuevo!`);
+      setSuccessMessage(isUserBuchisapaAdmin ? '¡Bienvenido Administrador Buchisapa!' : '¡Bienvenido de nuevo!');
       setMode('success');
       setTimeout(() => {
         onClose();
@@ -62,8 +64,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onOpenKit
     }
 
     // Default fast login
-    loginWithCustomAccount(email.split('@')[0], email);
-    setSuccessMessage(`¡Bienvenido de nuevo!`);
+    loginWithCustomAccount(isUserBuchisapaAdmin ? 'Administrador Buchisapa' : email.split('@')[0], email);
+    setSuccessMessage(isUserBuchisapaAdmin ? '¡Bienvenido Administrador Buchisapa!' : '¡Bienvenido de nuevo!');
     setMode('success');
     setTimeout(() => {
       onClose();

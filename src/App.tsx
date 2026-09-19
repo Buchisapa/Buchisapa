@@ -184,6 +184,7 @@ function MainApp() {
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
         onOpenPromotions={handleOpenPromotions}
+        onOpenAdmin={() => setIsAdminOpen(true)}
       />
     </div>
   );

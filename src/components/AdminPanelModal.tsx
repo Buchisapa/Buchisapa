@@ -36,6 +36,7 @@ import {
   Database
 } from 'lucide-react';
 import { useCart, Order, StoreSettings } from '../context/CartContext';
+import { useAuth, isEmailAdmin, isUidAdmin } from '../context/AuthContext';
 import { CATEGORIES, MenuItem, RESTAURANT_INFO } from '../data/menuData';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
@@ -45,6 +46,7 @@ interface AdminPanelModalProps {
 }
 
 export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({ isOpen, onClose }) => {
+  const { user, isAdmin } = useAuth();
   const {
     orders,
     updateOrderStatus,
@@ -65,10 +67,23 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({ isOpen, onClos
 
   // Admin Authentication State
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    return localStorage.getItem('buchisapa_admin_auth') === 'true';
+    return (
+      localStorage.getItem('buchisapa_admin_auth') === 'true' ||
+      (user ? isEmailAdmin(user.email) || isUidAdmin(user.id) : false)
+    );
   });
+
+  // Sync if user is buchisapaweb@gmail.com or isAdmin
+  React.useEffect(() => {
+    if (isOpen) {
+      if (isAdmin || (user && (isEmailAdmin(user.email) || isUidAdmin(user.id))) || localStorage.getItem('buchisapa_admin_auth') === 'true') {
+        setIsAuthenticated(true);
+      }
+    }
+  }, [isOpen, isAdmin, user]);
+
   const [adminAuthType, setAdminAuthType] = useState<'email' | 'pin'>('email');
-  const [emailInput, setEmailInput] = useState('buchisapaweb@gmail.com');
+  const [emailInput, setEmailInput] = useState(() => user?.email || 'buchisapaweb@gmail.com');
   const [passwordInput, setPasswordInput] = useState('Buchisapaweb26@26');
   const [showAdminPassword, setShowAdminPassword] = useState(false);
   const [pinInput, setPinInput] = useState('');
