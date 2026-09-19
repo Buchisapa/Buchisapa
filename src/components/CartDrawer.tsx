@@ -13,10 +13,12 @@ import {
   Send,
   Sparkles,
   Phone,
-  AlertCircle
+  AlertCircle,
+  Clock
 } from 'lucide-react';
 import { useCart, CartItem } from '../context/CartContext';
 import { RESTAURANT_INFO } from '../data/menuData';
+import { checkBusinessHours } from '../lib/businessHours';
 
 export const CartDrawer: React.FC = () => {
   const {
@@ -29,6 +31,8 @@ export const CartDrawer: React.FC = () => {
     cartSubtotal,
     createOrder
   } = useCart();
+
+  const businessHours = checkBusinessHours();
 
   const [step, setStep] = useState<'cart' | 'checkout'>('cart');
   const [orderType, setOrderType] = useState<'delivery' | 'pickup' | 'dinein'>('delivery');
@@ -99,8 +103,15 @@ export const CartDrawer: React.FC = () => {
         if (item.selectedOption) {
           details += `\n   Opción: ${item.selectedOption}`;
         }
+        if (item.removedAccompaniments && item.removedAccompaniments.length > 0) {
+          details += `\n   ⚠️ *Sin:* ${item.removedAccompaniments.join(', ')}`;
+        } else if (item.item.includes && item.item.includes.length > 0) {
+          details += `\n   ✓ *Acompañamientos:* Con todo`;
+        }
         if (item.selectedSauces && item.selectedSauces.length > 0) {
           details += `\n   Salsas: ${item.selectedSauces.join(', ')}`;
+        } else if (item.item.category !== 'bebidas' && item.item.category !== 'refrescos') {
+          details += `\n   Salsas: Sin cremas`;
         }
         if (item.notes) {
           details += `\n   Nota: ${item.notes}`;
@@ -187,6 +198,23 @@ export const CartDrawer: React.FC = () => {
           ) : step === 'cart' ? (
             /* STEP 1: REVIEW CART ITEMS */
             <div className="space-y-4">
+              {!businessHours.isOpen && (
+                <div className="p-3.5 bg-amber-50 border border-amber-300 rounded-2xl flex items-start gap-3 text-amber-900 shadow-sm">
+                  <Clock className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                  <div className="text-xs space-y-1">
+                    <p className="font-bold text-amber-950 flex items-center gap-1.5">
+                      <span>⏰ Fuera del Horario de Atención</span>
+                    </p>
+                    <p className="text-amber-800 leading-relaxed">
+                      Hora actual en Tarapoto: <strong className="text-amber-950">{businessHours.currentTimeString}</strong>. Horario habitual: <strong className="text-amber-950">{businessHours.scheduleDescription}</strong>.
+                    </p>
+                    <p className="text-[11px] text-amber-700 font-medium pt-0.5">
+                      ℹ️ Puedes realizar tu pedido como <strong>pre-orden</strong>. La cocina lo procesará apenas abra el turno.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               <div className="flex items-center justify-between text-xs text-neutral-600 pb-2 border-b border-neutral-200">
                 <span>{cart.length} {cart.length === 1 ? 'plato en pedido' : 'platos en pedido'}</span>
                 <button
@@ -236,19 +264,40 @@ export const CartDrawer: React.FC = () => {
                       </button>
                     </div>
 
-                    {/* Sauces & notes summary */}
-                    {cartItem.selectedSauces && cartItem.selectedSauces.length > 0 && (
-                      <div className="text-[11px] text-neutral-600 bg-neutral-50/60 p-2 rounded-lg">
-                        <span className="text-neutral-700 font-semibold">Salsas: </span>
-                        {cartItem.selectedSauces.join(', ')}
-                        {cartItem.notes && (
-                          <div className="text-amber-700/80 mt-1">
-                            <span className="font-semibold">Nota: </span>
-                            {cartItem.notes}
-                          </div>
-                        )}
-                      </div>
-                    )}
+                    {/* Accompaniments, Sauces & notes summary */}
+                    <div className="text-[11px] text-neutral-600 bg-neutral-50/80 p-2.5 rounded-xl space-y-1 border border-neutral-100">
+                      {/* Accompaniments */}
+                      {cartItem.removedAccompaniments && cartItem.removedAccompaniments.length > 0 ? (
+                        <div className="text-amber-800 font-semibold flex items-center gap-1">
+                          <span>⚠️ Sin:</span>
+                          <span className="font-normal">{cartItem.removedAccompaniments.join(', ')}</span>
+                        </div>
+                      ) : cartItem.item.includes && cartItem.item.includes.length > 0 ? (
+                        <div className="text-emerald-700 font-medium">
+                          ✓ Con todos sus acompañamientos
+                        </div>
+                      ) : null}
+
+                      {/* Sauces */}
+                      {cartItem.selectedSauces && cartItem.selectedSauces.length > 0 ? (
+                        <div>
+                          <span className="text-neutral-800 font-bold">Cremas: </span>
+                          <span>{cartItem.selectedSauces.join(', ')}</span>
+                        </div>
+                      ) : cartItem.item.category !== 'bebidas' && cartItem.item.category !== 'refrescos' ? (
+                        <div className="text-neutral-500 italic">
+                          Sin cremas
+                        </div>
+                      ) : null}
+
+                      {/* Notes */}
+                      {cartItem.notes && (
+                        <div className="text-amber-800 pt-0.5 border-t border-neutral-200/60 mt-1">
+                          <span className="font-bold">Nota cocina: </span>
+                          <span>{cartItem.notes}</span>
+                        </div>
+                      )}
+                    </div>
 
                     {/* Quantity controls */}
                     <div className="flex items-center justify-between pt-1">
@@ -278,6 +327,20 @@ export const CartDrawer: React.FC = () => {
           ) : (
             /* STEP 2: CHECKOUT FORM */
             <form onSubmit={handleCheckoutSubmit} className="space-y-4">
+              {!businessHours.isOpen && (
+                <div className="p-3.5 bg-amber-50 border border-amber-300 rounded-2xl flex items-start gap-3 text-amber-900 shadow-sm">
+                  <Clock className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                  <div className="text-xs space-y-1">
+                    <p className="font-bold text-amber-950">
+                      ⏰ Confirmación de Pre-Orden (Fuera de Horario)
+                    </p>
+                    <p className="text-amber-800 leading-relaxed">
+                      Hora en Tarapoto: <strong>{businessHours.currentTimeString}</strong>. Al enviar tu pedido, quedará agendado para prepararse al inicio del turno de cocina.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {errorMessage && (
                 <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-300 text-xs flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 shrink-0" />

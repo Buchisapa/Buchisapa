@@ -7,6 +7,8 @@ export interface CartItem {
   item: MenuItem;
   quantity: number;
   selectedOption?: string;
+  selectedAccompaniments?: string[];
+  removedAccompaniments?: string[];
   selectedSauces: string[];
   notes?: string;
 }
@@ -33,7 +35,15 @@ export interface Order {
 
 interface CartContextType {
   cart: CartItem[];
-  addToCart: (item: MenuItem, quantity?: number, selectedOption?: string, selectedSauces?: string[], notes?: string) => void;
+  addToCart: (
+    item: MenuItem,
+    quantity?: number,
+    selectedOption?: string,
+    selectedSauces?: string[],
+    notes?: string,
+    selectedAccompaniments?: string[],
+    removedAccompaniments?: string[]
+  ) => void;
   removeFromCart: (cartId: string) => void;
   updateQuantity: (cartId: string, quantity: number) => void;
   clearCart: () => void;
@@ -90,10 +100,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     quantity: number = 1,
     selectedOption?: string,
     selectedSauces: string[] = ["Mayonesa", "Tártara", "Ají de Rocoto"],
-    notes?: string
+    notes?: string,
+    selectedAccompaniments?: string[],
+    removedAccompaniments?: string[]
   ) => {
     setCart(prevCart => {
-      const cartId = `${item.id}-${selectedOption || 'default'}-${selectedSauces.sort().join(',')}-${notes || ''}`;
+      const sidesKey = (removedAccompaniments || []).slice().sort().join(',');
+      const saucesKey = [...selectedSauces].sort().join(',');
+      const cartId = `${item.id}-${selectedOption || 'def'}-sides:${sidesKey}-sauces:${saucesKey}-${notes || ''}`;
       const existingIndex = prevCart.findIndex(ci => ci.cartId === cartId);
 
       if (existingIndex > -1) {
@@ -111,6 +125,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
             item,
             quantity,
             selectedOption,
+            selectedAccompaniments,
+            removedAccompaniments,
             selectedSauces,
             notes
           }

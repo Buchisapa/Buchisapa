@@ -91,6 +91,8 @@
         </div>
     </footer>
 
+    <script src="/public/js/businessHours.js"></script>
+    <script src="/public/js/cart.js"></script>
     <script src="/public/js/app.js"></script>
     @yield('scripts')
 </body>

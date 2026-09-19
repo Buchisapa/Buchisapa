@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Helpers\BusinessHoursHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -70,12 +71,19 @@ class OrderController extends Controller
             // Limpiar carrito si existía en sesión
             $request->session()->forget('cart');
 
+            $scheduleStatus = BusinessHoursHelper::check();
+            $message = $scheduleStatus['is_open']
+                ? '¡Pedido recibido con éxito! En breve comenzaremos su preparación al carbón.'
+                : '¡Pre-orden recibida! Su pedido ha sido registrado fuera del horario regular y será preparado apenas inicie el turno.';
+
             return response()->json([
                 'success' => true,
                 'order_id' => $order->id,
                 'order_number' => $order->order_number,
                 'total' => $order->total,
-                'message' => '¡Pedido recibido con éxito! En breve comenzaremos su preparación al carbón.'
+                'is_open' => $scheduleStatus['is_open'],
+                'schedule_warning' => $scheduleStatus['warning'],
+                'message' => $message
             ], 201);
         });
     }

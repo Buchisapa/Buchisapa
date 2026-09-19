@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Minus, ChevronDown, ChevronUp, Check, ShieldAlert } from 'lucide-react';
+import {
+  ArrowLeft,
+  X,
+  Plus,
+  Minus,
+  Check,
+  Sparkles,
+  ShieldAlert,
+  Utensils,
+  CheckCheck,
+  RotateCcw
+} from 'lucide-react';
 import { MenuItem, SAUCES_LIST } from '../data/menuData';
 import { useCart } from '../context/CartContext';
 
@@ -8,120 +19,25 @@ interface ProductDetailModalProps {
   onClose: () => void;
 }
 
-interface CustomOptionSection {
-  id: string;
-  title: string;
-  required: boolean;
-  choices: string[];
-}
-
 export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ item, onClose }) => {
   const { addToCart } = useCart();
+  const CLASSIC_SAUCES = ['Mayonesa', 'Mostaza', 'Ketchup', 'Ají de Rocoto'];
+
   const [quantity, setQuantity] = useState(1);
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
-  const [selectedChoices, setSelectedChoices] = useState<Record<string, string>>({});
+  const [selectedAccompaniments, setSelectedAccompaniments] = useState<string[]>([]);
   const [selectedSauces, setSelectedSauces] = useState<string[]>([
     'Mayonesa',
-    'Tártara',
+    'Mostaza',
+    'Ketchup',
     'Ají de Rocoto',
   ]);
   const [notes, setNotes] = useState('');
   const [showAllergens, setShowAllergens] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
 
-  // Generate dynamic customization sections based on item category
-  const sections: CustomOptionSection[] = React.useMemo(() => {
-    if (!item) return [];
-
-    const list: CustomOptionSection[] = [];
-
-    // 1. Primary choice (Sánguche / Presa / Término / Preparación)
-    if (item.category === 'hamburguesas') {
-      list.push({
-        id: 'sanguche',
-        title: 'Sánguche',
-        required: true,
-        choices: [
-          'Pan Brioche Brasa',
-          'Pan Clásico Tostado',
-          'Pan Integral de Granos',
-        ],
-      });
-    } else if (item.category === 'broaster') {
-      list.push({
-        id: 'presa',
-        title: 'Presa Broaster',
-        required: true,
-        choices: [
-          'Pecho Broaster Crocante',
-          'Pierna Broaster Crocante',
-          'Encuentro Broaster Jugoso',
-        ],
-      });
-    } else if (item.category === 'amazonicos') {
-      list.push({
-        id: 'guarnicion_selva',
-        title: 'Preparación / Estilo',
-        required: true,
-        choices: [
-          'Tacacho Tradicional con Cecina',
-          'Plátano Bellaco Frito con Cecina',
-          'Yuca Frita Amazónica',
-        ],
-      });
-    } else if (item.category === 'alitas') {
-      list.push({
-        id: 'salsa_alitas',
-        title: 'Sabor de Baño',
-        required: true,
-        choices: [
-          'Salsa BBQ Ahumada Artesanal',
-          'Salsa Acevichada Especial',
-          'Alitas Crocantes Naturales',
-        ],
-      });
-    } else if (item.options && item.options.length > 0) {
-      list.push({
-        id: 'opcion_principal',
-        title: item.options[0].name,
-        required: true,
-        choices: item.options[0].choices,
-      });
-    }
-
-    // 2. Complemento / Guarnición
-    if (item.category !== 'bebidas' && item.category !== 'refrescos') {
-      list.push({
-        id: 'complemento',
-        title: 'Complemento',
-        required: true,
-        choices: [
-          'Papas Fritas (1 Ají y 1 Mayonesa)',
-          'Papas Doradas Nativas',
-          'Ensalada Fresca de la Casa',
-          'Yuca Frita Crocante',
-        ],
-      });
-    }
-
-    // 3. Bebida
-    list.push({
-      id: 'bebida',
-      title: 'Bebida',
-      required: true,
-      choices: [
-        'Chicha Pardos Personal (500ml)',
-        'Botella Inca Kola Personal',
-        'Botella Inca Kola sin azúcar Personal',
-        'Botella Coca Cola Personal',
-        'Botella Coca Cola sin azúcar Personal',
-        'Refresco Natural de Cocona (500ml)',
-        'Sin bebida adicional',
-      ],
-    });
-
-    return list;
-  }, [item]);
+  // Non-beverage detection
+  const isBeverage = item?.category === 'bebidas' || item?.category === 'refrescos';
+  const hasAccompaniments = !!item?.includes && item.includes.length > 0;
 
   useEffect(() => {
     if (item) {
@@ -130,350 +46,414 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ item, on
       setIsAdded(false);
       setShowAllergens(false);
 
-      // Default selections for each section
-      const defaults: Record<string, string> = {};
-      const initialOpen: Record<string, boolean> = {};
+      // Default accompaniments (all included by default)
+      if (item.includes && item.includes.length > 0) {
+        setSelectedAccompaniments([...item.includes]);
+      } else {
+        setSelectedAccompaniments([]);
+      }
 
-      sections.forEach((sec, idx) => {
-        defaults[sec.id] = sec.choices[0];
-        // Open the last section (Bebida) as shown in the screenshot
-        if (sec.id === 'bebida') {
-          initialOpen[sec.id] = true;
-        } else {
-          initialOpen[sec.id] = false;
-        }
-      });
-
-      setSelectedChoices(defaults);
-      setOpenSections(initialOpen);
-      setSelectedSauces(['Mayonesa', 'Tártara', 'Ají de Rocoto']);
+      // Default sauces (if savory item, default to the 4 classics)
+      if (!isBeverage) {
+        setSelectedSauces(['Mayonesa', 'Mostaza', 'Ketchup', 'Ají de Rocoto']);
+      } else {
+        setSelectedSauces([]);
+      }
     }
-  }, [item, sections]);
+  }, [item, isBeverage]);
 
   if (!item) return null;
 
-  const toggleSection = (sectionId: string) => {
-    setOpenSections((prev) => ({
-      ...prev,
-      [sectionId]: !prev[sectionId],
-    }));
-  };
-
-  const handleSelectChoice = (sectionId: string, choice: string) => {
-    setSelectedChoices((prev) => ({
-      ...prev,
-      [sectionId]: choice,
-    }));
-  };
-
-  const toggleSauce = (sauce: string) => {
-    if (selectedSauces.includes(sauce)) {
-      setSelectedSauces(selectedSauces.filter((s) => s !== sauce));
+  // Toggle single accompaniment
+  const toggleAccompaniment = (acc: string) => {
+    if (selectedAccompaniments.includes(acc)) {
+      setSelectedAccompaniments(prev => prev.filter(a => a !== acc));
     } else {
-      setSelectedSauces([...selectedSauces, sauce]);
+      setSelectedAccompaniments(prev => [...prev, acc]);
     }
   };
 
-  const handleAddToCart = () => {
-    const combinedOption = Object.entries(selectedChoices)
-      .map(([k, v]) => `${k}: ${v}`)
-      .join(' | ');
+  const selectAllAccompaniments = () => {
+    if (item.includes) {
+      setSelectedAccompaniments([...item.includes]);
+    }
+  };
 
-    addToCart(item, quantity, combinedOption, selectedSauces, notes);
+  const removeAllAccompaniments = () => {
+    setSelectedAccompaniments([]);
+  };
+
+  // Sauces
+  const toggleSauce = (sauce: string) => {
+    if (selectedSauces.includes(sauce)) {
+      setSelectedSauces(prev => prev.filter(s => s !== sauce));
+    } else {
+      setSelectedSauces(prev => [...prev, sauce]);
+    }
+  };
+
+  const selectAllSauces = () => {
+    setSelectedSauces([...SAUCES_LIST]);
+  };
+
+  const selectClassicSauces = () => {
+    setSelectedSauces([...CLASSIC_SAUCES]);
+  };
+
+  const removeAllSauces = () => {
+    setSelectedSauces([]);
+  };
+
+  // Removed accompaniments
+  const removedAccompaniments = (item.includes || []).filter(
+    acc => !selectedAccompaniments.includes(acc)
+  );
+
+  const handleAddToCart = () => {
+    addToCart(
+      item,
+      quantity,
+      undefined,
+      selectedSauces,
+      notes,
+      selectedAccompaniments,
+      removedAccompaniments
+    );
+
     setIsAdded(true);
     setTimeout(() => {
       onClose();
-    }, 450);
+    }, 400);
   };
 
   const totalPrice = (item.price * quantity).toFixed(2);
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-white min-h-screen flex flex-col justify-between">
-      {/* Container max-w matching the exact mobile/desktop view */}
-      <div className="w-full max-w-xl mx-auto flex-1 flex flex-col px-4 sm:px-6 py-4 pb-28">
-        {/* 1. Top Volver Header (Exact Screenshot_20260918-001124_Chrome.png) */}
-        <div className="flex items-center justify-between pb-3 border-b border-neutral-100 mb-3">
+    <div className="fixed inset-0 z-50 bg-black/65 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden">
+      {/* Modal Dialog Card */}
+      <div className="relative w-full max-w-lg bg-white rounded-t-[28px] sm:rounded-3xl max-h-[92vh] sm:max-h-[88vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200">
+        
+        {/* Modal Top Header (Fixed/Sticky at the top of modal) */}
+        <div className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-3.5 border-b border-neutral-100 bg-white shrink-0 z-20">
           <button
+            type="button"
             onClick={onClose}
-            className="inline-flex items-center gap-1.5 text-neutral-800 hover:text-[#E6192B] font-bold text-sm sm:text-base py-1 px-1 rounded-xl transition-all cursor-pointer"
+            className="inline-flex items-center gap-1.5 text-neutral-700 hover:text-[#E6192B] font-bold text-xs sm:text-sm py-1 px-1.5 rounded-lg hover:bg-neutral-100 transition-all cursor-pointer"
           >
-            <ArrowLeft className="w-5 h-5 stroke-[2.5]" />
+            <ArrowLeft className="w-4 h-4 stroke-[2.5]" />
             <span>Volver</span>
+          </button>
+
+          <span className="text-[11px] font-extrabold uppercase tracking-wider text-neutral-500 bg-neutral-100 px-2.5 py-1 rounded-full">
+            {item.category.replace('-', ' ')}
+          </span>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-7 h-7 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-600 flex items-center justify-center transition-all cursor-pointer"
+            aria-label="Cerrar"
+          >
+            <X className="w-4 h-4 stroke-[2.5]" />
           </button>
         </div>
 
-        {/* 2. Product Title & Quantity Controls Header */}
-        <div className="flex items-start justify-between gap-3 mb-4">
-          <h1 className="text-lg sm:text-xl font-black text-neutral-900 leading-snug font-heading flex-1">
-            {item.name}
-          </h1>
-
-          {/* Inline Quantity Controls [-] 1 [+] */}
-          <div className="flex items-center gap-2.5 shrink-0 pt-0.5">
-            <button
-              onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              disabled={quantity <= 1}
-              className="w-7 h-7 rounded-full border border-neutral-300 flex items-center justify-center text-neutral-400 hover:text-neutral-700 disabled:opacity-30 transition-all cursor-pointer bg-white"
-              aria-label="Disminuir cantidad"
-            >
-              <Minus className="w-3.5 h-3.5 stroke-[2.5]" />
-            </button>
-            <span className="text-sm sm:text-base font-bold text-neutral-800 min-w-[14px] text-center">
-              {quantity}
-            </span>
-            <button
-              onClick={() => setQuantity(quantity + 1)}
-              className="w-7 h-7 rounded-full border border-red-300 flex items-center justify-center text-red-500 hover:text-red-700 active:scale-95 transition-all cursor-pointer bg-white"
-              aria-label="Aumentar cantidad"
-            >
-              <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-            </button>
-          </div>
-        </div>
-
-        {/* 3. Big Product Image Full Width (Exact to Screenshot) */}
-        <div className="w-full aspect-[4/3] sm:aspect-[16/10] rounded-3xl overflow-hidden bg-neutral-100 mb-4 shadow-[0_4px_16px_rgba(0,0,0,0.06)] border border-neutral-100">
-          <img
-            src={item.image}
-            alt={item.name}
-            className="w-full h-full object-cover"
-          />
-        </div>
-
-        {/* 4. Description and Price Row */}
-        <div className="flex items-start justify-between gap-4 mb-5 pb-4 border-b border-neutral-100">
-          <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed flex-1 font-normal">
-            {item.description}
-          </p>
-          <div className="text-right shrink-0">
-            <span className="text-lg sm:text-xl font-black text-neutral-900 tracking-tight whitespace-nowrap">
-              S/ {item.price.toFixed(2)}
-            </span>
-          </div>
-        </div>
-
-        {/* 5. Instruction Title Banner */}
-        <div className="mb-3.5">
-          <h2 className="text-sm sm:text-base font-black text-neutral-900 leading-tight font-heading">
-            Por favor, elige todas las opciones necesarias para avanzar con tu pedido.
-          </h2>
-        </div>
-
-        {/* 6. Accordion Customization Sections */}
-        <div className="space-y-2.5 mb-5">
-          {sections.map((sec) => {
-            const isOpen = !!openSections[sec.id];
-            const selectedValue = selectedChoices[sec.id];
-
-            return (
-              <div
-                key={sec.id}
-                className="bg-white rounded-2xl border border-neutral-200/90 shadow-xs overflow-hidden transition-all"
-              >
-                {/* Accordion Bar Header */}
-                <button
-                  type="button"
-                  onClick={() => toggleSection(sec.id)}
-                  className="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-neutral-50/80 transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center flex-wrap gap-1.5 pr-2">
-                    <span className="font-bold text-sm sm:text-base text-neutral-900">
-                      {sec.title}:
-                    </span>
-                    {isOpen ? (
-                      <span className="bg-neutral-400 text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded">
-                        {sec.required ? 'Obligatorio' : 'Opcional'}
-                      </span>
-                    ) : (
-                      selectedValue && (
-                        <span className="text-emerald-700 font-semibold text-xs sm:text-sm">
-                          ({selectedValue})
-                        </span>
-                      )
-                    )}
-                  </div>
-
-                  <div className="shrink-0 text-neutral-800">
-                    {isOpen ? (
-                      <ChevronUp className="w-5 h-5 stroke-[2.5]" />
-                    ) : (
-                      <ChevronDown className="w-5 h-5 stroke-[2.5]" />
-                    )}
-                  </div>
-                </button>
-
-                {/* Accordion Radio Options List (Screenshot_20260918-001128_Chrome.png) */}
-                {isOpen && (
-                  <div className="px-4 pb-4 pt-1 space-y-3 border-t border-neutral-100 bg-white">
-                    {sec.choices.map((choice) => {
-                      const isSelected = selectedValue === choice;
-                      return (
-                        <label
-                          key={choice}
-                          onClick={() => handleSelectChoice(sec.id, choice)}
-                          className="flex items-center gap-3 py-1 cursor-pointer group select-none"
-                        >
-                          {/* Circular Radio Indicator */}
-                          <div
-                            className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all shrink-0 ${
-                              isSelected
-                                ? 'border-neutral-900 bg-white'
-                                : 'border-neutral-300 group-hover:border-neutral-400 bg-white'
-                            }`}
-                          >
-                            {isSelected && (
-                              <div className="w-2.5 h-2.5 rounded-full bg-neutral-900" />
-                            )}
-                          </div>
-                          <span
-                            className={`text-xs sm:text-sm leading-snug ${
-                              isSelected
-                                ? 'text-neutral-900 font-medium'
-                                : 'text-neutral-700 font-normal'
-                            }`}
-                          >
-                            {choice}
-                          </span>
-                        </label>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-
-          {/* Salsas y Cremas Section */}
-          <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-xs overflow-hidden">
-            <button
-              type="button"
-              onClick={() =>
-                setOpenSections((p) => ({ ...p, salsas: !p.salsas }))
-              }
-              className="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-neutral-50/80 transition-colors cursor-pointer"
-            >
-              <div className="flex items-center flex-wrap gap-1.5 pr-2">
-                <span className="font-bold text-sm sm:text-base text-neutral-900">
-                  Salsas y Cremas:
-                </span>
-                {!openSections.salsas ? (
-                  <span className="text-emerald-700 font-semibold text-xs sm:text-sm">
-                    ({selectedSauces.length} seleccionadas)
-                  </span>
-                ) : (
-                  <span className="bg-neutral-300 text-neutral-700 text-[10px] font-bold uppercase px-2 py-0.5 rounded">
-                    Opcional
-                  </span>
-                )}
-              </div>
-              <div className="shrink-0 text-neutral-800">
-                {openSections.salsas ? (
-                  <ChevronUp className="w-5 h-5 stroke-[2.5]" />
-                ) : (
-                  <ChevronDown className="w-5 h-5 stroke-[2.5]" />
-                )}
-              </div>
-            </button>
-
-            {openSections.salsas && (
-              <div className="px-4 pb-4 pt-1 border-t border-neutral-100 bg-white">
-                <div className="grid grid-cols-2 gap-2 pt-1">
-                  {SAUCES_LIST.map((sauce) => {
-                    const isChecked = selectedSauces.includes(sauce);
-                    return (
-                      <button
-                        key={sauce}
-                        type="button"
-                        onClick={() => toggleSauce(sauce)}
-                        className={`text-left px-2.5 py-2 rounded-xl border text-xs font-medium transition-all flex items-center justify-between cursor-pointer ${
-                          isChecked
-                            ? 'bg-red-50 border-[#E6192B] text-neutral-900'
-                            : 'bg-white border-neutral-200 text-neutral-600 hover:border-neutral-300'
-                        }`}
-                      >
-                        <span className="line-clamp-1">{sauce}</span>
-                        {isChecked && (
-                          <Check className="w-3.5 h-3.5 text-[#E6192B] shrink-0" />
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+        {/* Scrollable Modal Content */}
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-4.5 overscroll-contain">
+          
+          {/* Hero Image */}
+          <div className="w-full aspect-[16/10] rounded-2xl overflow-hidden bg-neutral-100 relative shadow-sm border border-neutral-100">
+            <img
+              src={item.image}
+              alt={item.name}
+              className="w-full h-full object-cover"
+            />
+            {item.badge && (
+              <span className="absolute top-3 left-3 bg-amber-500 text-neutral-950 font-black text-[11px] uppercase px-2.5 py-1 rounded-lg shadow-sm">
+                ★ {item.badge}
+              </span>
+            )}
+            {item.popular && !item.badge && (
+              <span className="absolute top-3 left-3 bg-[#E6192B] text-white font-black text-[11px] uppercase px-2.5 py-1 rounded-lg shadow-sm">
+                🔥 Favorito
+              </span>
             )}
           </div>
 
-          {/* Special Instructions Note Input */}
-          <div className="pt-2">
-            <label className="text-xs font-bold text-neutral-700 block mb-1">
-              Indicaciones especiales para la cocina
+          {/* Title, Price and Description */}
+          <div className="space-y-1.5">
+            <div className="flex items-start justify-between gap-3">
+              <h1 className="text-xl sm:text-2xl font-black text-neutral-900 leading-tight font-heading">
+                {item.name}
+              </h1>
+              <span className="text-xl sm:text-2xl font-black text-[#E6192B] tracking-tight font-mono shrink-0">
+                S/ {item.price.toFixed(2)}
+              </span>
+            </div>
+
+            <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed font-normal">
+              {item.description}
+            </p>
+          </div>
+
+          {/* SECTION 1: ACOMPAÑAMIENTOS E INGREDIENTES */}
+          {hasAccompaniments && (
+            <div className="bg-neutral-50/80 rounded-2xl border border-neutral-200/80 p-3.5 sm:p-4 space-y-3">
+              <div className="flex items-center justify-between gap-2 pb-2 border-b border-neutral-200/60">
+                <div className="flex items-center gap-1.5">
+                  <Utensils className="w-4 h-4 text-[#E6192B]" />
+                  <h2 className="text-xs sm:text-sm font-bold text-neutral-900">
+                    Acompañamientos
+                  </h2>
+                </div>
+
+                {/* Quick actions */}
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={selectAllAccompaniments}
+                    className="px-2 py-1 bg-white hover:bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] sm:text-[11px] font-bold rounded-lg transition-all cursor-pointer flex items-center gap-1"
+                  >
+                    <CheckCheck className="w-3 h-3" />
+                    <span>Con todo</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={removeAllAccompaniments}
+                    className="px-2 py-1 bg-white hover:bg-neutral-100 text-neutral-600 border border-neutral-200 text-[10px] sm:text-[11px] font-bold rounded-lg transition-all cursor-pointer flex items-center gap-1"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    <span>Quitar todo</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Accompaniments Checkbox Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {item.includes?.map((acc) => {
+                  const isIncluded = selectedAccompaniments.includes(acc);
+                  return (
+                    <button
+                      key={acc}
+                      type="button"
+                      onClick={() => toggleAccompaniment(acc)}
+                      className={`p-2.5 rounded-xl border text-xs font-semibold flex items-center justify-between transition-all cursor-pointer text-left ${
+                        isIncluded
+                          ? 'bg-white border-emerald-300 text-neutral-900 shadow-2xs'
+                          : 'bg-white border-neutral-200 text-neutral-700 hover:border-neutral-300'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <div
+                          className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 transition-colors ${
+                            isIncluded
+                              ? 'bg-emerald-600 border-emerald-600 text-white'
+                              : 'bg-white border-neutral-300'
+                          }`}
+                        >
+                          {isIncluded && <Check className="w-3 h-3 stroke-[3]" />}
+                        </div>
+                        <span className={isIncluded ? 'text-neutral-900 font-medium' : 'text-neutral-700 font-normal'}>
+                          {acc}
+                        </span>
+                      </div>
+
+                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded transition-colors ${
+                        isIncluded
+                          ? 'text-emerald-700 bg-emerald-50'
+                          : 'text-neutral-500 bg-neutral-100'
+                      }`}>
+                        {isIncluded ? 'Incluido' : 'Sin esto'}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Removed note banner */}
+              {removedAccompaniments.length > 0 && (
+                <div className="p-2 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-900 text-[11px] flex items-center gap-1.5">
+                  <span className="font-bold shrink-0">⚠️ Nota:</span>
+                  <span>Sin {removedAccompaniments.join(', ')}</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* SECTION 2: CREMAS Y SALSAS */}
+          {!isBeverage && (
+            <div className="bg-neutral-50/80 rounded-2xl border border-neutral-200/80 p-3.5 sm:p-4 space-y-3">
+              <div className="flex items-center justify-between gap-2 pb-2 border-b border-neutral-200/60">
+                <div className="flex items-center gap-1.5">
+                  <Sparkles className="w-4 h-4 text-[#E6192B]" />
+                  <h2 className="text-xs sm:text-sm font-bold text-neutral-900">
+                    Cremas y Salsas
+                  </h2>
+                </div>
+
+                {/* Quick actions for sauces */}
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={selectAllSauces}
+                    className="px-2 py-1 bg-white hover:bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] sm:text-[11px] font-bold rounded-lg transition-all cursor-pointer flex items-center gap-1"
+                  >
+                    <CheckCheck className="w-3 h-3" />
+                    <span>Con todo</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={selectClassicSauces}
+                    className="px-2 py-1 bg-white hover:bg-amber-50 text-amber-900 border border-amber-200 text-[10px] sm:text-[11px] font-bold rounded-lg transition-all cursor-pointer"
+                  >
+                    Clásicas
+                  </button>
+                  <button
+                    type="button"
+                    onClick={removeAllSauces}
+                    className="px-2 py-1 bg-white hover:bg-neutral-100 text-neutral-600 border border-neutral-200 text-[10px] sm:text-[11px] font-bold rounded-lg transition-all cursor-pointer flex items-center gap-1"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    <span>Sin cremas</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Sauces Grid matching Accompaniments design */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {SAUCES_LIST.map((sauce) => {
+                  const isChecked = selectedSauces.includes(sauce);
+                  return (
+                    <button
+                      key={sauce}
+                      type="button"
+                      onClick={() => toggleSauce(sauce)}
+                      className={`p-2.5 rounded-xl border text-xs font-semibold flex items-center justify-between transition-all cursor-pointer text-left ${
+                        isChecked
+                          ? 'bg-white border-emerald-300 text-neutral-900 shadow-2xs'
+                          : 'bg-white border-neutral-200 text-neutral-700 hover:border-neutral-300'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <div
+                          className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 transition-colors ${
+                            isChecked
+                              ? 'bg-emerald-600 border-emerald-600 text-white'
+                              : 'bg-white border-neutral-300'
+                          }`}
+                        >
+                          {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
+                        </div>
+                        <span className={isChecked ? 'text-neutral-900 font-medium' : 'text-neutral-700 font-normal'}>
+                          {sauce}
+                        </span>
+                      </div>
+
+                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded transition-colors ${
+                        isChecked
+                          ? 'text-emerald-700 bg-emerald-50'
+                          : 'text-neutral-500 bg-neutral-100'
+                      }`}>
+                        {isChecked ? 'Incluido' : 'Sin esto'}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Removed sauces note banner */}
+              {selectedSauces.length === 0 && (
+                <div className="p-2 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-900 text-[11px] flex items-center gap-1.5">
+                  <span className="font-bold shrink-0">⚠️ Nota:</span>
+                  <span>Sin cremas ni salsas</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* SECTION 3: INDICACIONES ESPECIALES */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-neutral-700 block">
+              Indicaciones especiales para cocina (opcional)
             </label>
             <input
               type="text"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Ej: Sin ensalada, papas bien doradas..."
-              className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-3.5 py-2.5 text-xs text-neutral-900 placeholder-neutral-400 focus:bg-white focus:outline-none focus:border-neutral-400 transition-all"
+              placeholder="Ej: Papas bien doraditas, cremas aparte, sin ensalada..."
+              className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-3.5 py-2.5 text-xs text-neutral-900 placeholder-neutral-400 focus:bg-white focus:outline-none focus:border-[#E6192B] transition-all"
             />
+          </div>
+
+          {/* Allergen link */}
+          <div className="text-xs text-neutral-500 pb-2">
+            <p>
+              ¿Tienes alguna alergia alimentaria?{' '}
+              <button
+                type="button"
+                onClick={() => setShowAllergens(!showAllergens)}
+                className="text-[#E6192B] font-semibold underline cursor-pointer hover:text-red-700"
+              >
+                Ver información de alérgenos
+              </button>
+            </p>
+
+            {showAllergens && (
+              <div className="mt-2 p-2.5 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-900 text-[11px] space-y-1">
+                <div className="flex items-center gap-1.5 font-bold text-amber-950">
+                  <ShieldAlert className="w-3.5 h-3.5 text-amber-600" />
+                  <span>Información de Alérgenos:</span>
+                </div>
+                <p>
+                  Nuestros productos pueden contener o entrar en contacto con gluten (trigo), huevos, lácteos, soya y ajonjolí.
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* 7. Allergen Warning Text (Exact to Screenshot) */}
-        <div className="pt-2 pb-3 text-xs text-neutral-600">
-          <p>
-            Si tienes alguna alergia por favor revisa nuestra{' '}
+        {/* Sticky Modal Bottom Action Bar (always cleanly pinned inside the modal) */}
+        <div className="sticky bottom-0 bg-white border-t border-neutral-200/80 px-4 py-3 sm:px-6 sm:py-3.5 shadow-[0_-6px_20px_rgba(0,0,0,0.08)] z-30 flex items-center gap-3">
+          
+          {/* Quantity Stepper Pill */}
+          <div className="flex items-center gap-2 bg-neutral-100 px-2.5 py-1.5 rounded-2xl border border-neutral-200/80 shrink-0">
             <button
               type="button"
-              onClick={() => setShowAllergens(!showAllergens)}
-              className="text-[#E6192B] font-semibold underline cursor-pointer hover:text-red-700"
+              onClick={() => setQuantity(Math.max(1, quantity - 1))}
+              disabled={quantity <= 1}
+              className="w-7 h-7 rounded-xl bg-white shadow-2xs flex items-center justify-center text-neutral-700 hover:text-neutral-900 disabled:opacity-30 active:scale-95 transition-all cursor-pointer"
+              aria-label="Disminuir cantidad"
             >
-              Carta de Alérgenos
+              <Minus className="w-3.5 h-3.5 stroke-[2.5]" />
             </button>
-          </p>
+            <span className="text-sm font-black text-neutral-900 min-w-[18px] text-center font-mono">
+              {quantity}
+            </span>
+            <button
+              type="button"
+              onClick={() => setQuantity(quantity + 1)}
+              className="w-7 h-7 rounded-xl bg-white shadow-2xs flex items-center justify-center text-neutral-700 hover:text-neutral-900 active:scale-95 transition-all cursor-pointer"
+              aria-label="Aumentar cantidad"
+            >
+              <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+            </button>
+          </div>
 
-          {showAllergens && (
-            <div className="mt-2.5 p-3 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-900 text-xs space-y-1 animate-in fade-in duration-150">
-              <div className="flex items-center gap-1.5 font-bold text-amber-950">
-                <ShieldAlert className="w-4 h-4 text-amber-600" />
-                <span>Información de Alérgenos Buchisapa:</span>
-              </div>
-              <p className="text-[11px] leading-relaxed">
-                Nuestros productos pueden contener o entrar en contacto con
-                gluten (trigo), huevos (mayonesas), lácteos (queso), soya y
-                ajonjolí. Si tienes requerimientos especiales, indícalo en las
-                notas.
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* 8. Fixed Bottom Action Bar with Pill Button (Exact Screenshot_20260918-001128_Chrome.png) */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md px-4 py-3 border-t border-neutral-100 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] flex justify-center">
-        <div className="w-full max-w-md">
+          {/* Add to Cart CTA Button */}
           <button
             id="product-detail-add-btn"
             type="button"
             onClick={handleAddToCart}
-            className={`w-full py-3.5 px-4 rounded-full font-bold text-xs sm:text-sm flex items-center justify-between shadow-md active:scale-98 transition-all cursor-pointer ${
+            className={`flex-1 py-3 px-4 rounded-2xl font-bold text-xs sm:text-sm flex items-center justify-between shadow-md shadow-red-500/20 active:scale-98 transition-all cursor-pointer ${
               isAdded
                 ? 'bg-emerald-600 text-white'
                 : 'bg-[#E6192B] hover:bg-[#c91222] text-white'
             }`}
           >
-            {/* Left Quantity Circle Pill */}
-            <span className="w-6 h-6 rounded-full bg-white/25 text-white flex items-center justify-center text-xs font-bold shrink-0">
-              {quantity}
+            <span className="truncate pr-2 font-bold">
+              {isAdded ? '✓ Agregado al pedido' : 'Agregar a mi pedido'}
             </span>
-
-            {/* Center Label */}
-            <span className="text-center font-bold px-2 truncate">
-              {isAdded ? '¡Agregado al pedido!' : 'Agregar a mi pedido'}
-            </span>
-
-            {/* Right Total Price */}
-            <span className="text-xs sm:text-sm font-black whitespace-nowrap">
+            <span className="text-xs sm:text-sm font-black whitespace-nowrap font-mono">
               S/ {totalPrice}
             </span>
           </button>

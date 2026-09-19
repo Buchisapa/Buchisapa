@@ -116,6 +116,11 @@ const BuchisapaCart = {
 
     if (subtotalEl) subtotalEl.textContent = `S/ ${this.getSubtotal().toFixed(2)}`;
     if (totalEl) totalEl.textContent = `S/ ${this.getTotal().toFixed(2)}`;
+
+    // Renderizar advertencia de horario si existe el utilitario
+    if (window.BuchisapaBusinessHours) {
+      window.BuchisapaBusinessHours.renderWarningInto('cart-schedule-warning-container');
+    }
   },
 
   openDrawer() {
