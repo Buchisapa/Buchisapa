@@ -1,4 +1,5 @@
 export { AdminPanelModal } from './AdminPanelModal';
+export { AdminOverviewTab } from './AdminOverviewTab';
 export { AdminAuthLogin } from './AdminAuthLogin';
 export { AdminOrdersTab } from './AdminOrdersTab';
 export { AdminMenuTab } from './AdminMenuTab';
