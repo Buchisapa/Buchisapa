@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pantalla de Cocina (KDS) - Buchisapa</title>
-  <link rel="stylesheet" href="/css/style.css">
-  <link rel="stylesheet" href="/css/kitchen.css">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/kitchen.css">
 </head>
 <body>
   <div class="kds-container">
@@ -14,7 +14,8 @@
         <span>🍗 BUCHISAPA</span>
         <span style="font-size: 16px; color: #94a3b8; font-weight: normal;">| Sistema KDS de Cocina en Vivo</span>
       </div>
-      <div>
+      <div style="display: flex; gap: 10px;">
+        <a href="index.html" class="kds-btn kds-btn-print" style="text-decoration: none; display: inline-flex; align-items: center;">🏠 Ver Menú</a>
         <button class="kds-btn kds-btn-print" onclick="fetchOrders()">🔄 Actualizar</button>
       </div>
     </header>
@@ -48,7 +49,7 @@
     </main>
   </div>
 
-  <script src="/js/supabase.js"></script>
-  <script src="/js/kitchen.js"></script>
+  <script src="../js/supabase.js"></script>
+  <script src="../js/kitchen.js"></script>
 </body>
 </html>

@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Libro de Reclamaciones Virtual - Buchisapa</title>
-  <link rel="stylesheet" href="/css/style.css">
-  <link rel="stylesheet" href="/css/modals.css">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/modals.css">
 </head>
 <body style="background-color: #f1f5f9; padding: 24px 0;">
   <div class="container" style="max-width: 760px;">
@@ -88,14 +88,17 @@
           <textarea id="claim-detail" class="form-textarea" rows="4" required placeholder="Describa de manera clara los motivos de su reclamo o queja..."></textarea>
         </div>
 
-        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px; font-size: 16px; margin-top: 12px;">
-          📋 Enviar y Registrar Reclamo Oficial
-        </button>
+        <div style="display: flex; gap: 10px; margin-top: 16px;">
+          <a href="index.html" class="btn btn-secondary" style="flex: 1; text-decoration: none;">Volver al Menú</a>
+          <button type="submit" class="btn btn-primary" style="flex: 2; padding: 14px; font-size: 15px;">
+            📋 Enviar Reclamo Oficial
+          </button>
+        </div>
       </form>
     </div>
   </div>
 
-  <script src="/js/supabase.js"></script>
+  <script src="../js/supabase.js"></script>
   <script>
     async function submitClaimForm(e) {
       e.preventDefault();
@@ -115,7 +118,7 @@
       try {
         const res = await window.BuchisapaAPI.createClaim(payload);
         alert('Reclamo registrado con éxito. Código de constancia: ' + (res.claimNumber || 'REC-' + Date.now()));
-        window.location.href = '/';
+        window.location.href = 'index.html';
       } catch (err) {
         alert('Error al guardar el reclamo. Por favor intente nuevamente.');
       }
