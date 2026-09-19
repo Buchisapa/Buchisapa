@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pantalla de Cocina (KDS) - Buchisapa</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/kitchen.css">
+</head>
+<body>
+  <div class="kds-container">
+    <header class="kds-header">
+      <div class="kds-title">
+        <span>🍗 BUCHISAPA</span>
+        <span style="font-size: 16px; color: #94a3b8; font-weight: normal;">| Sistema KDS de Cocina en Vivo</span>
+      </div>
+      <div>
+        <button class="kds-btn kds-btn-print" onclick="fetchOrders()">🔄 Actualizar</button>
+      </div>
+    </header>
+
+    <main class="kds-columns-grid">
+      <!-- Columna 1: Recibidos -->
+      <section class="kds-column">
+        <div class="kds-column-header recibido">
+          <span>🔔 RECIBIDOS / NUEVOS</span>
+        </div>
+        <div class="kds-orders-list" id="kds-recibidos">
+          <div style="text-align: center; color: #6b7280; padding: 20px;">Cargando pedidos...</div>
+        </div>
+      </section>
+
+      <!-- Columna 2: En Preparación -->
+      <section class="kds-column">
+        <div class="kds-column-header en_preparacion">
+          <span>🧑‍🍳 EN PREPARACIÓN AL CARBÓN</span>
+        </div>
+        <div class="kds-orders-list" id="kds-preparacion"></div>
+      </section>
+
+      <!-- Columna 3: Listos para Despacho -->
+      <section class="kds-column">
+        <div class="kds-column-header listo">
+          <span>🛵 LISTOS PARA DELIVERY / MESA</span>
+        </div>
+        <div class="kds-orders-list" id="kds-listos"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/js/supabase.js"></script>
+  <script src="/js/kitchen.js"></script>
+</body>
+</html>

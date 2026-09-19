@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BuchiSapa - Pollería & Sabor Amazónico | Tarapoto</title>
+  <!-- CSS Separado en carpeta /css/ -->
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/modals.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- HEADER NAVEGACIÓN -->
+  <header class="site-header">
+    <div class="container header-nav">
+      <a href="/" class="brand-logo">
+        <div class="logo-badge">🍗</div>
+        <div>
+          <div class="brand-name">BUCHISAPA</div>
+          <div class="brand-tag">Sabor Amazónico</div>
+        </div>
+      </a>
+
+      <div class="header-actions">
+        <a href="/cocina.html" class="btn btn-secondary" style="font-size: 13px;">🧑‍🍳 Cocina KDS</a>
+        <button class="btn btn-cart" onclick="BuchisapaCart.openDrawer()">
+          🛒 Carrito
+          <span class="cart-count-badge" id="cart-count-badge">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO BANNER -->
+  <section class="hero-section">
+    <div class="container hero-grid">
+      <div>
+        <h1 class="hero-title">El Verdadero Pollo al Carbón con Sazón Selvática</h1>
+        <p class="hero-desc">Pollo a la brasa dorado a la leña, chaufa con cecina ahumada de Tarapoto, mostritos y cremas artesanales.</p>
+        <div class="hero-stats">
+          <div class="hero-stat-card">
+            <div class="hero-stat-val">30 - 45 min</div>
+            <div class="hero-stat-label">Tiempo de Delivery</div>
+          </div>
+          <div class="hero-stat-card">
+            <div class="hero-stat-val">Tarapoto</div>
+            <div class="hero-stat-label">Cobertura Total</div>
+          </div>
+          <div class="hero-stat-card">
+            <div class="hero-stat-val">Yape / Plin</div>
+            <div class="hero-stat-label">Pagos y Efectivo</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CARTA Y CATÁLOGO -->
+  <main class="container">
+    <!-- FILTRO CATEGORÍAS -->
+    <div class="categories-bar">
+      <button class="category-tab active" onclick="filterCategory('all', this)">🔥 Toda la Carta</button>
+      <button class="category-tab" onclick="filterCategory('brasas', this)">🍗 Pollos a la Brasa</button>
+      <button class="category-tab" onclick="filterCategory('chaufas', this)">🍚 Chaufas Amazónicos</button>
+      <button class="category-tab" onclick="filterCategory('mostritos', this)">⭐ Mostritos</button>
+      <button class="category-tab" onclick="filterCategory('bebidas', this)">🥤 Bebidas Heladas</button>
+    </div>
+
+    <!-- GRID DE PRODUCTOS -->
+    <div class="products-grid" id="products-grid-container">
+      <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #94a3b8;">Cargando platos de Buchisapa...</div>
+    </div>
+  </main>
+
+  <!-- DRAWER DEL CARRITO DE COMPRAS -->
+  <div class="cart-drawer-backdrop" id="cart-drawer-modal">
+    <div class="cart-drawer">
+      <div class="modal-header">
+        <h2 class="modal-title">Tu Pedido</h2>
+        <button class="modal-close" onclick="BuchisapaCart.closeDrawer()">&times;</button>
+      </div>
+      <div class="cart-items-list" id="cart-items-container"></div>
+      <div class="cart-drawer-footer">
+        <div class="cart-summary-row">
+          <span>Subtotal:</span>
+          <span id="cart-subtotal">S/ 0.00</span>
+        </div>
+        <div class="cart-summary-row">
+          <span>Delivery estimado:</span>
+          <span>S/ 4.00</span>
+        </div>
+        <div class="cart-summary-row cart-summary-total">
+          <span>TOTAL A PAGAR:</span>
+          <span id="cart-total">S/ 0.00</span>
+        </div>
+        <button class="btn btn-primary" style="width: 100%; margin-top: 14px; padding: 14px;" onclick="openCheckoutModal()">
+          🛵 Proceder al Pago y Envío
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE CHECKOUT -->
+  <div class="modal-backdrop" id="checkout-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">Completar Datos de Entrega</h3>
+        <button class="modal-close" onclick="closeCheckoutModal()">&times;</button>
+      </div>
+      <form onsubmit="submitOrder(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Tu Nombre Completo *</label>
+            <input type="text" id="cust-name" class="form-input" required placeholder="Ej: Carlos Silva">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Celular / WhatsApp *</label>
+            <input type="tel" id="cust-phone" class="form-input" required placeholder="Ej: 927486448">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Dirección de Entrega</label>
+            <input type="text" id="cust-address" class="form-input" placeholder="Jr. San Martín 450, Tarapoto">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Método de Pago</label>
+            <select id="cust-payment" class="form-select">
+              <option value="yape">Yape / Plin (927 486 448)</option>
+              <option value="efectivo">Efectivo contraentrega</option>
+              <option value="tarjeta">Tarjeta POS Visa/Mastercard</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Notas para cocina / salsas extras</label>
+            <textarea id="cust-notes" class="form-textarea" rows="2" placeholder="Ej: Enviar ají extra, pollo parte pierna"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeCheckoutModal()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Confirmar Pedido</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div>
+        <h4 class="footer-heading">🍗 Buchisapa Tarapoto</h4>
+        <p style="font-size: 13px;">El sabor original del pollo a la brasa con el toque de la selva peruana.</p>
+      </div>
+      <div>
+        <h4 class="footer-heading">Horario de Atención</h4>
+        <p style="font-size: 13px;">Lunes a Domingo: 12:00 PM - 11:30 PM</p>
+        <p style="font-size: 13px; margin-top: 4px;">WhatsApp: +51 927 486 448</p>
+      </div>
+      <div>
+        <h4 class="footer-heading">Legal & Ayuda</h4>
+        <ul class="footer-links">
+          <li><a href="/libro-reclamaciones.html">📖 Libro de Reclamaciones</a></li>
+          <li><a href="/cocina.html">🧑‍🍳 Pantalla KDS Cocina</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom container">
+      © 2026 Buchisapa Restaurante. Todos los derechos reservados.
+    </div>
+  </footer>
+
+  <!-- JAVASCRIPT Separado en carpeta /js/ -->
+  <script src="/js/supabase.js"></script>
+  <script src="/js/cart.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

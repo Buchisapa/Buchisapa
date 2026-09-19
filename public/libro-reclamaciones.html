@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Libro de Reclamaciones Virtual - Buchisapa</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/modals.css">
+</head>
+<body style="background-color: #f1f5f9; padding: 24px 0;">
+  <div class="container" style="max-width: 760px;">
+    <div style="background: #fff; padding: 32px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: var(--shadow-md);">
+      
+      <div style="text-align: center; margin-bottom: 24px;">
+        <div style="font-size: 26px; font-weight: 900; color: #ea580c;">🍗 BUCHISAPA</div>
+        <h1 style="font-size: 20px; font-weight: 800; color: #0f172a; margin-top: 4px;">LIBRO DE RECLAMACIONES VIRTUAL</h1>
+        <p style="font-size: 13px; color: #64748b;">Conforme a lo establecido en el Código de Protección y Defensa del Consumidor - Ley N° 29571 (INDECOPI - Perú)</p>
+      </div>
+
+      <form id="claim-form" onsubmit="submitClaimForm(event)">
+        <h2 style="font-size: 15px; font-weight: 700; color: #ea580c; border-bottom: 2px solid #ffedd5; padding-bottom: 6px; margin-bottom: 16px;">1. IDENTIFICACIÓN DEL CONSUMIDOR RECLAMANTE</h2>
+        
+        <div class="form-group">
+          <label class="form-label">Nombre Completo *</label>
+          <input type="text" id="claim-name" class="form-input" required placeholder="Ej: Juan Pérez">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Tipo Doc. *</label>
+            <select id="claim-doc-type" class="form-select">
+              <option value="DNI">DNI</option>
+              <option value="CE">Carnet Extranjería</option>
+              <option value="PASAPORTE">Pasaporte</option>
+              <option value="RUC">RUC</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">N° de Documento *</label>
+            <input type="text" id="claim-doc-num" class="form-input" required placeholder="Ej: 74839201">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Celular / WhatsApp *</label>
+            <input type="tel" id="claim-phone" class="form-input" required placeholder="Ej: 927486448">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Correo Electrónico *</label>
+            <input type="email" id="claim-email" class="form-input" required placeholder="juan@ejemplo.com">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Dirección Domiciliaria</label>
+          <input type="text" id="claim-address" class="form-input" placeholder="Av. Lima 123, Tarapoto">
+        </div>
+
+        <h2 style="font-size: 15px; font-weight: 700; color: #ea580c; border-bottom: 2px solid #ffedd5; padding-bottom: 6px; margin: 24px 0 16px;">2. IDENTIFICACIÓN DEL BIEN CONTRATADO</h2>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Tipo de Bien</label>
+            <select id="claim-contracted-type" class="form-select">
+              <option value="producto">Producto (Comida / Bebida)</option>
+              <option value="servicio">Servicio (Atención / Delivery)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Monto Reclamado (S/)</label>
+            <input type="number" step="0.50" id="claim-amount" class="form-input" placeholder="0.00">
+          </div>
+        </div>
+
+        <h2 style="font-size: 15px; font-weight: 700; color: #ea580c; border-bottom: 2px solid #ffedd5; padding-bottom: 6px; margin: 24px 0 16px;">3. DETALLE DE LA RECLAMACIÓN</h2>
+
+        <div class="form-group">
+          <label class="form-label">Tipo</label>
+          <select id="claim-type" class="form-select">
+            <option value="reclamo">RECLAMO (Disconformidad relacionada a los productos o servicios)</option>
+            <option value="queja">QUEJA (Disconformidad no relacionada a los productos sino a la atención)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Detalle y Hechos *</label>
+          <textarea id="claim-detail" class="form-textarea" rows="4" required placeholder="Describa de manera clara los motivos de su reclamo o queja..."></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px; font-size: 16px; margin-top: 12px;">
+          📋 Enviar y Registrar Reclamo Oficial
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/supabase.js"></script>
+  <script>
+    async function submitClaimForm(e) {
+      e.preventDefault();
+      const payload = {
+        fullName: document.getElementById('claim-name').value,
+        documentType: document.getElementById('claim-doc-type').value,
+        documentNumber: document.getElementById('claim-doc-num').value,
+        phone: document.getElementById('claim-phone').value,
+        email: document.getElementById('claim-email').value,
+        address: document.getElementById('claim-address').value,
+        contractedType: document.getElementById('claim-contracted-type').value,
+        amount: parseFloat(document.getElementById('claim-amount').value || 0),
+        claimType: document.getElementById('claim-type').value,
+        detail: document.getElementById('claim-detail').value
+      };
+
+      try {
+        const res = await window.BuchisapaAPI.createClaim(payload);
+        alert('Reclamo registrado con éxito. Código de constancia: ' + (res.claimNumber || 'REC-' + Date.now()));
+        window.location.href = '/';
+      } catch (err) {
+        alert('Error al guardar el reclamo. Por favor intente nuevamente.');
+      }
+    }
+  </script>
+</body>
+</html>
