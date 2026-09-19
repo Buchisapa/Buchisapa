@@ -40,6 +40,16 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ item, on
   const hasAccompaniments = !!item?.includes && item.includes.length > 0;
 
   useEffect(() => {
+    // Lock background body scroll to prevent duplicate page scrollbars
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, []);
+
+  useEffect(() => {
     if (item) {
       setQuantity(1);
       setNotes('');
@@ -162,18 +172,18 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ item, on
         </button>
       </header>
 
-      {/* Main Full-Screen Content (Split Screen on Desktop) */}
-      <div className="flex-1 min-h-0 overflow-hidden grid grid-cols-1 lg:grid-cols-12">
+      {/* Main Full-Screen Content (Split Screen on Desktop and Laptops) */}
+      <div className="flex-1 min-h-0 overflow-hidden grid grid-cols-1 md:grid-cols-12">
         
-        {/* LEFT COLUMN: Full Height Product Photo Showcase on Desktop (5 cols on lg/xl) */}
-        <div className="lg:col-span-5 xl:col-span-5 bg-neutral-950 relative flex flex-col justify-between overflow-hidden shrink-0 border-b lg:border-b-0 lg:border-r border-neutral-200">
-          <div className="relative w-full aspect-[16/10] lg:aspect-auto lg:h-full min-h-[240px] lg:min-h-full bg-neutral-950 flex items-center justify-center overflow-hidden">
+        {/* LEFT COLUMN: Full Height Product Photo Showcase on Desktop (5 cols on md/lg/xl) */}
+        <div className="hidden md:flex md:col-span-5 bg-neutral-950 relative flex-col justify-between overflow-hidden shrink-0 border-r border-neutral-200 h-full">
+          <div className="relative w-full h-full min-h-full bg-neutral-950 flex items-center justify-center overflow-hidden">
             <img
               src={item.image}
               alt={item.name}
               className="w-full h-full object-cover select-none"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent lg:from-black/90 lg:via-black/25" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-transparent" />
 
             {/* Floating Badges */}
             <div className="absolute top-4 left-4 flex flex-wrap gap-2 z-10">
@@ -195,7 +205,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ item, on
             </div>
 
             {/* Desktop Bottom Showcase Info */}
-            <div className="absolute bottom-6 left-6 right-6 hidden lg:block text-white space-y-2 z-10">
+            <div className="absolute bottom-6 left-6 right-6 text-white space-y-2 z-10">
               <div className="flex items-center gap-2.5">
                 <span className="text-xs font-bold uppercase tracking-wider text-neutral-200 bg-white/20 backdrop-blur-md px-3 py-1 rounded-lg border border-white/20">
                   Restaurante Buchisapa
@@ -204,19 +214,41 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ item, on
                   ● Preparado al momento
                 </span>
               </div>
-              <p className="text-sm text-neutral-200 leading-relaxed max-w-lg">
+              <p className="text-xs sm:text-sm text-neutral-200 leading-relaxed max-w-lg">
                 Cocinado con ingredientes seleccionados y recetas auténticas de la selva y clásicos peruanos.
               </p>
             </div>
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Product Information, Customization & Options (7 cols on lg/xl) */}
-        <div className="lg:col-span-7 xl:col-span-7 flex flex-col min-h-0 bg-neutral-50/50">
+        {/* RIGHT COLUMN: Product Information, Customization & Options (7 cols on md/lg/xl) */}
+        <div className="col-span-1 md:col-span-7 flex flex-col h-full min-h-0 bg-neutral-50/50 overflow-hidden">
           
-          {/* Scrollable Configuration Details */}
-          <div className="flex-1 overflow-y-auto px-4 sm:px-8 lg:px-12 py-6 space-y-6 overscroll-contain">
+          {/* Scrollable Configuration Details (THE ONLY SINGLE SCROLLBAR) */}
+          <div className="flex-1 overflow-y-auto px-4 sm:px-8 md:px-10 lg:px-12 py-6 space-y-6 overscroll-contain">
             
+            {/* Mobile-only Image banner */}
+            <div className="md:hidden relative w-full aspect-[16/10] rounded-2xl overflow-hidden shadow-xs bg-neutral-900 -mt-2">
+              <img
+                src={item.image}
+                alt={item.name}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+              <div className="absolute top-3 left-3 flex flex-wrap gap-2">
+                {item.badge && (
+                  <span className="bg-amber-500 text-neutral-950 font-black text-xs uppercase px-2.5 py-1 rounded-lg">
+                    ★ {item.badge}
+                  </span>
+                )}
+                {item.popular && !item.badge && (
+                  <span className="bg-[#E6192B] text-white font-black text-xs uppercase px-2.5 py-1 rounded-lg">
+                    🔥 Más Vendido
+                  </span>
+                )}
+              </div>
+            </div>
+
             {/* Title, Price and Description */}
             <div className="bg-white p-5 sm:p-6 rounded-2xl border border-neutral-200/80 shadow-2xs space-y-3">
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-6">
