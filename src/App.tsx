@@ -15,6 +15,7 @@ import { LocationModal } from './components/LocationModal';
 import { AuthModal } from './components/AuthModal';
 import { GoogleAccountChooserModal } from './components/GoogleAccountChooserModal';
 import { UserProfileModal } from './components/UserProfileModal';
+import { AdminPanelModal } from './components/AdminPanelModal';
 import { MenuItem, RESTAURANT_INFO } from './data/menuData';
 
 type ViewMode = 'categories' | 'category-detail' | 'promotions';
@@ -34,6 +35,7 @@ function MainApp() {
   const [isSearching, setIsSearching] = useState<boolean>(false);
 
   const [isKitchenOpen, setIsKitchenOpen] = useState(false);
+  const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const [currentZone, setCurrentZone] = useState<string>('Entregar a Lima');
@@ -61,6 +63,7 @@ function MainApp() {
       {/* Navigation Header matching Screenshot 1 */}
       <Navbar
         onOpenKitchen={() => setIsKitchenOpen(true)}
+        onOpenAdmin={() => setIsAdminOpen(true)}
         onOpenAuth={() => setIsAuthOpen(true)}
         onOpenLocation={() => setIsLocationOpen(true)}
         currentZone={currentZone}
@@ -120,7 +123,7 @@ function MainApp() {
       </main>
 
       {/* Footer matching Screenshots 3 & 4 (Desktop multi-column + Mobile accordion) */}
-      <Footer />
+      <Footer onOpenAdmin={() => setIsAdminOpen(true)} />
 
       {/* Floating WhatsApp Action Button */}
       <aside aria-label="Contacto por WhatsApp" className="fixed bottom-6 right-6 z-40">
@@ -148,6 +151,11 @@ function MainApp() {
       <KitchenOrdersModal
         isOpen={isKitchenOpen}
         onClose={() => setIsKitchenOpen(false)}
+      />
+
+      <AdminPanelModal
+        isOpen={isAdminOpen}
+        onClose={() => setIsAdminOpen(false)}
       />
 
       <LocationModal

@@ -7,6 +7,7 @@ export interface MenuItem {
   includes?: string[];
   badge?: string;
   popular?: boolean;
+  isAvailable?: boolean;
   image: string;
   options?: {
     name: string;

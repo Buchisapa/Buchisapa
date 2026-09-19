@@ -24,6 +24,7 @@ import { RESTAURANT_INFO, CATEGORIES } from '../data/menuData';
 
 interface NavbarProps {
   onOpenKitchen: () => void;
+  onOpenAdmin: () => void;
   onOpenAuth: () => void;
   onOpenLocation: () => void;
   currentZone: string;
@@ -38,6 +39,7 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({
   onOpenKitchen,
+  onOpenAdmin,
   onOpenAuth,
   onOpenLocation,
   currentZone,
@@ -220,6 +222,16 @@ export const Navbar: React.FC<NavbarProps> = ({
                   >
                     <span>Pantalla de Cocina KDS</span>
                     <ChefHat className="w-3.5 h-3.5 text-emerald-600" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      onOpenAdmin();
+                      setSalonDropdownOpen(false);
+                    }}
+                    className="w-full text-left px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-between border-t border-neutral-100 mt-1 pt-2"
+                  >
+                    <span>Panel de Administración</span>
+                    <span className="text-[9px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-black">ADMIN</span>
                   </button>
                 </div>
               )}
@@ -521,6 +533,18 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </button>
               )}
               
+              {/* Admin Panel Button in Mobile Drawer */}
+              <button
+                onClick={() => {
+                  onOpenAdmin();
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full py-3 bg-neutral-900 hover:bg-black text-white rounded-lg text-[14px] font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-sm"
+              >
+                <ChefHat className="w-4 h-4 text-red-500" />
+                <span>Panel de Administración</span>
+              </button>
+
               <a
                 href={`https://wa.me/${RESTAURANT_INFO.phoneRaw}?text=${encodeURIComponent('¡Hola Buchisapa! Deseo hacer un pedido.')}`}
                 target="_blank"

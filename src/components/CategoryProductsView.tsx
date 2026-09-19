@@ -16,7 +16,7 @@ export const CategoryProductsView: React.FC<CategoryProductsViewProps> = ({
   onSelectItem,
   searchQuery = '',
 }) => {
-  const { addToCart } = useCart();
+  const { addToCart, menuItems } = useCart();
   const [quickAddedId, setQuickAddedId] = useState<string | null>(null);
 
   // Find category information
@@ -27,7 +27,7 @@ export const CategoryProductsView: React.FC<CategoryProductsViewProps> = ({
   };
 
   const items = useMemo(() => {
-    return MENU_ITEMS.filter((item) => {
+    return menuItems.filter((item) => {
       // Category match
       const inCategory = categoryKey === 'todos' || item.category === categoryKey;
       if (!inCategory && !searchQuery) return false;
@@ -43,7 +43,7 @@ export const CategoryProductsView: React.FC<CategoryProductsViewProps> = ({
 
       return inCategory;
     });
-  }, [categoryKey, searchQuery]);
+  }, [menuItems, categoryKey, searchQuery]);
 
   const handleQuickAdd = (e: React.MouseEvent, item: MenuItem) => {
     e.stopPropagation();
@@ -136,31 +136,48 @@ export const CategoryProductsView: React.FC<CategoryProductsViewProps> = ({
 
                     {/* Price and Add Button */}
                     <div className="flex items-center justify-between gap-2 mt-2 pt-1">
-                      <span className="text-lg sm:text-xl font-bold text-neutral-900 tracking-tight">
-                        S/{item.price.toFixed(2)}
-                      </span>
-
-                      <button
-                        type="button"
-                        onClick={(e) => handleQuickAdd(e, item)}
-                        className={`px-4 sm:px-5 py-2 rounded-2xl text-xs sm:text-sm font-semibold flex items-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer ${
-                          isAdded
-                            ? 'bg-emerald-600 text-white'
-                            : 'bg-[#E6192B] hover:bg-[#c91222] text-white'
-                        }`}
-                      >
-                        {isAdded ? (
-                          <>
-                            <Check className="w-4 h-4 stroke-[2.5]" />
-                            <span>Agregado</span>
-                          </>
-                        ) : (
-                          <>
-                            <ShoppingBag className="w-4 h-4 stroke-[2.5]" />
-                            <span>Agregar</span>
-                          </>
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg sm:text-xl font-bold text-neutral-900 tracking-tight">
+                          S/{item.price.toFixed(2)}
+                        </span>
+                        {item.isAvailable === false && (
+                          <span className="text-[10px] font-bold uppercase bg-red-100 text-red-700 px-2 py-0.5 rounded-md">
+                            Agotado
+                          </span>
                         )}
-                      </button>
+                      </div>
+
+                      {item.isAvailable === false ? (
+                        <button
+                          type="button"
+                          disabled
+                          className="px-4 sm:px-5 py-2 rounded-2xl text-xs sm:text-sm font-semibold bg-neutral-100 text-neutral-400 cursor-not-allowed"
+                        >
+                          Agotado
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={(e) => handleQuickAdd(e, item)}
+                          className={`px-4 sm:px-5 py-2 rounded-2xl text-xs sm:text-sm font-semibold flex items-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer ${
+                            isAdded
+                              ? 'bg-emerald-600 text-white'
+                              : 'bg-[#E6192B] hover:bg-[#c91222] text-white'
+                          }`}
+                        >
+                          {isAdded ? (
+                            <>
+                              <Check className="w-4 h-4 stroke-[2.5]" />
+                              <span>Agregado</span>
+                            </>
+                          ) : (
+                            <>
+                              <ShoppingBag className="w-4 h-4 stroke-[2.5]" />
+                              <span>Agregar</span>
+                            </>
+                          )}
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>

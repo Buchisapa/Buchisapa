@@ -60,7 +60,11 @@ const FOOTER_SECTIONS: AccordionSection[] = [
   },
 ];
 
-export const Footer: React.FC = () => {
+interface FooterProps {
+  onOpenAdmin?: () => void;
+}
+
+export const Footer: React.FC<FooterProps> = ({ onOpenAdmin }) => {
   const [isLibroOpen, setIsLibroOpen] = useState(false);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
 
@@ -260,8 +264,16 @@ export const Footer: React.FC = () => {
           </div>
 
           {/* Copyright Row */}
-          <div className="mt-6 text-neutral-500 text-[11px] text-center sm:text-left">
+          <div className="mt-6 text-neutral-500 text-[11px] flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-neutral-800/80 pt-4">
             <p>© 2026, Restaurante Buchisapa. Todos los derechos reservados</p>
+            {onOpenAdmin && (
+              <button
+                onClick={onOpenAdmin}
+                className="text-neutral-500 hover:text-red-400 text-[11px] font-bold transition-colors cursor-pointer flex items-center gap-1.5"
+              >
+                <span>🔒 Panel de Administración</span>
+              </button>
+            )}
           </div>
         </div>
       </footer>

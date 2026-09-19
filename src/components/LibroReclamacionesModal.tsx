@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, BookOpen, CheckCircle2, ShieldAlert } from 'lucide-react';
 import { RESTAURANT_INFO } from '../data/menuData';
 import { ApiService } from '../services/apiService';
+import { useCart } from '../context/CartContext';
 
 interface LibroReclamacionesModalProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ export const LibroReclamacionesModal: React.FC<LibroReclamacionesModalProps> = (
   isOpen,
   onClose,
 }) => {
+  const { addComplaint } = useCart();
   const [submitted, setSubmitted] = useState(false);
   const [claimCode, setClaimCode] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -31,7 +33,20 @@ export const LibroReclamacionesModal: React.FC<LibroReclamacionesModalProps> = (
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const res = await ApiService.submitClaim({
+      const generatedCode = addComplaint({
+        fullName: formData.fullName,
+        dni: formData.dni,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        type: formData.type,
+        detail: formData.detail
+      });
+
+      setClaimCode(generatedCode);
+
+      // Async backend sync if available
+      ApiService.submitClaim({
         fullName: formData.fullName,
         docType: 'DNI',
         docNumber: formData.dni,
@@ -43,8 +58,8 @@ export const LibroReclamacionesModal: React.FC<LibroReclamacionesModalProps> = (
         productDescription: 'Pedido / Servicio en Restaurante Buchisapa',
         detail: formData.detail,
         consumerRequest: 'Revisión y solución de conformidad con la ley de protección al consumidor.'
-      });
-      setClaimCode(res.claimCode);
+      }).catch(() => {});
+
       setSubmitted(true);
     } catch {
       setClaimCode('LR-' + new Date().getFullYear() + '-001');
