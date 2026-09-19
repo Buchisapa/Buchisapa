@@ -130,13 +130,13 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ item, on
 
   return (
     <div 
-      className="fixed inset-0 z-50 w-full h-full bg-neutral-100/80 flex flex-col overflow-y-auto animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 w-full h-full bg-white flex flex-col overflow-hidden animate-in fade-in duration-150"
       role="dialog"
       aria-modal="true"
       aria-labelledby="product-detail-title"
     >
-      {/* Top Header Bar (Sticky at top of the window) */}
-      <header className="sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3.5 border-b border-neutral-200 bg-white/95 backdrop-blur-md shrink-0 shadow-2xs">
+      {/* Top Header Bar (Full width edge-to-edge) */}
+      <header className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3.5 border-b border-neutral-200 bg-white shrink-0 z-30 shadow-xs">
         <button
           type="button"
           onClick={onClose}
@@ -162,63 +162,85 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ item, on
         </button>
       </header>
 
-      {/* Main Content: Natural single-scroll layout across desktop and mobile */}
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-10 items-start">
+      {/* Main Full-Screen Content (Split Screen on Desktop and Laptops) */}
+      <div className="flex-1 min-h-0 overflow-hidden grid grid-cols-1 md:grid-cols-12">
+        
+        {/* LEFT COLUMN: Full Height Product Photo Showcase on Desktop (5 cols on md/lg/xl) */}
+        <div className="hidden md:flex md:col-span-5 bg-neutral-950 relative flex-col justify-between overflow-hidden shrink-0 border-r border-neutral-200 h-full">
+          <div className="relative w-full h-full min-h-full bg-neutral-950 flex items-center justify-center overflow-hidden">
+            <img
+              src={item.image}
+              alt={item.name}
+              className="w-full h-full object-cover select-none"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-transparent" />
+
+            {/* Floating Badges */}
+            <div className="absolute top-4 left-4 flex flex-wrap gap-2 z-10">
+              {item.badge && (
+                <span className="bg-amber-500 text-neutral-950 font-black text-xs sm:text-sm uppercase px-3.5 py-1.5 rounded-xl shadow-md flex items-center gap-1.5">
+                  ★ {item.badge}
+                </span>
+              )}
+              {item.popular && !item.badge && (
+                <span className="bg-[#E6192B] text-white font-black text-xs sm:text-sm uppercase px-3.5 py-1.5 rounded-xl shadow-md flex items-center gap-1.5">
+                  🔥 Más Vendido
+                </span>
+              )}
+              {item.isAvailable === false && (
+                <span className="bg-neutral-800 text-white font-black text-xs sm:text-sm uppercase px-3.5 py-1.5 rounded-xl shadow-md">
+                  Agotado Temporalmente
+                </span>
+              )}
+            </div>
+
+            {/* Desktop Bottom Showcase Info */}
+            <div className="absolute bottom-6 left-6 right-6 text-white space-y-2 z-10">
+              <div className="flex items-center gap-2.5">
+                <span className="text-xs font-bold uppercase tracking-wider text-neutral-200 bg-white/20 backdrop-blur-md px-3 py-1 rounded-lg border border-white/20">
+                  Restaurante Buchisapa
+                </span>
+                <span className="text-xs text-emerald-400 font-bold flex items-center gap-1.5 bg-emerald-950/60 backdrop-blur-md px-2.5 py-1 rounded-lg border border-emerald-500/30">
+                  ● Preparado al momento
+                </span>
+              </div>
+              <p className="text-xs sm:text-sm text-neutral-200 leading-relaxed max-w-lg">
+                Cocinado con ingredientes seleccionados y recetas auténticas de la selva y clásicos peruanos.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT COLUMN: Product Information, Customization & Options (7 cols on md/lg/xl) */}
+        <div className="col-span-1 md:col-span-7 flex flex-col h-full min-h-0 bg-neutral-50/50 overflow-hidden">
           
-          {/* LEFT COLUMN: Product Image & Highlights (Sticky beside content on Desktop) */}
-          <div className="md:col-span-5 lg:col-span-5 md:sticky md:top-24 space-y-4">
-            <div className="relative w-full aspect-[4/3] md:aspect-square rounded-3xl overflow-hidden shadow-md bg-neutral-950 border border-neutral-200/80">
+          {/* Scrollable Configuration Details */}
+          <div className="flex-1 overflow-y-auto px-4 sm:px-8 md:px-10 lg:px-12 py-6 space-y-6 overscroll-contain">
+            
+            {/* Mobile-only Image banner */}
+            <div className="md:hidden relative w-full aspect-[16/10] rounded-2xl overflow-hidden shadow-xs bg-neutral-900 -mt-2">
               <img
                 src={item.image}
                 alt={item.name}
-                className="w-full h-full object-cover select-none"
+                className="w-full h-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
-
-              {/* Floating Badges */}
-              <div className="absolute top-4 left-4 flex flex-wrap gap-2 z-10">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+              <div className="absolute top-3 left-3 flex flex-wrap gap-2">
                 {item.badge && (
-                  <span className="bg-amber-500 text-neutral-950 font-black text-xs sm:text-sm uppercase px-3.5 py-1.5 rounded-xl shadow-md flex items-center gap-1.5">
+                  <span className="bg-amber-500 text-neutral-950 font-black text-xs uppercase px-2.5 py-1 rounded-lg">
                     ★ {item.badge}
                   </span>
                 )}
                 {item.popular && !item.badge && (
-                  <span className="bg-[#E6192B] text-white font-black text-xs sm:text-sm uppercase px-3.5 py-1.5 rounded-xl shadow-md flex items-center gap-1.5">
+                  <span className="bg-[#E6192B] text-white font-black text-xs uppercase px-2.5 py-1 rounded-lg">
                     🔥 Más Vendido
                   </span>
                 )}
-                {item.isAvailable === false && (
-                  <span className="bg-neutral-800 text-white font-black text-xs sm:text-sm uppercase px-3.5 py-1.5 rounded-xl shadow-md">
-                    Agotado Temporalmente
-                  </span>
-                )}
-              </div>
-
-              {/* Bottom Image Info */}
-              <div className="absolute bottom-5 left-5 right-5 text-white space-y-1.5 z-10">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-neutral-200 bg-white/20 backdrop-blur-md px-3 py-1 rounded-lg border border-white/20">
-                    Restaurante Buchisapa
-                  </span>
-                  <span className="text-xs text-emerald-400 font-bold flex items-center gap-1.5 bg-emerald-950/60 backdrop-blur-md px-2.5 py-1 rounded-lg border border-emerald-500/30">
-                    ● Preparado al momento
-                  </span>
-                </div>
               </div>
             </div>
 
-            <div className="hidden md:block bg-white p-4 rounded-2xl border border-neutral-200/80 shadow-2xs text-xs text-neutral-600 leading-relaxed">
-              <span className="font-bold text-neutral-900 block mb-1">Tradición y Sabor:</span>
-              Platos preparados con los mejores ingredientes, recetas artesanales y el auténtico sabor de la selva y clásicos peruanos.
-            </div>
-          </div>
-
-          {/* RIGHT COLUMN: Full Natural Downward Flow (NO nested scrollbox) */}
-          <div className="md:col-span-7 lg:col-span-7 space-y-6">
-            
-            {/* Title, Price and Description Card */}
-            <div className="bg-white p-6 sm:p-7 rounded-3xl border border-neutral-200/80 shadow-2xs space-y-4">
+            {/* Title, Price and Description */}
+            <div className="bg-white p-5 sm:p-6 rounded-2xl border border-neutral-200/80 shadow-2xs space-y-3">
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-6">
                 <div className="space-y-1">
                   <h1 id="product-detail-title" className="text-2xl sm:text-3xl lg:text-4xl font-black text-neutral-900 leading-tight font-heading">
@@ -229,22 +251,22 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ item, on
                   </p>
                 </div>
                 <div className="sm:text-right shrink-0">
-                  <span className="text-3xl sm:text-4xl font-black text-[#E6192B] tracking-tight font-mono block">
+                  <span className="text-3xl lg:text-4xl font-black text-[#E6192B] tracking-tight font-mono block">
                     S/ {item.price.toFixed(2)}
                   </span>
                   <span className="text-xs text-neutral-500 font-medium">Precio unitario</span>
                 </div>
               </div>
 
-              <p className="text-sm sm:text-base text-neutral-600 leading-relaxed font-normal pt-2 border-t border-neutral-100">
+              <p className="text-sm sm:text-base text-neutral-600 leading-relaxed font-normal pt-1 border-t border-neutral-100">
                 {item.description}
               </p>
             </div>
 
             {/* SECTION 1: ACOMPAÑAMIENTOS E INGREDIENTES */}
             {hasAccompaniments && (
-              <div className="bg-white rounded-3xl border border-neutral-200/80 p-6 sm:p-7 shadow-2xs space-y-4">
-                <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-neutral-100">
+              <div className="bg-white rounded-2xl border border-neutral-200/80 p-5 sm:p-6 shadow-2xs space-y-4">
+                <div className="flex items-center justify-between gap-2 pb-3 border-b border-neutral-200/70">
                   <div className="flex items-center gap-2.5">
                     <div className="w-8 h-8 rounded-xl bg-red-100 text-[#E6192B] flex items-center justify-center">
                       <Utensils className="w-4 h-4" />
@@ -279,7 +301,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ item, on
                 </div>
 
                 {/* Accompaniments Checkbox Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {item.includes?.map((acc) => {
                     const isIncluded = selectedAccompaniments.includes(acc);
                     return (
@@ -290,7 +312,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ item, on
                         className={`p-3.5 rounded-xl border text-xs sm:text-sm font-semibold flex items-center justify-between transition-all cursor-pointer text-left ${
                           isIncluded
                             ? 'bg-emerald-50/40 border-emerald-300 text-neutral-900 shadow-2xs ring-1 ring-emerald-400/30'
-                            : 'bg-neutral-50/50 border-neutral-200 text-neutral-600 hover:border-neutral-300 opacity-80'
+                            : 'bg-white border-neutral-200 text-neutral-600 hover:border-neutral-300 opacity-80'
                         }`}
                       >
                         <div className="flex items-center gap-3">
@@ -298,7 +320,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ item, on
                             className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-colors ${
                               isIncluded
                                 ? 'bg-emerald-600 border-emerald-600 text-white'
-                                : 'bg-white border-neutral-300'
+                                : 'bg-neutral-50 border-neutral-300'
                             }`}
                           >
                             {isIncluded && <Check className="w-3.5 h-3.5 stroke-[3]" />}
@@ -322,7 +344,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ item, on
 
                 {/* Removed note banner */}
                 {removedAccompaniments.length > 0 && (
-                  <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-900 text-xs sm:text-sm flex items-center gap-2">
+                  <div className="p-3 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-900 text-xs sm:text-sm flex items-center gap-2">
                     <span className="font-black shrink-0">⚠️ Nota para cocina:</span>
                     <span>Sin {removedAccompaniments.join(', ')}</span>
                   </div>
@@ -332,8 +354,8 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ item, on
 
             {/* SECTION 2: CREMAS Y SALSAS */}
             {!isBeverage && (
-              <div className="bg-white rounded-3xl border border-neutral-200/80 p-6 sm:p-7 shadow-2xs space-y-4">
-                <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-neutral-100">
+              <div className="bg-white rounded-2xl border border-neutral-200/80 p-5 sm:p-6 shadow-2xs space-y-4">
+                <div className="flex items-center justify-between gap-2 pb-3 border-b border-neutral-200/70">
                   <div className="flex items-center gap-2.5">
                     <div className="w-8 h-8 rounded-xl bg-red-100 text-[#E6192B] flex items-center justify-center">
                       <Sparkles className="w-4 h-4" />
@@ -375,7 +397,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ item, on
                 </div>
 
                 {/* Sauces Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {SAUCES_LIST.map((sauce) => {
                     const isChecked = selectedSauces.includes(sauce);
                     return (
@@ -386,7 +408,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ item, on
                         className={`p-3.5 rounded-xl border text-xs sm:text-sm font-semibold flex items-center justify-between transition-all cursor-pointer text-left ${
                           isChecked
                             ? 'bg-emerald-50/40 border-emerald-300 text-neutral-900 shadow-2xs ring-1 ring-emerald-400/30'
-                            : 'bg-neutral-50/50 border-neutral-200 text-neutral-700 hover:border-neutral-300'
+                            : 'bg-white border-neutral-200 text-neutral-700 hover:border-neutral-300'
                         }`}
                       >
                         <div className="flex items-center gap-3">
@@ -394,7 +416,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ item, on
                             className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-colors ${
                               isChecked
                                 ? 'bg-emerald-600 border-emerald-600 text-white'
-                                : 'bg-white border-neutral-300'
+                                : 'bg-neutral-50 border-neutral-300'
                             }`}
                           >
                             {isChecked && <Check className="w-3.5 h-3.5 stroke-[3]" />}
@@ -418,7 +440,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ item, on
 
                 {/* Removed sauces note banner */}
                 {selectedSauces.length === 0 && (
-                  <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-900 text-xs sm:text-sm flex items-center gap-2">
+                  <div className="p-3 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-900 text-xs sm:text-sm flex items-center gap-2">
                     <span className="font-black shrink-0">⚠️ Nota:</span>
                     <span>Sin cremas ni salsas (plato seco)</span>
                   </div>
@@ -427,7 +449,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ item, on
             )}
 
             {/* SECTION 3: INDICACIONES ESPECIALES */}
-            <div className="bg-white rounded-3xl border border-neutral-200/80 p-6 sm:p-7 shadow-2xs space-y-2.5">
+            <div className="bg-white rounded-2xl border border-neutral-200/80 p-5 sm:p-6 shadow-2xs space-y-2">
               <label className="text-xs sm:text-sm font-bold text-neutral-800 block">
                 Indicaciones especiales para la cocina (opcional)
               </label>
@@ -441,7 +463,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ item, on
             </div>
 
             {/* Allergen link */}
-            <div className="bg-white rounded-3xl border border-neutral-200/80 p-5 sm:p-6 shadow-2xs text-xs sm:text-sm text-neutral-500 space-y-2">
+            <div className="text-xs sm:text-sm text-neutral-500 pb-4">
               <p>
                 ¿Tienes alguna alergia alimentaria?{' '}
                 <button
@@ -466,67 +488,65 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ item, on
               )}
             </div>
           </div>
-        </div>
-      </main>
 
-      {/* Sticky Bottom Action Bar (Pinned cleanly across the window bottom) */}
-      <footer className="sticky bottom-0 z-30 bg-white/95 backdrop-blur-md border-t border-neutral-200 px-4 sm:px-6 lg:px-8 py-4 shadow-[0_-6px_25px_rgba(0,0,0,0.08)] shrink-0">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-          
-          {/* Quantity Stepper Pill */}
-          <div className="flex items-center gap-2.5 bg-neutral-100 px-3.5 py-2 rounded-2xl border border-neutral-200 shrink-0">
-            <button
-              type="button"
-              onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              disabled={quantity <= 1}
-              className="w-9 h-9 rounded-xl bg-white shadow-2xs flex items-center justify-center text-neutral-700 hover:text-neutral-900 disabled:opacity-30 active:scale-95 transition-all cursor-pointer font-bold"
-              aria-label="Disminuir cantidad"
-            >
-              <Minus className="w-4 h-4 stroke-[2.5]" />
-            </button>
-            <span className="text-lg font-black text-neutral-900 min-w-[24px] text-center font-mono">
-              {quantity}
-            </span>
-            <button
-              type="button"
-              onClick={() => setQuantity(quantity + 1)}
-              className="w-9 h-9 rounded-xl bg-white shadow-2xs flex items-center justify-center text-neutral-700 hover:text-neutral-900 active:scale-95 transition-all cursor-pointer font-bold"
-              aria-label="Aumentar cantidad"
-            >
-              <Plus className="w-4 h-4 stroke-[2.5]" />
-            </button>
+          {/* Sticky Bottom Action Bar inside Right Column */}
+          <div className="bg-white border-t border-neutral-200 px-4 sm:px-8 lg:px-12 py-4 shadow-[0_-6px_20px_rgba(0,0,0,0.06)] z-30 flex items-center gap-4">
+            
+            {/* Quantity Stepper Pill */}
+            <div className="flex items-center gap-2.5 bg-neutral-100 px-3.5 py-2 rounded-2xl border border-neutral-200 shrink-0">
+              <button
+                type="button"
+                onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                disabled={quantity <= 1}
+                className="w-9 h-9 rounded-xl bg-white shadow-2xs flex items-center justify-center text-neutral-700 hover:text-neutral-900 disabled:opacity-30 active:scale-95 transition-all cursor-pointer font-bold"
+                aria-label="Disminuir cantidad"
+              >
+                <Minus className="w-4 h-4 stroke-[2.5]" />
+              </button>
+              <span className="text-lg font-black text-neutral-900 min-w-[24px] text-center font-mono">
+                {quantity}
+              </span>
+              <button
+                type="button"
+                onClick={() => setQuantity(quantity + 1)}
+                className="w-9 h-9 rounded-xl bg-white shadow-2xs flex items-center justify-center text-neutral-700 hover:text-neutral-900 active:scale-95 transition-all cursor-pointer font-bold"
+                aria-label="Aumentar cantidad"
+              >
+                <Plus className="w-4 h-4 stroke-[2.5]" />
+              </button>
+            </div>
+
+            {/* Add to Cart CTA Button */}
+            {item.isAvailable === false ? (
+              <button
+                type="button"
+                disabled
+                className="flex-1 py-4 px-6 rounded-2xl font-bold text-base bg-neutral-100 text-neutral-400 cursor-not-allowed text-center"
+              >
+                Producto Agotado
+              </button>
+            ) : (
+              <button
+                id="product-detail-add-btn"
+                type="button"
+                onClick={handleAddToCart}
+                className={`flex-1 py-4 px-6 rounded-2xl font-bold text-base flex items-center justify-between shadow-lg shadow-red-500/20 active:scale-98 transition-all cursor-pointer ${
+                  isAdded
+                    ? 'bg-emerald-600 text-white'
+                    : 'bg-[#E6192B] hover:bg-[#c91222] text-white'
+                }`}
+              >
+                <span className="truncate pr-2 font-bold text-base sm:text-lg">
+                  {isAdded ? '✓ ¡Agregado a tu pedido!' : 'Agregar a mi pedido'}
+                </span>
+                <span className="text-base sm:text-lg font-black whitespace-nowrap font-mono bg-black/15 px-3 py-1 rounded-xl">
+                  S/ {totalPrice}
+                </span>
+              </button>
+            )}
           </div>
-
-          {/* Add to Cart CTA Button */}
-          {item.isAvailable === false ? (
-            <button
-              type="button"
-              disabled
-              className="flex-1 py-4 px-6 rounded-2xl font-bold text-base bg-neutral-100 text-neutral-400 cursor-not-allowed text-center"
-            >
-              Producto Agotado
-            </button>
-          ) : (
-            <button
-              id="product-detail-add-btn"
-              type="button"
-              onClick={handleAddToCart}
-              className={`flex-1 py-4 px-6 sm:px-8 rounded-2xl font-bold text-base sm:text-lg flex items-center justify-between shadow-lg shadow-red-500/20 active:scale-98 transition-all cursor-pointer ${
-                isAdded
-                  ? 'bg-emerald-600 text-white'
-                  : 'bg-[#E6192B] hover:bg-[#c91222] text-white'
-              }`}
-            >
-              <span className="truncate pr-2 font-bold">
-                {isAdded ? '✓ ¡Agregado a tu pedido!' : 'Agregar a mi pedido'}
-              </span>
-              <span className="text-base sm:text-lg font-black whitespace-nowrap font-mono bg-black/15 px-3 py-1 rounded-xl">
-                S/ {totalPrice}
-              </span>
-            </button>
-          )}
         </div>
-      </footer>
+      </div>
     </div>
   );
 };
