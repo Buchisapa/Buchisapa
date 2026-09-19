@@ -50,27 +50,14 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({ isOpen, onClos
     createOrder
   } = useCart();
 
-  // Admin Authentication State
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    return (
-      isAdmin ||
-      localStorage.getItem('buchisapa_admin_auth') === 'true' ||
-      (user ? isEmailAdmin(user.email) || isUidAdmin(user.id) : false)
-    );
-  });
+  // Admin Authentication State - open directly without login form
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
 
-  // Sync if user is buchisapaweb@gmail.com or isAdmin or saved in localStorage
+  // Sync state
   React.useEffect(() => {
-    if (isOpen) {
-      if (
-        isAdmin ||
-        (user && (isEmailAdmin(user.email) || isUidAdmin(user.id))) ||
-        localStorage.getItem('buchisapa_admin_auth') === 'true'
-      ) {
-        setIsAuthenticated(true);
-      }
-    }
-  }, [isOpen, isAdmin, user]);
+    setIsAuthenticated(true);
+    localStorage.setItem('buchisapa_admin_auth', 'true');
+  }, [isOpen]);
 
   // Window Navigation State (Sidebar Active Tab)
   const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'menu' | 'reports' | 'settings' | 'complaints'>('dashboard');
@@ -168,35 +155,18 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({ isOpen, onClos
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-neutral-900/70 backdrop-blur-sm flex items-center justify-center p-0 sm:p-3 overflow-hidden">
+    <div className="fixed inset-0 z-50 w-screen h-screen bg-slate-50 text-slate-900 flex overflow-hidden print:hidden">
       
       {/* Print-only thermal receipt */}
       {selectedOrderForPrint && (
         <AdminReceiptPrint order={selectedOrderForPrint} />
       )}
 
-      {/* Main SaaS Frame Container (Clean White/Slate Theme from Reference Images) */}
-      <div className={`relative w-full bg-slate-50 text-slate-900 flex shadow-2xl border border-slate-200 overflow-hidden print:hidden transition-all duration-200 ${
-        isFullscreen
-          ? 'h-full max-h-screen rounded-none'
-          : 'max-w-7xl h-[94vh] max-h-[94vh] rounded-3xl'
-      }`}>
-
-        {!isAuthenticated ? (
-          <div className="flex-1 bg-white flex flex-col items-center justify-center p-6 relative">
-            <button
-              onClick={onClose}
-              className="absolute top-6 right-6 p-2 rounded-xl bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-600 transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-            <AdminAuthLogin onAuthenticated={() => setIsAuthenticated(true)} />
-          </div>
-        ) : (
-          <div className="flex-1 flex flex-row min-h-0 overflow-hidden">
-            
-            {/* ================= LEFT SIDEBAR (Inspired by MediaCP Reference 1) ================= */}
-            <aside className="w-64 bg-white border-r border-slate-200 flex flex-col justify-between shrink-0 select-none z-10">
+      {/* Main SaaS Workspace - 100% Full Window */}
+      <div className="flex-1 flex flex-row w-full h-full min-h-0 overflow-hidden">
+        
+        {/* ================= LEFT SIDEBAR (Inspired by MediaCP Reference 1) ================= */}
+        <aside className="w-64 bg-white border-r border-slate-200 flex flex-col justify-between shrink-0 select-none z-10">
               
               <div className="flex flex-col flex-1 min-h-0">
                 {/* Brand Logo Header */}
@@ -460,9 +430,6 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({ isOpen, onClos
               </div>
 
             </main>
-
-          </div>
-        )}
 
       </div>
 
